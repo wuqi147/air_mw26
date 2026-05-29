@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#cloudconnection-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+table {
+    width: 100%;
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+td {
+    height: 32px;
+    line-height: 21px;
+    text-align: left;
+}
+td.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    height: 2px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.RADIO_WIDTH {
+    width: 120px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var xmlReq;
+var ishttps = 'https:' == document.location.protocol ? true : false;
+const HTML_STATUS_OK = 200;
+const XML_HTTP_REQUEST_READY_STATE_DONE = 4;
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function initmqttd()
+{
+    if(mqttd_ds.enable == 0)
+    {
+        $id("mqttd_enable").checked = false;
+    }
+    else
+    {
+        $id("mqttd_enable").checked = true;
+    }
+}
+function xml_cbk()
+{
+    if((XML_HTTP_REQUEST_READY_STATE_DONE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status))
+    {
+        alert(js_mqttd_enabled = parent.window.mqttd_info.tip_cfmsuccess);
+    }
+}
+function doSubmit()
+{
+    var urlString = "";
+    xmlReq = parent.getXMLObject();
+    xmlReq.onreadystatechange = xml_cbk;
+    if($id("mqttd_enable").checked == true)
+    {
+        var ret = true;
+        if (ishttps)
+        {
+            ret = confirm(js_confirm_enable = parent.window.mqttd_info.cfm_note);
+        }
+        if (ret)
+        {
+            urlString = "mqttdSet.cgi?mqttd_en=1";
+        }
+        else
+        {
+            $id("mqttd_enable").checked = false;
+            return;
+        }
+    }
+    else
+    {
+        urlString = "mqttdSet.cgi?mqttd_en=0";
+    }
+    xmlReq.open("GET", urlString, true);
+    xmlReq.send(null);
+}
+window.onload = () => {
+    initmqttd();
+    $id("btn_submit").onclick = () => doSubmit();
+    $id("btn_submit").value = parent.window.str_info.btn_apply;
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <div id="autoHeight">
+    <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.mqttd_info.lgd_mqttdset)</script></span></legend>
+        <form action="mqttdSet.cgi">
+            <table>
+            <tbody>
+                <tr>
+                    <td width="30%"><span class="NORMAL"><script>docW(parent.window.mqttd_info.lgd_mqttden)</script></span></td>
+                    <td width="12%">
+                        <input class="RADIO_NORMAL" type="radio" name="mqttd_en" id="mqttd_enable" value="1" />
+                        <label for="mqttd_enable"><span class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span></label>
+                    </td>
+                    <td width="15%">
+                        <input class="RADIO_NORMAL" type="radio" name="mqttd_en" id="mqttd_disable" value="0" checked />
+                        <label for="mqttd_disable"><span class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span></label>
+                    </td>
+                    <td>
+                        <a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_submit" /></a>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+            <table>
+            <tbody>
+                <tr>
+                    <td class="BOTTOM_LINE"></td>
+                </tr>
+            </tbody>
+            </table>
+            <table>
+            <tbody>
+                <tr>
+                    <td><span class="BOLDER"><script>docW(parent.window.str_info.spn_attention)</script></span></td>
+                </tr>
+                <tr>
+                    <td><span class="NORMAL"><script>docW(parent.window.mqttd_info.spn_note0)</script></span></td>
+                </tr>
+                <tr>
+                    <td><span class="NORMAL"><script>docW(parent.window.mqttd_info.spn_note2)</script><a href="https://www.cloudmw.airoha.com/#/" target="_blank"><b>Cloud-Magic Wand</b></a></span></td>
+                </tr>
+            </tbody>
+            </table>
+        </form>
+    </fieldset>
+</body>
+</html>

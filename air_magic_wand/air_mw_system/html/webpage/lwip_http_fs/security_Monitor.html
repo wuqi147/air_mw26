@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#monitorportstat-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+tr.TABLE_HEAD {
+    height: 22px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+const HTML_STATUS_OK = 200;
+const XML_HTTP_REQUEST_READY_STATE_UNSENT = 0;
+const XML_HTTP_REQUEST_READY_STATE_OPENED = 1;
+const XML_HTTP_REQUEST_READY_STATE_HEADERS_RECEIVED = 1;
+const XML_HTTP_REQUEST_READY_STATE_LOADING = 3;
+const XML_HTTP_REQUEST_READY_STATE_DONE = 4;
+const FLUSH_TIMER_REPEAT_INTERVAL = 2000;
+const DEBOUNCE_TIMER_EXPIRE_VALUE = 500;
+var xmlReq = 0;
+var mib = 0;
+var value = 0;
+var method = ["txbyes_", "rxbyes_", "txpkts_", "rxpkts_"];
+var flush_timer_id = 0;
+var debounce_timer_id = 0;
+
+function stop_flush_timer()
+{
+    if (0 < flush_timer_id)
+    {
+        clearTimeout(flush_timer_id);
+        flush_timer_id = 0;
+    }
+}
+
+function start_flush_timer()
+{
+    flush_timer_id = setTimeout(flush_timer_handler, FLUSH_TIMER_REPEAT_INTERVAL);
+    return flush_timer_id;
+}
+
+function state_change_handler()
+{
+    if((XML_HTTP_REQUEST_READY_STATE_DONE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status))
+    {
+        var i = 0;
+        var cnt = 0;
+        mib = xmlReq.responseText.split(";");
+        for(var m = 0; m < 4; m++)
+        {
+            value = mib[m].split(",");
+            for(let [key, tvalue] of _port_list.entries())
+            {
+                cnt = 0;
+                for(i = 0; i < portNumber; i++)
+                {
+                    if(0 != (tvalue & (0x01 << i)))
+                    {
+                       cnt += Number(value[i]);
+                    }
+                }
+                $id(method[m] + key).innerHTML = Number(cnt);
+            }
+        }
+        start_flush_timer();
+    }
+}
+
+function send_flush_request()
+{
+    if(null != xmlReq)
+    {
+        if ((XML_HTTP_REQUEST_READY_STATE_UNSENT < xmlReq.readystate) && (XML_HTTP_REQUEST_READY_STATE_DONE > xmlReq.readystate))
+        {
+            xmlReq.abort();
+        }
+        xmlReq.open("GET", "/mibState.xml", true);
+        xmlReq.send(null);
+    }
+}
+
+function flush_timer_handler()
+{
+    flush_timer_id = 0;
+    send_flush_request();
+}
+
+function page_init()
+{
+    xmlReq = parent.getXMLObject();
+    if(null != xmlReq)
+    {
+        xmlReq.onreadystatechange = state_change_handler;
+        send_flush_request();
+    }
+}
+
+function send_cgi_request()
+{
+    if (null != xmlReq)
+    {
+        var port_bitmap = 0xFFFFFFF;
+        var monitor_uri = "clear_mib_counter.cgi?port_bitmap=" + port_bitmap.toString();
+
+        xmlReq.open("GET", monitor_uri, true);
+        xmlReq.send(null);
+    }
+}
+
+function debounce_timer_handler()
+{
+    debounce_timer_id = 0;
+    send_cgi_request();
+}
+
+function do_submit()
+{
+    stop_flush_timer();
+    if ((XML_HTTP_REQUEST_READY_STATE_UNSENT < xmlReq.readystate) && (XML_HTTP_REQUEST_READY_STATE_DONE > xmlReq.readystate))
+    {
+        xmlReq.abort();
+    }
+
+    for (var m = 0; m < 4; m++)
+    {
+        for (let [key, tvalue] of _port_list.entries())
+        {
+            $id(method[m] + key).innerHTML = 0;
+        }
+    }
+
+    if (0 < debounce_timer_id)
+    {
+        clearTimeout(debounce_timer_id);
+        debounce_timer_id = 0;
+    }
+
+    debounce_timer_id = setTimeout(debounce_timer_handler, DEBOUNCE_TIMER_EXPIRE_VALUE);
+}
+
+window.onload = () => {
+    let btn = $id("btn_submit");
+    btn.value = parent.window.str_info.btn_clear;
+    btn.onclick = () => { return do_submit(); };
+    page_init();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <div>
+      <fieldset>
+         <legend><span class="NORMAL"><script>docW(parent.window.monitor_info.lgd_cntmonitor)</script></span></legend>
+            <div id=portstat>
+                  <table class="BORDER">
+                     <tbody>
+                        <tr class="TABLE_HEAD">
+                           <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_port)</script></span></td>
+                           <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.monitor_info.lgd_txb)</script></span></td>
+                           <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.monitor_info.lgd_rxb)</script></span></td>
+                           <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.monitor_info.lgd_txp)</script></span></td>
+                           <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.monitor_info.lgd_rxp)</script></span></td>
+                        </tr>
+                        <script type="text/javascript">
+                        for(let [key, value] of _port_list.entries())
+                        {
+                            docW("<tr>");
+                            if(-1 == key.indexOf("Trunk"))
+                            {
+                                docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port + " " + key +"</span></td>");
+                            }
+                            else
+                            {
+                                newKey = key.replace("Trunk",parent.window.trunk_info.opt_trunk);
+                                docW("<td><span class='NORMAL'>" + newKey  +"</span></td>");
+                            }
+                            docW("<td><span class='NORMAL'><div id=txbyes_" + key + "></div></span></td>"), docW("<td><span class='NORMAL'><div id=rxbyes_" + key + "></div></span></td>");
+                            docW("<td><span class='NORMAL'><div id=txpkts_" + key + "></div></span></td>"), docW("<td><span class='NORMAL'><div id=rxpkts_" + key + "></div></span></td>");
+                            docW("</tr>");
+                        }
+                        </script>
+                     </tbody>
+                  </table>
+                  <table class="BTN_WRAPPER" align="center">
+                     <tbody>
+                        <tr>
+                           <td class="BTN_WRAPPER">
+                              <a class="BTN">
+                                <input class="BTN_NORMAL_BTN" type="button" id="btn_submit" name="clear_mib_counter">
+                              </a>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+            </div>
+      </fieldset>
+   </div>
+</body>
+</html>

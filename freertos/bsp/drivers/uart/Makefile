@@ -1,0 +1,1 @@
+obj-$(CONFIG_UART_COMMON) += uart.o

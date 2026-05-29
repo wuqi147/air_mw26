@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    margin: 0;
+    font: 12px Arial, Verdana;
+    color: <!--#menuText-->; /* Menu text color */
+}
+span.copyright {
+    font-size: 160%;
+}
+ul.menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 160%;
+}
+ul.menu * {
+    margin: 0;
+    padding: 0;
+}
+ul.menu a {
+    display: block;
+    color: <!--#menuText-->; /* Menu text color */
+    text-decoration: none;
+}
+ul.menu li {
+    position: relative;
+    width: 220px;
+}
+ul.menu ul {
+    left: 150px;
+    top: 0;
+    display: none;
+    opacity: 0;
+    list-style: none;
+}
+ul.menu ul li {
+    position: relative;
+    border-top: none;
+    width: 220px;
+    margin: 0;
+}
+ul.menu ul li a {
+    text-indent: 7px;
+    background: no-repeat -15px top;
+    display: block;
+    padding: 3px 0 4px 25px;
+}
+a:focus {
+    outline: none;
+}
+a#corporation {
+    text-decoration:none;
+}
+ul.menu ul ul {
+    left: 200px;
+    top: -1px;
+}
+ul.menu .menulink {
+    padding: 2px 0 5px 20px;
+    margin: 4px 0 0 0;
+    width: 220px;
+}
+ul.menu .menulink:hover,
+ul.menu .menuhover {
+    cursor: pointer;
+}
+ul.menu .menulink li {
+    background: -10px top;
+}
+ul.menu ul li.sub ul li a {
+    text-indent: 15px;
+}
+DIV.MENURESIZE {
+    overflow-x: hidden;
+    overflow-y: auto;
+    top: 0;
+    position: relative;
+    margin: 0 0 10px 0;
+    height: 800px;
+}
+div#div_copyright {
+    position: absolute;
+    top: 550px;
+}
+div#shadow {
+    position: absolute;
+    width: 188px;
+    height: 816px;
+    left: 0px;
+    top: 0px;
+    background-image: url("aboutblank.html");
+    display: none;
+}
+div#logout * {
+    margin: 0;
+    padding: 0;
+}
+div#logout a:hover {
+    background-color: <!--#menuHvrBkGd-->; /* Menu hover background color */
+    color: <!--#menuHvrFont-->; /* Menu hover font color */
+    cursor: pointer;
+}
+div#logout .menulink:hover {
+    cursor: pointer;
+}
+div#logout .menulink {
+    padding: 2px 20px 5px;
+    width: 220px;
+}
+div#logout {
+    position: relative;
+    top: 30px;
+}
+div#logout ul {
+    list-style: none;
+}
+div#logout ul a {
+    display: block;
+    color: <!--#menuText-->; /* Menu text color */
+    text-decoration: none;
+}
+div#logout li {
+    position: relative;
+    width: 188px;
+}
+.borderLine {
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    left: 20px;
+    top: -1px;
+    background-repeat: no-repeat;
+    border: none;
+    background-color: <!--#menuText-->; /* Menu text color */
+    font-size: 150%;
+    height: 1px;
+    width: 230px;
+    overflow: hidden;
+}
+.borderLine-select {
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    left: 8px;
+    top: -5px;
+    background-repeat: no-repeat;
+    border: 0;
+    background-color: #2F6D95;
+    font-size: 150%;
+    height: 1px;
+    width: 230px;
+    overflow: hidden;
+}
+.borderLine-hidden {
+    display: block;
+    left: 8px;
+    top: -5px;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    background-repeat: no-repeat;
+    border: 0;
+    background-color: #c3d9ff;
+    font-size: 150%;
+    height: 1px;
+    overflow: hidden;
+    width: 230px;
+}
+.borderLine-click {
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    background-repeat: no-repeat;
+    border: 0;
+    background: white;
+    font-size: 1px;
+    height: 1px;
+    overflow: hidden;
+    width: 230px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var g_itemLen;
+var g_len;
+var g_menuId;
+var g_parent;
+var g_childNum;
+var g_tempUl;
+var g_currentMenu = null;
+var g_prevMenu = null;
+var g_currentDiv = null;
+var g_prevDiv = null;
+var g_divIndex = -1;
+const MENU_OVER_ITEM_BG_COLOR = "<!--#menuHvrBkGd-->"; /* Menu hover background color */
+const MENU_OVER_ITEM_FONT_COLOR = "<!--#menuHvrFont-->"; /* Menu hover font color */
+const MENU_NORMAL_ITEM_FONT_COLOR = "<!--#menuText-->"; /* Menu text color */
+const MENU_NORMAL_ITEM_BG_COLOR = "<!--#menuBkGd-->"; /* Menu background color */
+const MENU_SEL_ITEM_BG_COLOR = "<!--#selctedMnuBkGd-->"; /* Selected menu background color */
+const MENU_SEL_ITEM_FONT_COLOR = "<!--#menuText-->"; /* Menu text color */
+var menuList = new Array(
+"System_Account", 0, 1, parent.window.str_menu.system, 1, 4,
+"sys_SystemInfoRpm", 0, 0, parent.window.str_menu.systemInfo, 1, 0,
+"sys_Ipsetting", 0, 0, parent.window.str_menu.ipSetting, 1, 0,
+"sys_Account", 0, 0, parent.window.str_menu.userAccount, 1, 0,
+"sys_portsetting", 0, 0, parent.window.str_menu.portSetting, 1, 0,
+<!--#menuDDM-->
+
+"Configuration", 0, 1, parent.window.str_menu.Configuration, 1, 13,
+<!--#menuIgsnp-->
+"cfg_PortTrunkRpm", 0, 0, parent.window.str_menu.portTrunk, 1, 0,
+<!--#menuLoop-->
+"cfg_PortMirrorRpm", 0, 0, parent.window.str_menu.portMirror, 1, 0,
+"cfg_BandWidthControl", 0, 0, parent.window.str_menu.cfgbandwidth, 1, 0,
+"cfg_JumboFrame", 0, 0, parent.window.str_menu.JumboFrame, 1, 0,
+"cfg_EEEConfig", 0, 0, parent.window.str_menu.EEEConfig, 1, 0,
+<!--#menuSnmp-->
+<!--#menuRstp-->
+<!--#menuMstp-->
+<!--#menuStpSecurity-->
+<!--#menuMqttd-->
+<!--#menuLldp-->
+<!--#menuLldpNeighbor-->
+<!--#menuSystime-->
+<!--#menuErps-->
+
+"Vlan", 0, 1, parent.window.str_menu.vlan, 1, 5,
+"vlan_mtu", 0, 0, parent.window.str_menu.mVlan, 1, 0,
+"vlan_PortBased", 0, 0, parent.window.str_menu.pVlan, 1, 0,
+"vlan_8021q", 0, 0, parent.window.str_menu.qVlan, 1, 0,
+<!--#menuVoice-->
+<!--#menuSurveil-->
+
+"QoS", 0, 1, parent.window.str_menu.qos, 1, 2,
+"qos_BasicRpm", 0, 0, parent.window.str_menu.qosBasic, 1, 0,
+"qos_AdvanceRpm", 0, 0, parent.window.str_menu.qosAdvance, 1, 0,
+
+<!--#menuPoe-->
+<!--#menuPoeConfig-->
+<!--#menuPoeWatchDog-->
+
+"Security", 0, 1, parent.window.str_menu.Security, 1, 5,
+"security_Maccfg", 0, 0, parent.window.str_menu.SecurityMaccfg, 1, 0,
+"security_StormControlRpm", 0, 0, parent.window.str_menu.stormControl, 1, 0,
+"security_Monitor", 0, 0, parent.window.str_menu.SecurityMonitor, 1, 0,
+<!--#menuDsnp-->
+
+"tools", 0, 1, parent.window.str_menu.tools, 1, 6,
+<!--#menuIcmp-->
+<!--#menuDiag-->
+"tools_FirmwareUpgrade", 0, 0, parent.window.str_menu.toolsfirmwareupgrade, 1, 0,
+"tools_configuration", 0, 0, parent.window.str_menu.toolsconfiguration, 1, 0,
+"tools_ResetToFactory", 0, 0, parent.window.str_menu.toolsresettofactory, 1, 0,
+"tools_saveSettings", 0, 0, parent.window.str_menu.savingConfig, 1, 0,
+"tools_reboot", 0, 0, parent.window.str_menu.toolsreboot, 1, 0);
+
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function $name(a)
+{
+    return document.getElementsByTagName(a)
+};
+function Logout()
+{
+    return !!confirm(js_logout = parent.window.str_info.spn_logout) && (top.location.href = "logout.cgi", !0)
+}
+function resize_menu()
+{
+    var t, e = document.documentElement.clientHeight,
+        i = $id("div_bt1").offsetHeight + $id("div_bt1").offsetTop;
+    return t = e - 150 <= i ? i + 55 : e - 90, $id("div_copyright").style.top = t + "px", $id("autoHeight_menu")
+        .style.height = e - 10 + "px", $id("shadow").style.height = e + "px", !0
+}
+function menuIdInit()
+{
+    g_menuId = document.createElement("ul");
+    if ($id("div_bt1")) {
+        $id("div_bt1").appendChild(g_menuId)
+    }
+    g_menuId.setAttribute("class", "menu");
+    g_menuId.setAttribute("id", "menu")
+}
+function menuItemInit()
+{
+    var a = 0;
+    g_parent = g_menuId;
+    g_len = menuList.length;
+    g_itemLen = 6;
+    generateMenuItem(a);
+    setIndexPage()
+}
+function setIndexPage()
+{
+    if (top.frames.mainFrame) {
+        top.frames.mainFrame.location.href = menuList[g_itemLen] + ".html"
+    }
+}
+function generateMenuItem(d)
+{
+    if (d == g_len) {
+        return
+    }
+    var g = menuList[d + 3];
+    var e = generateMenuItemLi(d, g);
+    var a = e.li;
+    var h = null;
+    var b = a.firstChild;
+    if (menuList[d + 5] != 0) {
+        var c = document.createElement("ul");
+        a.appendChild(c);
+        if (menuList[d + 2] == 1) {
+            g_parent = g_menuId;
+            g_parent.appendChild(a);
+            g_parent = c;
+            g_tempUl = c
+        } else {
+            g_childNum = menuList[d + 5];
+            g_tempUl.appendChild(a);
+            g_parent = c;
+            addClass(b, "sub");
+            addClass(a, "sub")
+        }
+        b.setAttribute("href", menuList[d + g_itemLen] + ".html");
+        b.setAttribute("target", "mainFrame")
+    } else {
+        if (g_childNum == 0) {
+            g_tempUl.appendChild(a)
+        } else {
+            g_parent.appendChild(a);
+            g_childNum--
+        }
+        if (menuList[d + 2] == 1) {
+            g_parent = g_menuId;
+            g_parent.appendChild(a);
+            var c = document.createElement("ul");
+            a.appendChild(c);
+            var f = document.createElement("li");
+            c.appendChild(f);
+            g_parent = c;
+            g_tempUl = c
+        }
+        b.setAttribute("href", menuList[d] + ".html");
+        b.setAttribute("target", "mainFrame")
+    }
+    if (menuList[d + 2] == 1) {
+        h = document.createElement("div");
+        h.className = "borderLine";
+        if (menuList[d + 5] == 0) {
+            h.name = "specDiv"
+        }
+        insertAfter(h, a);
+        attachClick(e, h)
+    } else {
+        attachClick(e)
+    }
+    generateMenuItem(d + g_itemLen)
+}
+function generateMenuItemLi(c, f)
+{
+    var d = new Object();
+    var a = document.createElement("li");
+    var b = document.createElement("a");
+    var e = document.createTextNode(f);
+    b.appendChild(e);
+    a.appendChild(b);
+    d.index = c;
+    d.li = a;
+    return d
+}
+function initCssForMenu()
+{
+    var b = g_menuId.childNodes.length;
+    for (var d = 0; d < b; d = d + 2) {
+        var a = g_menuId.childNodes[d];
+        var c = a.firstChild;
+        addClass(c, "menulink")
+    }
+    var e = $name("ul");
+    b = e.length;
+    for (var d = 0; d < b; d++) {
+        if (e[d].getAttribute("class") != "menu") {
+            addClass(e[d].firstChild, "topline")
+        }
+    }
+}
+function attachClick(d, g)
+{
+    var f = d.li;
+    var c = d.index;
+    var e = menuList[c + 5];
+    var b = menuList[c + 2];
+    var a = "";
+    f.onmouseover = function (h) {
+        h = EventUtil.getEvent(h);
+        var j = EventUtil.getTarget(h);
+        if (j.style.fontWeight != "bold") {
+            j.style.backgroundColor = MENU_OVER_ITEM_BG_COLOR;
+            j.style.color = MENU_OVER_ITEM_FONT_COLOR;
+            j.style.width = "225px";
+            a = j.getAttribute("class");
+        }
+    };
+    f.onmouseout = function (h) {
+        h = EventUtil.getEvent(h);
+        var j = EventUtil.getTarget(h);
+        if (j.style.fontWeight != "bold") {
+            j.style.backgroundColor = MENU_NORMAL_ITEM_BG_COLOR;
+            j.style.color = MENU_NORMAL_ITEM_FONT_COLOR;
+            a = j.getAttribute("class");
+        }
+    };
+    f.onclick = function (h) {
+        h = EventUtil.getEvent(h);
+        var j = EventUtil.getTarget(h);
+        if (g_prevMenu != null) {
+            g_prevMenu.style.backgroundColor = MENU_NORMAL_ITEM_BG_COLOR;
+            g_prevMenu.style.fontWeight = "normal"
+        }
+        if (e) {
+            var k = f.childNodes[1].firstChild.firstChild;
+            k.style.backgroundColor = MENU_SEL_ITEM_BG_COLOR;
+            k.style.fontWeight = "bold";
+            k.style.color = MENU_SEL_ITEM_FONT_COLOR;
+            k.style.width = "225px";
+            g_prevMenu = k
+        } else {
+            j.style.backgroundColor = MENU_SEL_ITEM_BG_COLOR;
+            j.style.fontWeight = "bold";
+            j.style.color = MENU_SEL_ITEM_FONT_COLOR;
+            j.style.width = "225px";
+            g_prevMenu = j
+        }
+        if (typeof g != "undefined") {
+            if (g_prevDiv != null && "specDiv" != g_prevDiv.name) {
+                if (g_prevDiv == g) {
+                    if (g.style.display == "none") {
+                        g.className = "borderLine";
+                        g.style.display = "block"
+                    } else {
+                        g.style.display = "none"
+                    }
+                } else {
+                    g_prevDiv.className = "borderLine";
+                    g_prevDiv.style.display = "block";
+                    if ("specDiv" != g.name) {
+                        g.style.display = "none"
+                    }
+                }
+            } else {
+                if ("specDiv" != g.name) {
+                    g.style.display = "none"
+                }
+            }
+            g_prevDiv = g
+        }
+        EventUtil.stopPropagation(h);
+        window.onresize()
+    }
+}
+var menu = function ()
+{
+    var e = 15,
+        g = 50,
+        f = 6,
+        d;
+
+    function c(a) {
+        this.n = a;
+        this.h = [];
+        this.c = [];
+        this.pt = [];
+        this.len = 0
+    }
+    c.prototype.init = function (n, o) {
+        d = o;
+        var j = $id(n),
+            m = j.getElementsByTagName("ul"),
+            a = m.length;
+        var self = this;
+        this.len = a;
+        for (let i = 0; i < a; i++) {
+            var k = m[i].parentNode;
+            var li = k.getElementsByTagName("a")[0];
+            this.h[i] = k;
+            this.c[i] = m[i];
+            this.pt[i] = false;
+            li.onclick = () => {
+                var obj = window[self.n];
+                obj && (typeof obj.handleClick === 'function') && obj.handleClick(i, true);
+            };
+        }
+    };
+    c.prototype.handleClick = function (h, a) {
+        var j = 0;
+        if (this.pt[h] == true) {
+            for (j = this.len - 1; j >= 0; j--) {
+                if (this.c[j].parentNode.parentNode == this.c[h]) {
+                    if (this.pt[j] == true) {
+                        this.st(j, false);
+                        this.pt[j] = false
+                    }
+                    continue
+                }
+            }
+            this.st(h, false);
+            this.pt[h] = false
+        } else {
+            for (j = this.len - 1; j >= 0; j--) {
+                if (this.c[j] == this.c[h].parentNode.parentNode) {
+                    continue
+                }
+                if (j == h) {
+                    this.st(j, true);
+                    this.pt[j] = true;
+                    continue
+                }
+                if (this.pt[j] == true) {
+                    this.st(j, false);
+                    this.pt[j] = false
+                }
+            }
+        }
+    };
+    c.prototype.st = function (a, k) {
+        var m = this.c[a],
+            j = this.h[a],
+            l = j.getElementsByTagName("a")[0];
+        m.style.overflow = "visible";
+        if (k) {
+            temp = m.parentNode.parentNode;
+            l.className += " " + d;
+            if (!m.mh) {
+                m.style.display = "block";
+                m.style.height = "";
+                m.mh = m.offsetHeight;
+                m.style.height = 0
+            }
+            if (temp.mh) {
+                temp.mh += m.mh;
+                b(temp, 1)
+            }
+            if (m.mh == m.offsetHeight) {
+                m.style.overflow = "visible"
+            } else {
+                m.style.zIndex = g;
+                g++;
+                b(m, 1)
+            }
+        } else {
+            temp = m.parentNode.parentNode;
+            if (temp.mh) {
+                temp.mh -= m.mh;
+                b(temp, 1)
+            }
+            l.className = l.className.replace(d, "");
+            b(m, -1)
+        }
+    };
+
+    function b(k, j) {
+        var a = k.offsetHeight;
+        if (k.offsetHeight > k.mh) {
+            a = 0
+        }
+        if (j == 1) {
+            k.style.height = k.mh + "px";
+            k.style.opacity = 1;
+            k.style.overflow = "visible";
+            k.style.display = "block"
+        } else {
+            k.style.height = "0px";
+            k.style.opacity = 0;
+            k.style.display = "none"
+        }
+        return
+    }
+    return {
+        dd: c
+    }
+}();
+function addClass(b, c)
+{
+    if (!b.className) {
+        b.className = c
+    } else {
+        var a;
+        a = b.className;
+        a += " ";
+        a += c;
+        b.className = a
+    }
+}
+function insertAfter(c, a)
+{
+    var b = a.parentNode;
+    if (b.lastChild == a) {
+        b.appendChild(c)
+    } else {
+        b.insertBefore(c, a.nextSibling)
+    }
+}
+var EventUtil = {
+    getEvent: function (a) {
+        return a ? a : window.event
+    },
+    getTarget: function (a) {
+        return a.target || a.srcElement
+    },
+    stopPropagation: function (a) {
+        if ((a).stopPropagation) {
+            (a).stopPropagation()
+        } else {
+            (a).cancelBubble = true
+        }
+    }
+};
+
+window.onresize = () => resize_menu();
+window.onload = () => {
+    $id("logoutlnk").onclick = () => Logout();
+};
+</script>
+</head>
+<body class="menumain" marginwidth="0" marginheight="0">
+    <div id="autoHeight_menu" class="MENURESIZE">
+        <div id="div_bt1"> <br>
+            <script>
+                menuIdInit(), menuItemInit(), initCssForMenu();
+                var menu = new menu.dd("menu");
+                menu.init("menu", "menuhover")
+            </script>
+        </div>
+        <div id="logout">
+            <ul>
+                <li><a class="menulink" id="logoutlnk"><span class="NORMAL"><script>docW(parent.window.str_menu.str_info0)</script></span></a></li>
+                <div class="borderLine"></div>
+            </ul>
+        </div>
+        <div id="div_copyright">
+            <table cellspace="2" cellpadding="1" border="0">
+                <tbody>
+                    <tr>
+                        <td align="center">
+                            <a id="corporation" target="blank">
+                                <!--#custMenuCopyright-->
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="shadow"></div>
+</body>
+</html>

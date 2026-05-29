@@ -1,0 +1,1808 @@
+/* FILE NAME:   hal_sco_reg.h
+ * PURPOSE:
+ *      Define the chip registers in AIR SDK.
+ * NOTES:
+ */
+
+#ifndef HAL_SCO_REG_H
+#define HAL_SCO_REG_H
+
+/* INCLUDE FILE DECLARATIONS
+ */
+
+/* NAMING CONSTANT DECLARATIONS
+ */
+
+/* EN8851 register map perport offset is 0x200 */
+#define PORT_CTRL_PORT_OFFSET (0x200)
+
+#define VTCR_ADDR         (0x10200600)
+#define VTCR_VID_OFFT     (0)
+#define VTCR_VID_LENG     (12)
+#define VTCR_VID_RELMASK  (0x00000FFF)
+#define VTCR_VID_MASK     (VTCR_VID_RELMASK << VTCR_VID_OFFT)
+#define VTCR_FUNC_OFFT    (12)
+#define VTCR_FUNC_LENG    (4)
+#define VTCR_FUNC_RELMASK (0x0000000F)
+#define VTCR_FUNC_MASK    (VTCR_FUNC_RELMASK << VTCR_FUNC_OFFT)
+#define VTCR_BUSY_OFFT    (31)
+#define VTCR_BUSY_LENG    (1)
+#define VTCR_BUSY_RELMASK (0x00000001)
+#define VTCR_BUSY_MASK    (VTCR_BUSY_RELMASK << VTCR_BUSY_OFFT)
+
+#define VLNWDATA0 (0x10200604)
+#define VLNWDATA1 (0x10200608)
+#define VLNWDATA2 (0x1020060c)
+#define VLNWDATA3 (0x10200610)
+#define VLNWDATA4 (0x10200614)
+#define VLNRDATA0 (0x10200618)
+#define VLNRDATA1 (0x1020061c)
+#define VLNRDATA2 (0x10200620)
+#define VLNRDATA3 (0x10200624)
+#define VLNRDATA4 (0x10200628)
+
+/* Field of VLAN*/
+#define VLN_TYPE_MAC_VOICE_SURVEILLANCE_BASE (0 << 1)
+#define VLN_TYPE_IPV4_BASE                   (1 << 1)
+#define VLN_TYPE_SELECTIVE_QINQ_BASE         (2 << 1)
+
+/* Field of Selecive QinQ */
+#define SELECTIVE_QINQ_VLAN_ENTRY_INVAILD (0x0)
+#define SELECTIVE_QINQ_VLAN_ENTRY_VAILD   (0x1)
+#define SELECTIVE_QINQ_ETHERTYPE_OFFSET   (4)
+#define SELECTIVE_QINQ_CVID_OFFSET        (20)
+#define SELECTIVE_QINQ_CVID_PRI_OFFSET    (0)
+#define SELECTIVE_QINQ_SVID_PRI_OFFSET    (2)
+#define SELECTIVE_QINQ_SVID_OFFSET        (5)
+
+#define SELECTIVE_QINQ_ETHERTYPE_LENG (16)
+#define SELECTIVE_QINQ_VID_LENG       (12)
+#define SELECTIVE_QINQ_VID_PRI_LENG   (3)
+
+/* Field of MAC-based VLAN*/
+#define MAC_BASED_VLAN_ENTRY_INVALID  (0x0)
+#define MAC_BASED_VLAN_ENTRY_VALID    (0x1)
+#define MAC_BASED_VLAN_MACADDR_OFFSET (4)
+#define MAC_BASED_VLAN_MACMASK_OFFSET (20)
+#define MAC_BASED_VLAN_PRI_OFFSET     (26)
+#define MAC_BASED_VLAN_CVID_OFFSET    (29)
+
+#define MAC_BASED_VLAN_MACMASK_LENG   (6)
+#define MAC_BASED_VLAN_PRI_LENG       (3)
+#define MAC_BASED_VLAN_MACADDR_L_LENG (28)
+#define MAC_BASED_VLAN_MACADDR_H_LENG (20)
+#define MAC_BASED_VLAN_CVID_LENG      (12)
+#define MAC_BASED_VLAN_CVID_L_LENG    (3)
+#define MAC_BASED_VLAN_CVID_H_LENG    (9)
+
+/* Field of IPv4-based VLAN */
+#define IPV4_BASED_VLAN_ENTRY_INVALID (0)
+#define IPV4_BASED_VLAN_ENTRY_VALID   (1)
+#define IPV4_BASED_VLAN_IPADDR_OFFSET (4)
+#define IPV4_BASED_VLAN_IPMASK_OFFSET (4)
+#define IPV4_BASED_VLAN_PRI_OFFSET    (4)
+#define IPV4_BASED_VLAN_CVID_OFFSET   (7)
+
+#define IPV4_BASED_VLAN_IPADDR_L_LENG (28)
+#define IPV4_BASED_VLAN_IPADDR_H_LENG (4)
+#define IPV4_BASED_VLAN_IPMASK_L_LENG (28)
+#define IPV4_BASED_VLAN_IPMASK_H_LENG (4)
+#define IPV4_BASED_VLAN_PRI_LENG      (3)
+#define IPV4_BASED_VLAN_CVID_LENG     (12)
+
+/* Field of IPv6-based VLAN */
+#define IPV6_BASED_VLAN_ENTRY_INVALID (0)
+#define IPV6_BASED_VLAN_ENTRY_VALID   (1)
+#define IPV6_BASED_VLAN_IPADDR_OFFSET (1)
+#define IPV6_BASED_VLAN_IPMASK_OFFSET (1)
+#define IPV6_BASED_VLAN_PRI_OFFSET    (9)
+#define IPV6_BASED_VLAN_CVID_OFFSET   (12)
+
+#define IPV6_BASED_VLAN_IPADDR_LENG (31)
+#define IPV6_BASED_VLAN_IPMASK_LENG (8)
+#define IPV6_BASED_VLAN_PRI_LENG    (3)
+#define IPV6_BASED_VLAN_CVID_LENG   (12)
+
+/* Field of Protocol-based VLAN */
+#define PROTOCOL_BASED_VLAN_ENTRY_INVALID         (0)
+#define PROTOCOL_BASED_VLAN_ENTRY_VALID           (1)
+#define PROTOCOL_BASED_VLAN_FRAME_TYPE_OFFSET     (1)
+#define PROTOCOL_BASED_VLAN_FRAME_TYPE_ETHERNET   (0)
+#define PROTOCOL_BASED_VLAN_FRAME_TYPE_RFC1042    (1)
+#define PROTOCOL_BASED_VLAN_FRAME_TYPE_SNAP_OTHER (2)
+#define PROTOCOL_BASED_VLAN_FRAME_TYPE_LLC_OTHER  (3)
+#define PROTOCOL_BASED_VLAN_TYPE_VALUE_L_OFFSET   (4)
+#define PROTOCOL_BASED_VLAN_TYPE_VALUE_H_OFFSET   (0)
+#define PROTOCOL_BASED_VLAN_GROUP_ID_OFFSET       (12)
+
+#define PROTOCOL_BASED_VLAN_FRAME_TYPE_LENG   (3)
+#define PROTOCOL_BASED_VLAN_TYPE_VALUE_L_LENG (28)
+#define PROTOCOL_BASED_VLAN_TYPE_VALUE_H_LENG (12)
+#define PROTOCOL_BASED_VLAN_GROUP_ID_LENG     (2)
+
+/* ARL Register Base */
+#define REG_ARL_BASE_ADDRESS (0x10200000)
+
+/* Global Control Base */
+/* fields of ARL Global Control */
+#define AGC                      (REG_ARL_BASE_ADDRESS + 0x000C)
+#define CSR_BCSTRM_EXC_MG        (25)
+#define CSR_LOCAL_EN_OFFT        (7)
+#define CSR_LOCAL_EN_LENG        (1)
+#define AGC_MAC_MOVE_EN_OFFT     (28)
+#define AGC_MAC_MOVE_EN_LENG     (1)
+#define AGC_ACLRATE_EXC_MG_OFFT  (26)
+#define AGC_ACLRATE_EXC_MG_LENG  (1)
+#define AGC_BCSTRM_EXC_MG_OFFT   (25)
+#define AGC_BCSTRM_EXC_MG_LENG   (1)
+#define AGC_MAC_OLD_RPLC_HW_OFFT (23)
+#define AGC_MAC_OLD_RPLC_HW_LENG (1)
+#define AGC_COMP_BNUM_OFFT       (8)
+#define AGC_COMP_BNUM_LENG       (7)
+
+/* fields of MAC Forward Control */
+#define MFC                 (REG_ARL_BASE_ADDRESS + 0x0010)
+#define CSR_CPU_PORT        (8)
+#define CSR_CPU_PORT_LENGTH (5)
+#define CSR_CPU_PORT_EN     (15)
+
+/* fields of IGMP Snooping Control */
+#define ISC               (REG_ARL_BASE_ADDRESS + 0x0018)
+#define ISC_CSR_IGMPV3_EN (1 << 0)
+
+/* fields of IGMP Message Control */
+#define IMC                      (REG_ARL_BASE_ADDRESS + 0x001C)
+#define REG_IGMP_REP_MANG_OFFT   (30)
+#define REG_IGMP_REP_MANG_LENGTH (1)
+
+#define REG_IGMP_REP_BPDU_OFFT   (28)
+#define REG_IGMP_REP_BPDU_LENGTH (1)
+
+#define REG_IGMP_REP_PRI_HIGH_OFFT   (23)
+#define REG_IGMP_REP_PRI_HIGH_LENGTH (1)
+
+#define REG_IGMP_REP_PORT_FWD_OFFT   (16)
+#define REG_IGMP_REP_PORT_FWD_LENGTH (3)
+
+#define REG_IGMP_QRY_MANG_OFFT   (14)
+#define REG_IGMP_QRY_MANG_LENGTH (1)
+
+#define REG_IGMP_QRY_BPDU_OFFT   (12)
+#define REG_IGMP_QRY_BPDU_LENGTH (1)
+
+#define REG_IGMP_QRY_PRI_HIGH_OFFT   (7)
+#define REG_IGMP_QRY_PRI_HIGH_LENGTH (1)
+
+#define REG_IGMP_QRY_PORT_FWD_OFFT   (0)
+#define REG_IGMP_QRY_PORT_FWD_LENGTH (3)
+
+/* fields of ARP and PPPoE Control */
+#define APC                   (REG_ARL_BASE_ADDRESS + 0x0020)
+#define REG_PPPOE_MANG_OFFT   (30)
+#define REG_PPPOE_MANG_LENGTH (1)
+
+#define REG_PPPOE_BPDU_OFFT   (28)
+#define REG_PPPOE_BPDU_LENGTH (1)
+
+#define REG_PPPOE_PRI_HIGH_OFFT   (23)
+#define REG_PPPOE_PRI_HIGH_LENGTH (1)
+
+#define REG_PPPOE_PORT_FWD_OFFT   (16)
+#define REG_PPPOE_PORT_FWD_LENGTH (3)
+
+#define REG_ARP_MANG_OFFT   (14)
+#define REG_ARP_MANG_LENGTH (1)
+
+#define REG_ARP_BPDU_OFFT   (12)
+#define REG_ARP_BPDU_LENGTH (1)
+
+#define REG_ARP_PRI_HIGH_OFFT   (7)
+#define REG_ARP_PRI_HIGH_LENGTH (1)
+
+#define REG_ARP_PORT_FWD_OFFT   (0)
+#define REG_ARP_PORT_FWD_LENGTH (3)
+
+/* fields of PAE (un-tagged/ tagged) Control */
+#define PAC                     (REG_ARL_BASE_ADDRESS + 0x0024)
+#define REG_TAG_PAE_MANG_OFFT   (30)
+#define REG_TAG_PAE_MANG_LENGTH (1)
+
+#define REG_TAG_PAE_BPDU_OFFT   (28)
+#define REG_TAG_PAE_BPDU_LENGTH (1)
+
+#define REG_TAG_PAE_PRI_HIGH_OFFT   (23)
+#define REG_TAG_PAE_PRI_HIGH_LENGTH (1)
+
+#define REG_TAG_PAE_PORT_FWD_OFFT   (16)
+#define REG_TAG_PAE_PORT_FWD_LENGTH (3)
+
+#define REG_UTAG_PAE_MANG_OFFT   (14)
+#define REG_UTAG_PAE_MANG_LENGTH (1)
+
+#define REG_UTAG_PAE_BPDU_OFFT   (12)
+#define REG_UTAG_PAE_BPDU_LENGTH (1)
+
+#define REG_UTAG_PAE_PRI_HIGH_OFFT   (7)
+#define REG_UTAG_PAE_PRI_HIGH_LENGTH (1)
+
+#define REG_UTAG_PAE_PORT_FWD_OFFT   (0)
+#define REG_UTAG_PAE_PORT_FWD_LENGTH (3)
+
+/* fields of REV_01 and REV_02 Control */
+#define RGAC1                  (REG_ARL_BASE_ADDRESS + 0x0028)
+#define REG_REV_02_MANG_OFFT   (30)
+#define REG_REV_02_MANG_LENGTH (1)
+
+#define REG_REV_02_BPDU_OFFT   (28)
+#define REG_REV_02_BPDU_LENGTH (1)
+
+#define REG_REV_02_PRI_HIGH_OFFT   (23)
+#define REG_REV_02_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_02_PORT_FWD_OFFT   (16)
+#define REG_REV_02_PORT_FWD_LENGTH (3)
+
+#define REG_REV_01_MANG_OFFT   (14)
+#define REG_REV_01_MANG_LENGTH (1)
+
+#define REG_REV_01_BPDU_OFFT   (12)
+#define REG_REV_01_BPDU_LENGTH (1)
+
+#define REG_REV_01_PRI_HIGH_OFFT   (7)
+#define REG_REV_01_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_01_PORT_FWD_OFFT   (0)
+#define REG_REV_01_PORT_FWD_LENGTH (3)
+
+/* fields of REV_03 and REV_0E Control */
+#define RGAC2                  (REG_ARL_BASE_ADDRESS + 0x002C)
+#define REG_REV_0E_MANG_OFFT   (30)
+#define REG_REV_0E_MANG_LENGTH (1)
+
+#define REG_REV_0E_BPDU_OFFT   (28)
+#define REG_REV_0E_BPDU_LENGTH (1)
+
+#define REG_REV_0E_PRI_HIGH_OFFT   (23)
+#define REG_REV_0E_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_0E_PORT_FWD_OFFT   (16)
+#define REG_REV_0E_PORT_FWD_LENGTH (3)
+
+#define REG_REV_03_MANG_OFFT   (14)
+#define REG_REV_03_MANG_LENGTH (1)
+
+#define REG_REV_03_BPDU_OFFT   (12)
+#define REG_REV_03_BPDU_LENGTH (1)
+
+#define REG_REV_03_PRI_HIGH_OFFT   (7)
+#define REG_REV_03_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_03_PORT_FWD_OFFT   (0)
+#define REG_REV_03_PORT_FWD_LENGTH (3)
+
+/* fields of REV_10 and REV_20 Control */
+#define RGAC3                  (REG_ARL_BASE_ADDRESS + 0x0030)
+#define REG_REV_20_MANG_OFFT   (30)
+#define REG_REV_20_MANG_LENGTH (1)
+
+#define REG_REV_20_BPDU_OFFT   (28)
+#define REG_REV_20_BPDU_LENGTH (1)
+
+#define REG_REV_20_PRI_HIGH_OFFT   (23)
+#define REG_REV_20_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_20_PORT_FWD_OFFT   (16)
+#define REG_REV_20_PORT_FWD_LENGTH (3)
+
+#define REG_REV_10_MANG_OFFT   (14)
+#define REG_REV_10_MANG_LENGTH (1)
+
+#define REG_REV_10_BPDU_OFFT   (12)
+#define REG_REV_10_BPDU_LENGTH (1)
+
+#define REG_REV_10_PRI_HIGH_OFFT   (7)
+#define REG_REV_10_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_10_PORT_FWD_OFFT   (0)
+#define REG_REV_10_PORT_FWD_LENGTH (3)
+
+/* fields of REV_21 and REV_UN Control */
+#define RGAC4                  (REG_ARL_BASE_ADDRESS + 0x0034)
+#define REG_REV_UN_MANG_OFFT   (30)
+#define REG_REV_UN_MANG_LENGTH (1)
+
+#define REG_REV_UN_BPDU_OFFT   (28)
+#define REG_REV_UN_BPDU_LENGTH (1)
+
+#define REG_REV_UN_PRI_HIGH_OFFT   (23)
+#define REG_REV_UN_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_UN_PORT_FWD_OFFT   (16)
+#define REG_REV_UN_PORT_FWD_LENGTH (3)
+
+#define REG_REV_21_MANG_OFFT   (14)
+#define REG_REV_21_MANG_LENGTH (1)
+
+#define REG_REV_21_BPDU_OFFT   (12)
+#define REG_REV_21_BPDU_LENGTH (1)
+
+#define REG_REV_21_PRI_HIGH_OFFT   (7)
+#define REG_REV_21_PRI_HIGH_LENGTH (1)
+
+#define REG_REV_21_PORT_FWD_OFFT   (0)
+#define REG_REV_21_PORT_FWD_LENGTH (3)
+
+/* fields of DHCP v4/v6 Control */
+#define DHCP                   (REG_ARL_BASE_ADDRESS + 0x00A4)
+#define REG_DHCP_6_MANG_OFFT   (30)
+#define REG_DHCP_6_MANG_LENGTH (1)
+
+#define REG_DHCP_6_BPDU_OFFT   (28)
+#define REG_DHCP_6_BPDU_LENGTH (1)
+
+#define REG_DHCP_6_PRI_HIGH_OFFT   (23)
+#define REG_DHCP_6_PRI_HIGH_LENGTH (1)
+
+#define REG_DHCP_6_PORT_FWD_OFFT   (16)
+#define REG_DHCP_6_PORT_FWD_LENGTH (3)
+
+#define REG_DHCP_4_MANG_OFFT   (14)
+#define REG_DHCP_4_MANG_LENGTH (1)
+
+#define REG_DHCP_4_BPDU_OFFT   (12)
+#define REG_DHCP_4_BPDU_LENGTH (1)
+
+#define REG_DHCP_4_PRI_HIGH_OFFT   (7)
+#define REG_DHCP_4_PRI_HIGH_LENGTH (1)
+
+#define REG_DHCP_4_PORT_FWD_OFFT   (0)
+#define REG_DHCP_4_PORT_FWD_LENGTH (3)
+
+/* fields of ARL Global Security Control */
+#define REG_AGSC                      (REG_ARL_BASE_ADDRESS + 0x00B0)
+#define REG_AGSC_GLB_SA_CNT_EN_OFFT   (31)
+#define REG_AGSC_GLB_SA_CNT_EN_LENGTH (1)
+
+#define REG_AGSC_GLB_SA_LRN_CNT_OFFT   (16)
+#define REG_AGSC_GLB_SA_LRN_CNT_LENGTH (14)
+
+#define REG_AGSC_GLB_MAC_SA_LRN_OFFT   (0)
+#define REG_AGSC_GLB_MAC_SA_LRN_LENGTH (14)
+
+/* fields of Default Router Port Control */
+#define DRP (REG_ARL_BASE_ADDRESS + 0x00C8)
+
+/* fields of BPDU Control */
+#define BPC                   (REG_ARL_BASE_ADDRESS + 0x00D0)
+#define REG_TTL_0_MANG_OFFT   (30)
+#define REG_TTL_0_MANG_LENGTH (1)
+
+#define REG_TTL_0_BPDU_OFFT   (28)
+#define REG_TTL_0_BPDU_LENGTH (1)
+
+#define REG_TTL_0_PRI_HIGH_OFFT   (23)
+#define REG_TTL_0_PRI_HIGH_LENGTH (1)
+
+#define REG_TTL_0_PORT_FWD_OFFT   (16)
+#define REG_TTL_0_PORT_FWD_LENGTH (3)
+
+#define REG_BPDU_MANG_OFFT   (14)
+#define REG_BPDU_MANG_LENGTH (1)
+
+#define REG_BPDU_BPDU_OFFT   (12)
+#define REG_BPDU_BPDU_LENGTH (1)
+
+#define REG_BPDU_EG_TAG_OFFT   (9)
+#define REG_BPDU_EG_TAG_LENGTH (3)
+
+#define REG_BPDU_PRI_HIGH_OFFT   (7)
+#define REG_BPDU_PRI_HIGH_LENGTH (1)
+
+#define REG_BPDU_PORT_FWD_OFFT   (0)
+#define REG_BPDU_PORT_FWD_LENGTH (3)
+
+/* fields of MLD Message Control */
+#define MMC                     (REG_ARL_BASE_ADDRESS + 0x00D4)
+#define REG_MLD_REP_MANG_OFFT   (30)
+#define REG_MLD_REP_MANG_LENGTH (1)
+
+#define REG_MLD_REP_BPDU_OFFT   (28)
+#define REG_MLD_REP_BPDU_LENGTH (1)
+
+#define REG_MLD_REP_PRI_HIGH_OFFT   (23)
+#define REG_MLD_REP_PRI_HIGH_LENGTH (1)
+
+#define REG_MLD_REP_PORT_FWD_OFFT   (16)
+#define REG_MLD_REP_PORT_FWD_LENGTH (3)
+
+#define REG_MLD_QRY_MANG_OFFT   (14)
+#define REG_MLD_QRY_MANG_LENGTH (1)
+
+#define REG_MLD_QRY_BPDU_OFFT   (12)
+#define REG_MLD_QRY_BPDU_LENGTH (1)
+
+#define REG_MLD_QRY_PRI_HIGH_OFFT   (7)
+#define REG_MLD_QRY_PRI_HIGH_LENGTH (1)
+
+#define REG_MLD_QRY_PORT_FWD_OFFT   (0)
+#define REG_MLD_QRY_PORT_FWD_LENGTH (3)
+
+/* fields of IGMP Query Port Control */
+#define QRYP (REG_ARL_BASE_ADDRESS + 0x00D8)
+
+/* fields of queue setting*/
+#define UPW (REG_ARL_BASE_ADDRESS + 0x0044)
+
+#define PEM1 (REG_ARL_BASE_ADDRESS + 0x0048)
+#define PEM2 (REG_ARL_BASE_ADDRESS + 0x004c)
+#define PEM3 (REG_ARL_BASE_ADDRESS + 0x0050)
+#define PEM4 (REG_ARL_BASE_ADDRESS + 0x0054)
+
+#define PIM1 (REG_ARL_BASE_ADDRESS + 0x0058)
+#define PIM2 (REG_ARL_BASE_ADDRESS + 0x005c)
+#define PIM3 (REG_ARL_BASE_ADDRESS + 0x0060)
+#define PIM4 (REG_ARL_BASE_ADDRESS + 0x0064)
+#define PIM5 (REG_ARL_BASE_ADDRESS + 0x0068)
+#define PIM6 (REG_ARL_BASE_ADDRESS + 0x006c)
+#define PIM7 (REG_ARL_BASE_ADDRESS + 0x0070)
+
+/* fields of AAC*/
+#define AAC                   (REG_ARL_BASE_ADDRESS + 0x00A0)
+#define AAC_AGE_UNIT_OFFSET   (0)
+#define AAC_AGE_UNIT_LENGTH   (11)
+#define AAC_AGE_CNT_OFFSET    (12)
+#define AAC_AGE_CNT_LENGTH    (9)
+#define AAC_AUTO_FLUSH_OFFSET (28)
+#define AAC_AUTO_FLUSH_LENGTH (1)
+
+/* Register of Forwarding Control Base address */
+#define UNUF   (REG_ARL_BASE_ADDRESS + 0x00B4)
+#define UNMF   (REG_ARL_BASE_ADDRESS + 0x00B8)
+#define BCF    (REG_ARL_BASE_ADDRESS + 0x00BC)
+#define UNIPMF (REG_ARL_BASE_ADDRESS + 0x00DC)
+
+/* fields of AGDIS */
+#define AGDIS             (REG_ARL_BASE_ADDRESS + 0x00C0)
+#define AGDIS_PORT_OFFSET (0)
+#define AGDIS_PORT_LENGTH (32)
+
+/* fields of ATC */
+#define ATC                   (REG_ARL_BASE_ADDRESS + 0x0300)
+#define ATC_MAC_OFFSET        (0)
+#define ATC_MAC_LENGTH        (3)
+#define ATC_SAT_OFFSET        (4)
+#define ATC_SAT_LENGTH        (2)
+#define ATC_MAT_OFFSET        (7)
+#define ATC_MAT_LENGTH        (5)
+#define ATC_ENTRY_HIT_OFFSET  (12)
+#define ATC_ENTRY_HIT_LENGTH  (4)
+#define ATC_ADDR_OFFSET       (16)
+#define ATC_ADDR_LENGTH       (11)
+#define ATC_SINGLE_HIT_OFFSET (30)
+#define ATC_SINGLE_HIT_LENGTH (1)
+#define ATC_BUSY_OFFSET       (31)
+#define ATC_BUSY_LENGTH       (1)
+
+enum
+{
+    _ATC_CMD_READ = 0,
+    _ATC_CMD_WRITE,
+    _ATC_CMD_CLEAN,
+    _ATC_CMD_SEARCH = 4,
+    _ATC_CMD_SEARCH_NEXT,
+    _ATC_CMD_LAST
+};
+
+#define ATC_CMD_READ        (_ATC_CMD_READ << ATC_MAC_OFFSET)
+#define ATC_CMD_WRITE       (_ATC_CMD_WRITE << ATC_MAC_OFFSET)
+#define ATC_CMD_CLEAN       (_ATC_CMD_CLEAN << ATC_MAC_OFFSET)
+#define ATC_CMD_SEARCH      (_ATC_CMD_SEARCH << ATC_MAC_OFFSET)
+#define ATC_CMD_SEARCH_NEXT (_ATC_CMD_SEARCH_NEXT << ATC_MAC_OFFSET)
+
+enum
+{
+    _ATC_SAT_MAC = 0,
+    _ATC_SAT_DIP,
+    _ATC_SAT_SIP,
+    _ATC_SAT_ADDR,
+    _ATC_SAT_LAST
+};
+
+#define ATC_SAT_MAC  (_ATC_SAT_MAC << ATC_SAT_OFFSET)
+#define ATC_SAT_DIP  (_ATC_SAT_DIP << ATC_SAT_OFFSET)
+#define ATC_SAT_SIP  (_ATC_SAT_SIP << ATC_SAT_OFFSET)
+#define ATC_SAT_ADDR (_ATC_SAT_ADDR << ATC_SAT_OFFSET)
+
+enum
+{
+    _ATC_MAT_ALL = 0,
+    _ATC_MAT_MAC,
+    _ATC_MAT_DYNAMIC_MAC,
+    _ATC_MAT_STATIC_MAC,
+    _ATC_MAT_DIP,
+    _ATC_MAT_DIPV4,
+    _ATC_MAT_DIPV6,
+    _ATC_MAT_SIP,
+    _ATC_MAT_SIPV4,
+    _ATC_MAT_SIPV6,
+    _ATC_MAT_MAC_BY_VID,
+    _ATC_MAT_MAC_BY_FID,
+    _ATC_MAT_MAC_BY_PORT,
+    _ATC_MAT_SIP_BY_DIPV4,
+    _ATC_MAT_SIP_BY_SIPV4,
+    _ATC_MAT_SIP_BY_DIPV6,
+    _ATC_MAT_SIP_BY_SIPV6,
+    _ATC_MAT_LAST
+};
+
+#define ATC_MAT_ALL          (_ATC_MAT_ALL << ATC_MAT_OFFSET)
+#define ATC_MAT_MAC          (_ATC_MAT_MAC << ATC_MAT_OFFSET)
+#define ATC_MAT_DYNAMIC_MAC  (_ATC_MAT_DYNAMIC_MAC << ATC_MAT_OFFSET)
+#define ATC_MAT_STATIC_MAC   (_ATC_MAT_STATIC_MAC << ATC_MAT_OFFSET)
+#define ATC_MAT_DIP          (_ATC_MAT_DIP << ATC_MAT_OFFSET)
+#define ATC_MAT_DIPV4        (_ATC_MAT_DIPV4 << ATC_MAT_OFFSET)
+#define ATC_MAT_DIPV6        (_ATC_MAT_DIPV6 << ATC_MAT_OFFSET)
+#define ATC_MAT_SIP          (_ATC_MAT_SIP << ATC_MAT_OFFSET)
+#define ATC_MAT_SIPV4        (_ATC_MAT_SIPV4 << ATC_MAT_OFFSET)
+#define ATC_MAT_SIPV6        (_ATC_MAT_SIPV6 << ATC_MAT_OFFSET)
+#define ATC_MAT_MAC_BY_VID   (_ATC_MAT_MAC_BY_VID << ATC_MAT_OFFSET)
+#define ATC_MAT_MAC_BY_FID   (_ATC_MAT_MAC_BY_FID << ATC_MAT_OFFSET)
+#define ATC_MAT_MAC_BY_PORT  (_ATC_MAT_MAC_BY_PORT << ATC_MAT_OFFSET)
+#define ATC_MAT_SIP_BY_DIPV4 (_ATC_MAT_SIP_BY_DIPV4 << ATC_MAT_OFFSET)
+#define ATC_MAT_SIP_BY_SIPV4 (_ATC_MAT_SIP_BY_SIPV4 << ATC_MAT_OFFSET)
+#define ATC_MAT_SIP_BY_DIPV6 (_ATC_MAT_SIP_BY_DIPV6 << ATC_MAT_OFFSET)
+#define ATC_MAT_SIP_BY_SIPV6 (_ATC_MAT_SIP_BY_SIPV6 << ATC_MAT_OFFSET)
+
+#define ATC_START_BUSY (0x01 << ATC_BUSY_OFFSET)
+
+/* fields of ATA1 */
+#define ATA1                     (REG_ARL_BASE_ADDRESS + 0x0304)
+#define ATA1_MAC_ADDR_MSB_OFFSET (0)
+#define ATA1_MAC_ADDR_MSB_LENGTH (32)
+#define ATA1_SAT_ADDR_OFFSET     (0)
+#define ATA1_SAT_ADDR_LENGTH     (11)
+#define ATA1_SAT_BANK_OFFSET     (16)
+#define ATA1_SAT_BANK_LENGTH     (4)
+
+/* fields of ATA2 */
+#define ATA2                     (REG_ARL_BASE_ADDRESS + 0x0308)
+#define ATA2_MAC_AGETIME_OFFSET  (0)
+#define ATA2_MAC_AGETIME_LENGTH  (9)
+#define ATA2_MAC_LIFETIME_OFFSET (9)
+#define ATA2_MAC_LIFETIME_LENGTH (1)
+#define ATA2_MAC_UNAUTH_OFFSET   (10)
+#define ATA2_MAC_UNAUTH_LENGTH   (1)
+#define ATA2_MAC_ADDR_LSB_OFFSET (16)
+#define ATA2_MAC_ADDR_LSB_LENGTH (16)
+
+/* fields of ATA3 */
+#define ATA3 (REG_ARL_BASE_ADDRESS + 0x030C)
+
+/* fields of ATA4 */
+#define ATA4 (REG_ARL_BASE_ADDRESS + 0x0310)
+
+/* fields of ATA5 */
+#define ATA5 (REG_ARL_BASE_ADDRESS + 0x0314)
+
+/* fields of ATA6 */
+#define ATA6 (REG_ARL_BASE_ADDRESS + 0x0318)
+
+/* fields of ATA7 */
+#define ATA7 (REG_ARL_BASE_ADDRESS + 0x031C)
+
+/* fields of ATA8 */
+#define ATA8 (REG_ARL_BASE_ADDRESS + 0x0320)
+
+/* fields of ATWD */
+#define ATWD                 (REG_ARL_BASE_ADDRESS + 0x0324)
+#define ATWD_MAC_LIVE_OFFSET (0)
+#define ATWD_MAC_LIVE_LENGTH (1)
+#define ATWD_MAC_LEAK_OFFSET (1)
+#define ATWD_MAC_LEAK_LENGTH (1)
+#define ATWD_MAC_UPRI_OFFSET (2)
+#define ATWD_MAC_UPRI_LENGTH (3)
+#define ATWD_MAC_FWD_OFFSET  (5)
+#define ATWD_MAC_FWD_LENGTH  (3)
+#define ATWD_MAC_MIR_OFFSET  (8)
+#define ATWD_MAC_MIR_LENGTH  (4)
+#define ATWD_MAC_ETAG_OFFSET (12)
+#define ATWD_MAC_ETAG_LENGTH (3)
+#define ATWD_MAC_IVL_OFFSET  (15)
+#define ATWD_MAC_IVL_LENGTH  (1)
+#define ATWD_MAC_VID_OFFSET  (16)
+#define ATWD_MAC_VID_LENGTH  (12)
+#define ATWD_MAC_FID_OFFSET  (28)
+#define ATWD_MAC_FID_LENGTH  (4)
+
+/* fields of ATWD2 */
+#define ATWD2                 (REG_ARL_BASE_ADDRESS + 0x0328)
+#define ATWD2_MAC_PORT_OFFSET (0)
+#define ATWD2_MAC_PORT_LENGTH (29)
+
+/* fields of ATWDS */
+#define ATRDS                (REG_ARL_BASE_ADDRESS + 0x0330)
+#define ATRD0_MAC_SEL_OFFSET (0)
+#define ATRD0_MAC_SEL_LENGTH (2)
+
+/* fields of ATRD0 */
+#define ATRD0                     (REG_ARL_BASE_ADDRESS + 0x0334)
+#define ATRD0_MAC_LIVE_OFFSET     (0)
+#define ATRD0_MAC_LIVE_LENGTH     (1)
+#define ATRD0_MAC_LIFETIME_OFFSET (1)
+#define ATRD0_MAC_LIFETIME_LENGTH (2)
+#define ATRD0_MAC_TYPE_OFFSET     (3)
+#define ATRD0_MAC_TYPE_LENGTH     (2)
+#define ATRD0_MAC_LEAK_OFFSET     (5)
+#define ATRD0_MAC_LEAK_LENGTH     (1)
+#define ATRD0_MAC_UPRI_OFFSET     (6)
+#define ATRD0_MAC_UPRI_LENGTH     (3)
+#define ATRD0_MAC_IVL_OFFSET      (9)
+#define ATRD0_MAC_IVL_LENGTH      (1)
+#define ATRD0_MAC_VID_OFFSET      (10)
+#define ATRD0_MAC_VID_LENGTH      (12)
+#define ATRD0_MAC_ETAG_OFFSET     (22)
+#define ATRD0_MAC_ETAG_LENGTH     (3)
+#define ATRD0_MAC_FID_OFFSET      (25)
+#define ATRD0_MAC_FID_LENGTH      (4)
+#define ATRD1_MAC_UNAUTH_OFFSET   (31)
+#define ATRD1_MAC_UNAUTH_LENGTH   (1)
+
+/* fields of ATRD1 */
+#define ATRD1                     (REG_ARL_BASE_ADDRESS + 0x0338)
+#define ATRD1_MAC_FWD_OFFSET      (0)
+#define ATRD1_MAC_FWD_LENGTH      (3)
+#define ATRD1_MAC_AGETIME_OFFSET  (3)
+#define ATRD1_MAC_AGETIME_LENGTH  (9)
+#define ATRD1_MAC_MIR_OFFSET      (12)
+#define ATRD1_MAC_MIR_LENGTH      (4)
+#define ATRD1_MAC_ADDR_LSB_OFFSET (16)
+#define ATRD1_MAC_ADDR_LSB_LENGTH (16)
+
+/* fields of ATRD2 */
+#define ATRD2                     (REG_ARL_BASE_ADDRESS + 0x033C)
+#define ATRD2_MAC_ADDR_MSB_OFFSET (0)
+#define ATRD2_MAC_ADDR_MSB_LENGTH (32)
+
+/* fields of ATRD3 */
+#define ATRD3                 (REG_ARL_BASE_ADDRESS + 0x0340)
+#define ATRD3_MAC_PORT_OFFSET (0)
+#define ATRD3_MAC_PORT_LENGTH (29)
+
+/* fields of LOGMACPORT */
+#define LOGMACPORT             (REG_ARL_BASE_ADDRESS + 0x350)
+#define LOGMACPORT_PORT_OFFSET (0)
+#define LOGMACPORT_PORT_LENGTH (29)
+
+/* fields of LOGMACDATA */
+#define LOGMACDATA                 (REG_ARL_BASE_ADDRESS + 0x354)
+#define LOGMACDATA_BANK_OFFSET     (0)
+#define LOGMACDATA_BANK_LENGTH     (4)
+#define LOGMACDATA_ADDR_OFFSET     (4)
+#define LOGMACDATA_ADDR_LENGTH     (11)
+#define LOGMACDATA_PORTMOVE_OFFSET (15)
+#define LOGMACDATA_PORTMOVE_LENGTH (1)
+#define LOGMACDATA_REPLACE_OFFSET  (16)
+#define LOGMACDATA_REPLACE_LENGTH  (1)
+#define LOGMACDATA_EMPTY_OFFSET    (19)
+#define LOGMACDATA_EMPTY_LENGTH    (1)
+#define LOGMACDATA_CNT_OFFSET      (20)
+#define LOGMACDATA_CNT_LENGTH      (5)
+#define LOGMACDATA_NEXT_OFFSET     (31)
+#define LOGMACDATA_NEXT_LENGTH     (1)
+
+/* fields of LOGAGEPORT */
+#define LOGAGEPORT             (REG_ARL_BASE_ADDRESS + 0x358)
+#define LOGAGEPORT_PORT_OFFSET (0)
+#define LOGAGEPORT_PORT_LENGTH (29)
+
+/* fields of LOGAGEDATA0 */
+#define LOGAGEDATA0              (REG_ARL_BASE_ADDRESS + 0x35C)
+#define LOGAGEDATA0_FID_OFFSET   (0)
+#define LOGAGEDATA0_FID_LENGTH   (4)
+#define LOGAGEDATA0_VID_OFFSET   (4)
+#define LOGAGEDATA0_VID_LENGTH   (12)
+#define LOGAGEDATA0_IVL_OFFSET   (16)
+#define LOGAGEDATA0_IVL_LENGTH   (1)
+#define LOGAGEDATA0_EMPTY_OFFSET (19)
+#define LOGAGEDATA0_EMPTY_LENGTH (1)
+#define LOGAGEDATA0_CNT_OFFSET   (20)
+#define LOGAGEDATA0_CNT_LENGTH   (5)
+#define LOGAGEDATA0_NEXT_OFFSET  (31)
+#define LOGAGEDATA0_NEXT_LENGTH  (1)
+
+/* fields of LOGAGEDATA1 */
+#define LOGAGEDATA1 (REG_ARL_BASE_ADDRESS + 0x360)
+
+/* fields of LOGAGEDATA2 */
+#define LOGAGEDATA2 (REG_ARL_BASE_ADDRESS + 0x364)
+
+/* fields of MACLMTC */
+#define MACLMTC                     (REG_ARL_BASE_ADDRESS + 0x0370)
+#define MACLMTC_LMT_TICK_OFFSET     (0)
+#define MACLMTC_LMT_TICK_LENGTH     (3)
+#define MACLMTC_SA_FULL_DROP_OFFSET (4)
+#define MACLMTC_SA_FULL_DROP_LENGTH (1)
+#define MACLMTC_PORT_MV_DROP_OFFSET (5)
+#define MACLMTC_PORT_MV_DROP_LENGTH (1)
+#define MACLMTC_EXC_MNG_OFFSET      (30)
+#define MACLMTC_EXC_MNG_LENGTH      (1)
+#define MACLMTC_EN_OFFSET           (31)
+#define MACLMTC_EN_LENGTH           (1)
+
+/* fields of MACLMTTH */
+#define MACLMTTH                        (REG_ARL_BASE_ADDRESS + 0x0374)
+#define MACLMTTH_SA_FULL_CPU_THR_OFFSET (0)
+#define MACLMTTH_SA_FULL_CPU_THR_LENGTH (8)
+#define MACLMTTH_PORT_MV_CPU_THR_OFFSET (8)
+#define MACLMTTH_PORT_MV_CPU_THR_LENGTH (8)
+
+/* fields of MAUTHC */
+#define MAUTHC                         (REG_ARL_BASE_ADDRESS + 0x03A0)
+#define MAUTHC_MAC_AUTH_OFFSET         (0)
+#define MAUTHC_MAC_AUTH_LENGTH         (1)
+#define MAUTHC_AUTH_FW_OFFSET          (4)
+#define MAUTHC_AUTH_FW_LENGTH          (2)
+#define MAUTHC_AUTH_FW_MAC             (0)
+#define MAUTHC_AUTH_FW_DROP            (2)
+#define MAUTHC_AUTH_FW_CPU             (3)
+#define MAUTHC_UNAUTH_FW_OFFSET        (6)
+#define MAUTHC_UNAUTH_FW_LENGTH        (2)
+#define MAUTHC_UNAUTH_FW_MAC           (0)
+#define MAUTHC_UNAUTH_FW_DROP          (2)
+#define MAUTHC_UNAUTH_FW_CPU           (3)
+#define MAUTHC_AUTH_PORT_MOVE_OFFSET   (8)
+#define MAUTHC_AUTH_PORT_MOVE_LENGTH   (1)
+#define MAUTHC_UNAUTH_PORT_MOVE_OFFSET (9)
+#define MAUTHC_UNAUTH_PORT_MOVE_LENGTH (1)
+
+/* fields of GVMC */
+#define GVMC             (REG_ARL_BASE_ADDRESS + 0x03A8)
+#define GVMC_GMEM_OFFSET (0)
+#define GVMC_GMEM_LENGTH (32)
+
+/* fields of ingress and egress rate control */
+#define IRLCR(p)          (REG_ARL_BASE_ADDRESS + (p * PORT_CTRL_PORT_OFFSET) + 0x4000)
+#define ERLCR(p)          (REG_ARL_BASE_ADDRESS + (p * PORT_CTRL_PORT_OFFSET) + 0xC040)
+#define REG_RATE_CIR_OFFT (0)
+#define REG_RATE_CIR_LENG (17)
+#define REG_TB_EN_OFFT    (19)
+#define REG_RATE_TB_OFFT  (20)
+#define REG_RATE_TB_LENG  (4)
+#define REG_RATE_CBS_OFFT (24)
+#define REG_RATE_CBS_LENG (7)
+#define REG_RATE_EN_OFFT  (31)
+
+/* fields of SFCR */
+#define SFCR(p)                  (REG_ARL_BASE_ADDRESS + (p * PORT_CTRL_PORT_OFFSET) + 0x4070)
+#define SFLOW_SAMPLING_RATE_OFFT (0)
+#define SFLOW_SAMPLING_RATE_LENG (24)
+#define SFLOW_SAMPLING_NUM_OFFT  (24)
+#define SFLOW_SAMPLING_NUM_LENG  (8)
+
+/* fields of IBCR */
+#define IBCR(p)                        (REG_ARL_BASE_ADDRESS + (p * PORT_CTRL_PORT_OFFSET) + 0x40B0)
+#define REG_IGC_STOP_REFILL_TOKEN_OFFT (8)
+#define REG_IGC_STOP_REFILL_TOKEN_LENG (4)
+
+/* fields of global ingress and egress rate control */
+#define GIRLCR               (REG_ARL_BASE_ADDRESS + 0x7E24)
+#define GERLCR               (REG_ARL_BASE_ADDRESS + 0xFE00)
+#define REG_IPG_BYTE_OFFT    (0)
+#define REG_IPG_BYTE_LENG    (8)
+#define REG_MFRM_EX_OFFT     (9)
+#define REG_MFRM_EX_LENG     (1)
+#define SFLOW_MFRM_EX_OFFT   (25)
+#define SFLOW_MFRM_EX_LENG   (1)
+#define L1_RATE_IPG_BYTE_CNT (0x18)
+#define L2_RATE_IPG_BYTE_CNT (0x04)
+
+/* BMU Global Reg Base */
+#define BMU_GLOBAL (REG_ARL_BASE_ADDRESS + 0x7E00)
+
+/* fields of FPLC(Free Page Link Count Register ) */
+#define FPLC                          (BMU_GLOBAL + 0x0)
+#define FPLC_MIN_FREE_PL_CNT_RST_OFFT (31)
+#define FPLC_MIN_FREE_PL_CNT_RST_LENG (1)
+#define FPLC_MIN_FREE_PL_CNT_OFFT     (16)
+#define FPLC_MIN_FREE_PL_CNT_LENG     (12)
+#define FPLC_FREE_PL_CNT_OFFT         (0)
+#define FPLC_FREE_PL_CNT_LENG         (12)
+
+/* fields of GFCCR0(Global Flow Control Register0) */
+#define SCO_GFCCR0                  (BMU_GLOBAL + 0x4)
+#define SCO_GFCCR0_FREE_BLK_HI_OFFT (15)
+#define SCO_GFCCR0_FREE_BLK_HI_LENG (10)
+#define SCO_GFCCR0_FREE_BLK_LO_OFFT (0)
+#define SCO_GFCCR0_FREE_BLK_LO_LENG (10)
+/* fields of GFCCR1(Global Flow Control Register1) */
+#define SCO_GFCCR1                  (BMU_GLOBAL + 0x8)
+#define SCO_GFCCR1_PORT_BLK_HI_OFFT (16)
+#define SCO_GFCCR1_PORT_BLK_HI_LENG (8)
+#define SCO_GFCCR1_PORT_BLK_LO_OFFT (8)
+#define SCO_GFCCR1_PORT_BLK_LO_LENG (8)
+#define SCO_GFCCR1_QUE_BLK_HI_OFFT  (0)
+#define SCO_GFCCR1_QUE_BLK_HI_LENG  (8)
+/* fields of GFCCR2(Global Flow Control Register2) */
+#define SCO_GFCCR2                 (BMU_GLOBAL + 0xC)
+#define SCO_GFCCR2_QUE_BLK_Q7_OFFT (24)
+#define SCO_GFCCR2_QUE_BLK_Q7_LENG (7)
+#define SCO_GFCCR2_QUE_BLK_Q6_OFFT (16)
+#define SCO_GFCCR2_QUE_BLK_Q6_LENG (7)
+#define SCO_GFCCR2_QUE_BLK_Q5_OFFT (8)
+#define SCO_GFCCR2_QUE_BLK_Q5_LENG (7)
+#define SCO_GFCCR2_QUE_BLK_Q4_OFFT (0)
+#define SCO_GFCCR2_QUE_BLK_Q4_LENG (7)
+/* fields of GFCCR3(Global Flow Control Register3) */
+#define SCO_GFCCR3                 (BMU_GLOBAL + 0x10)
+#define SCO_GFCCR3_QUE_BLK_Q3_OFFT (24)
+#define SCO_GFCCR3_QUE_BLK_Q3_LENG (7)
+#define SCO_GFCCR3_QUE_BLK_Q2_OFFT (16)
+#define SCO_GFCCR3_QUE_BLK_Q2_LENG (7)
+#define SCO_GFCCR3_QUE_BLK_Q1_OFFT (8)
+#define SCO_GFCCR3_QUE_BLK_Q1_LENG (7)
+#define SCO_GFCCR3_QUE_BLK_Q0_OFFT (0)
+#define SCO_GFCCR3_QUE_BLK_Q0_LENG (7)
+
+/* field of l3 unicast routing table */
+#define RATCR              (BMU_GLOBAL + 0x30)
+#define RATDPL             (BMU_GLOBAL + 0x34)
+#define RATDPH             (BMU_GLOBAL + 0x38)
+#define RAT_SEL_DA_OFFT    (31)
+#define RAT_SEL_DA_LENG    (1)
+#define RAT_SEL_WRITE_OFFT (30)
+#define RAT_SEL_WRITE_LENG (1)
+#define RAT_ADDR_OFFT      (0)
+#define RAT_ADDR_DA_LENG   (8)
+#define RAT_ADDR_SA_LENG   (4)
+#define RAT_DATA_L_OFFT    (0)
+#define RAT_DATA_L_LENG    (32)
+#define RAT_DATA_H_OFFT    (0)
+#define RAT_DATA_H_LENG    (16)
+
+/* fields of PCPCR(Packet/Page Count Probe Control Register) */
+#define PCPCR                 (BMU_GLOBAL + 0x48)
+#define PCPCR_PACKET_SEL_OFFT (31)
+#define PCPCR_PACKET_SEL_LENG (1)
+#define PCPCR_PORT_SEL_OFFT   (8)
+#define PCPCR_PORT_SEL_LENG   (5)
+#define PCPCR_QUEUE_SEL_OFFT  (0)
+#define PCPCR_QUEUE_SEL_LENG  (4)
+
+/* fields of PCPSR(Packet/Page Count Probe Statuc Register) */
+#define PCPSR              (BMU_GLOBAL + 0x4C)
+#define PCPSR_COUNTER_OFFT (0)
+#define PCPSR_COUNTER_LENG (11)
+
+/* Port Control Base */
+#define PORT_CTRL_BASE         (0x8000)
+#define REG_ARL_PORT_BASE_ADDR (REG_ARL_BASE_ADDRESS + PORT_CTRL_BASE)
+#define PORT_CTRL_REG(p, r)    (PORT_CTRL_BASE + (p) * PORT_CTRL_PORT_OFFSET + (r))
+
+#define SSC(p) (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x00))
+
+#define PCR(p)                (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x04))
+#define PCR_PORT_VLAN_OFFT    (0)
+#define PCR_PORT_VLAN_LENG    (2)
+#define PCR_PORT_VLAN_RELMASK (0x00000003)
+#define PCR_PORT_VLAN_MASK    (PCR_PORT_VLAN_RELMASK << PCR_PORT_VLAN_OFFT)
+#define PCR_PORT_RX_MIR_OFFT  (16)
+#define PCR_PORT_RX_MIR_LENG  (4)
+#define PCR_PORT_TX_MIR_OFFT  (20)
+#define PCR_PORT_TX_MIR_LENG  (4)
+#define PCR_PORT_PRI_OFFT     (24)
+#define PCR_PORT_PRI_LENG     (3)
+#define PCR_PORT_PRI_RELMASK  (0x00000007)
+#define PCR_PORT_PRI_MASK     (PCR_PORT_PRI_RELMASK << PCR_PORT_PRI_OFFT)
+#define PCR_EG_TAG_OFFT       (28)
+#define PCR_EG_TAG_LENG       (2)
+#define PCR_EG_TAG_RELMASK    (0x00000003)
+#define PCR_EG_TAG_MASK       (PCR_EG_TAG_RELMASK << PCR_EG_TAG_OFFT)
+
+/* fields of PIC */
+#define PIC(p)                         (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x08))
+#define PIC_PORT_IGMP_CTRL_CSR_IPM_01  (1 << 8)
+#define PIC_PORT_IGMP_CTRL_CSR_IPM_33  (1 << 9)
+#define PIC_PORT_IGMP_CTRL_CSR_IPM_224 (1 << 10)
+
+/* fields of PSC */
+#define PSC(p)                (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x0C))
+#define PSC_RX_LOCK_OFFSET    (0)
+#define PSC_RX_LOCK_LENGTH    (1)
+#define PSC_DIS_LRN_OFFSET    (4)
+#define PSC_DIS_LRN_LENGTH    (1)
+#define PSC_SA_CNT_EN_OFFSET  (5)
+#define PSC_SA_CNT_EN_LENGTH  (1)
+#define PSC_SA_CNT_LMT_OFFSET (8)
+#define PSC_SA_CNT_LMT_LENGTH (14)
+
+#define PVC(p)                 (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x10))
+#define PVC_ACC_FRM_OFFT       (0)
+#define PVC_ACC_FRM_LENG       (2)
+#define PVC_ACC_FRM_RELMASK    (0x00000003)
+#define PVC_ACC_FRM_MASK       (PVC_ACC_FRM_RELMASK << PVC_ACC_FRM_OFFT)
+#define PVC_UC_LKYV_EN_OFFT    (2)
+#define PVC_UC_LKYV_EN_LENG    (1)
+#define PVC_UC_LKYV_EN_RELMASK (0x00000001)
+#define PVC_UC_LKYV_EN_MASK    (PVC_UC_LKYV_EN_RELMASK << PVC_UC_LKYV_EN_OFFT)
+#define PVC_MC_LKYV_EN_OFFT    (3)
+#define PVC_MC_LKYV_EN_LENG    (1)
+#define PVC_MC_LKYV_EN_RELMASK (0x00000001)
+#define PVC_MC_LKYV_EN_MASK    (PVC_MC_LKYV_EN_RELMASK << PVC_MC_LKYV_EN_OFFT)
+#define PVC_BC_LKYV_EN_OFFT    (4)
+#define PVC_BC_LKYV_EN_LENG    (1)
+#define PVC_BC_LKYV_EN_RELMASK (0x00000001)
+#define PVC_BC_LKYV_EN_MASK    (PVC_BC_LKYV_EN_RELMASK << PVC_BC_LKYV_EN_OFFT)
+#define PVC_SPTAG_EN_OFFT      (5)
+#define PVC_SPTAG_EN_LENG      (1)
+#define PVC_SPTAG_EN_RELMASK   (0x00000001)
+#define PVC_SPTAG_EN_MASK      (PVC_SPTAG_EN_RELMASK << PVC_SPTAG_EN_OFFT)
+#define PVC_VLAN_ATTR_OFFT     (6)
+#define PVC_VLAN_ATTR_LENG     (2)
+#define PVC_VLAN_ATTR_RELMASK  (0x00000003)
+#define PVC_VLAN_ATTR_MASK     (PVC_VLAN_ATTR_RELMASK << PVC_VLAN_ATTR_OFFT)
+#define PVC_EG_TAG_OFFT        (8)
+#define PVC_EG_TAG_LENG        (3)
+#define PVC_EG_TAG_RELMASK     (0x00000007)
+#define PVC_EG_TAG_MASK        (PVC_EG_TAG_RELMASK << PVC_EG_TAG_OFFT)
+#define PVC_SPTAG_MODE_OFFT    (11)
+#define PVC_SPTAG_MODE_LENG    (1)
+#define PVC_SPTAG_MODE_RELMASK (0x00000001)
+#define PVC_SPTAG_MODE_MASK    (PVC_SPTAG_MODE_RELMASK << PVC_SPTAG_MODE_OFFT)
+#define PVC_STAG_VPID_OFFT     (16)
+#define PVC_STAG_VPID_LENG     (16)
+#define PVC_STAG_VPID_RELMASK  (0x0000FFFF)
+#define PVC_STAG_VPID_MASK     (PVC_STAG_VPID_RELMASK << PVC_STAG_VPID_OFFT)
+
+#define PPBV1(p)                  (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x14))
+#define PPBV1_G0_PORT_VID_OFFT    (0)
+#define PPBV1_G0_PORT_VID_LENG    (12)
+#define PPBV1_G0_PORT_VID_RELMASK (0x00000FFF)
+#define PPBV1_G0_PORT_VID_MASK    (PPBV1_G0_PORT_VID_RELMASK << PPBV1_G0_PORT_VID_OFFT)
+
+#define PPBV2(p) (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x18))
+
+#define EG_TPID(p)                   (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x40))
+#define EG_TPID_CSR_ETAG_TPID_0_OFFT (0)
+#define EG_TPID_CSR_ETAG_TPID_1_OFFT (16)
+#define EG_TPID_TPID_RELMASK         (0x0000FFFF)
+#define EG_TPID_TPID_MASK(offt)      (EG_TPID_TPID_RELMASK << (offt))
+
+#define PVID(p)                 (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x48))
+#define PVID_CTAG_VID_OFFT      (0)
+#define PVID_CTAG_VID_LENG      (12)
+#define PVID_CTAG_VID_RELMASK   (0x00000FFF)
+#define PVID_CTAG_PORT_VID_MASK (PVID_CTAG_VID_RELMASK << PVID_CTAG_VID_OFFT)
+
+#define PSVID(p)                 (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x48))
+#define PSVID_STAG_VID_OFFT      (16)
+#define PSVID_STAG_VID_LENG      (12)
+#define PSVID_STAG_VID_RELMASK   (0x00000FFF)
+#define PSVID_STAG_PORT_VID_MASK (PSVID_STAG_VID_RELMASK << PSVID_STAG_VID_OFFT)
+
+#define PORTMATRIX(p) (REG_ARL_BASE_ADDRESS + PORT_CTRL_REG(p, 0x44))
+
+#define PFFC(p)              (REG_ARL_PORT_BASE_ADDR + ((p) * PORT_CTRL_PORT_OFFSET) + 0x3C)
+#define CSR_FORCE_FW_EN_OFFT (31)
+#define CSR_FORCE_FW_EN_LENG (1)
+
+#define MIR (REG_ARL_BASE_ADDRESS + (0xCC))
+/* fields of MIR */
+#define MIR_MIRROR_BASE_OFFSER         (8)
+#define MIR_MIRROR_EN_OFFSER(p)        ((p) * MIR_MIRROR_BASE_OFFSER + 0x07)
+#define MIR_MIRROR_EN_LEN              (1)
+#define MIR_MIRROR_PORT_OFFSER(p)      ((p) * MIR_MIRROR_BASE_OFFSER + 0x00)
+#define MIR_MIRROR_PORT_LEN            (5)
+#define MIR_MIRROR_TAG_TX_EN_OFFSER(p) ((p) * MIR_MIRROR_BASE_OFFSER + 0x06)
+#define MIR_MIRROR_TAG_TX_EN_LEN       (1)
+
+#define ABSTC (REG_ARL_BASE_ADDRESS + 0xC4)
+/* fields of MAC and Multicast */
+#define ATWD_IPM_VLD_OFFSET    0  /* bit[0]     */
+#define ATWD_IPM_LEAKY_OFFSET  1  /* bit[1]     */
+#define ATWD_IPM_UPRI_OFFSET   2  /* bit[4:2]   */
+#define ATWD_IPM_IPV6_OFFSET   5  /* bit[5]     */
+#define ATWD_IPM_EG_TAG_OFFSET 12 /* bit[14:12] */
+#define ATWD_IPM_VID_OFFSET    16 /* bit[27:16] */
+
+#define ATWD_IPM_VLD_RANGE    1
+#define ATWD_IPM_LEAKY_RANGE  1
+#define ATWD_IPM_UPRI_RANGE   3
+#define ATWD_IPM_IPV6_RANGE   1
+#define ATWD_IPM_EG_TAG_RANGE 3
+#define ATWD_IPM_VID_RANGE    12
+
+#define ATRD0_IPM_LEAKY_OFFSET 5  /* bit[5] */
+#define ATRD0_IPM_LEAKY_RANGE  1
+#define ATRD0_IPM_VID_OFFSET   10 /* bit[21:10] */
+#define ATRD0_IPM_VID_RANGE    12
+
+/* BSR perport register map*/
+#define ARL_PORT_BSR_ADDR(p)  (REG_ARL_PORT_BASE_ADDR + ((p) * (PORT_CTRL_PORT_OFFSET)) + (0x50))
+#define ARL_PORT_BSR1_ADDR(p) (REG_ARL_PORT_BASE_ADDR + ((p) * (PORT_CTRL_PORT_OFFSET)) + (0x58))
+#define ARL_PORT_BSR2_ADDR(p) (REG_ARL_PORT_BASE_ADDR + ((p) * (PORT_CTRL_PORT_OFFSET)) + (0x60))
+#define ARL_PORT_BSR3_ADDR(p) (REG_ARL_PORT_BASE_ADDR + ((p) * (PORT_CTRL_PORT_OFFSET)) + (0x68))
+
+#define ARL_PORT_BSR_EXT_ADDR(p)  (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x54)
+#define ARL_PORT_BSR1_EXT_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x5c)
+#define ARL_PORT_BSR2_EXT_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x64)
+#define ARL_PORT_BSR3_EXT_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x6c)
+
+#define ARL_PORT_BSR_TOKEN_10_ADDR(p)   (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x74)
+#define ARL_PORT_BSR_TOKEN_100_ADDR(p)  (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x78)
+#define ARL_PORT_BSR_TOKEN_1000_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x7c)
+#define ARL_PORT_BSR_TOKEN_2500_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x80)
+
+#define ARL_PORT_BSR1_TOKEN_10_ADDR(p)   (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x84)
+#define ARL_PORT_BSR1_TOKEN_100_ADDR(p)  (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x88)
+#define ARL_PORT_BSR1_TOKEN_1000_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x8c)
+#define ARL_PORT_BSR1_TOKEN_2500_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x90)
+
+#define ARL_PORT_BSR2_TOKEN_10_ADDR(p)   (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x94)
+#define ARL_PORT_BSR2_TOKEN_100_ADDR(p)  (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x98)
+#define ARL_PORT_BSR2_TOKEN_1000_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0x9c)
+#define ARL_PORT_BSR2_TOKEN_2500_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0xa0)
+
+#define ARL_PORT_BSR3_TOKEN_10_ADDR(p)   (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0xa4)
+#define ARL_PORT_BSR3_TOKEN_100_ADDR(p)  (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0xa8)
+#define ARL_PORT_BSR3_TOKEN_1000_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0xac)
+#define ARL_PORT_BSR3_TOKEN_2500_ADDR(p) (REG_ARL_PORT_BASE_ADDR + (p) * PORT_CTRL_PORT_OFFSET + 0xb0)
+
+/* fields of port mac control */
+#define GMAC_PORT_BASE (0x10210000)
+
+#define PMCR(p)                    (GMAC_PORT_BASE + ((p) * PORT_CTRL_PORT_OFFSET))
+#define MCR_FORCE_LINK_OFFT        (0)
+#define MCR_FORCE_DUPLEX_OFFT      (1)
+#define MCR_FORCE_DUPLEX_LENG      (1)
+#define MCR_FORCE_SPEED_OFFT       (2)
+#define MCR_FORCE_SPEED_LENG       (2)
+#define MCR_FORCE_FLOWCTRL_TX_OFFT (4)
+#define MCR_FORCE_FLOWCTRL_TX_LENG (1)
+#define MCR_FORCE_FLOWCTRL_RX_OFFT (5)
+#define MCR_FORCE_FLOWCTRL_RX_LENG (1)
+#define MCR_EEE_100_EN_OFFT        (6)
+#define MCR_EEE_1G_EN_OFFT         (7)
+#define MCR_EEE_2P5G_EN_OFFT       (8)
+#define MCR_BACK_PRESSURE_OFFT     (11)
+#define MCR_BACK_PRESSURE_LENG     (1)
+#define MCR_FORCE_MODE_OFFT        (17)
+#define MCR_FORCE_MODE_LENG        (1)
+
+#define PMSR(p)                   (GMAC_PORT_BASE + (p * PORT_CTRL_PORT_OFFSET) + 0x08)
+#define REG_PORT_LINK_OFFT        (0)
+#define REG_PORT_LINK_LENG        (1)
+#define REG_PORT_DUPLEX_OFFT      (1)
+#define REG_PORT_DUPLEX_LENG      (1)
+#define REG_PORT_SPEED_OFFT       (2)
+#define REG_PORT_SPEED_LENG       (2)
+#define REG_PORT_TX_FLOWCTRL_OFFT (4)
+#define REG_PORT_TX_FLOWCTRL_LENG (1)
+#define REG_PORT_RX_FLOWCTRL_OFFT (5)
+#define REG_PORT_RX_FLOWCTRL_LENG (1)
+#define REG_PORT_EEE100_STS_OFFT  (6)
+#define REG_PORT_EEE100_STS_LENG  (1)
+#define REG_PORT_EEE1G_STS_OFFT   (7)
+#define REG_PORT_EEE1G_STS_LENG   (1)
+#define REG_PORT_EEE2P5G_STS_OFFT (8)
+#define REG_PORT_EEE2P5G_STS_LENG (1)
+
+/* fields of global mac control */
+#define GMAC_GLOBAL_BASE (0x10213E00)
+
+#define LPDETCR1                (GMAC_GLOBAL_BASE)
+#define LPDETCR2                (GMAC_GLOBAL_BASE + 0x04)
+#define REG_LPDET_PERIOD_OFFT   (7)
+#define REG_LPDET_PERIOD_LENG   (1)
+#define REG_LPDET_ALARM_EN_OFFT (9)
+#define REG_LPDET_ALARM_EN_LENG (1)
+#define REG_LPDET_MODE_OFFT     (15)
+#define REG_LPDET_MODE_LENG     (1)
+
+#define LPDETSR                   (GMAC_GLOBAL_BASE + 0x08)
+#define LPDET_SA_MSB              (GMAC_GLOBAL_BASE + 0x0C)
+#define REG_LPDET_FRAME_TYPE_OFFT (16)
+#define REG_LPDET_FRAME_TYPE_LENG (16)
+#define REG_LPDET_SMAC_MMSK       (0xFFFF)
+#define REG_LPDET_SMAC_LMSK       (0xFFFFFFFF)
+
+#define LPDET_SA_LSB (GMAC_GLOBAL_BASE + 0x10)
+
+#define GMACCR              (GMAC_GLOBAL_BASE + 0x60)
+#define MAX_RX_PKT_LEN_OFFT (0)
+#define MAX_RX_PKT_LEN_LENG (2)
+#define MAX_RX_JUMBO_OFFT   (4)
+#define MAX_RX_JUMBO_LENG   (4)
+#define GMACCR_MTCC_OFFT    (8)
+#define GMACCR_MTCC_LENG    (4)
+
+#define SMACCR0 (GMAC_GLOBAL_BASE + 0x64)
+#define SMACCR1 (GMAC_GLOBAL_BASE + 0x68)
+
+#define CKGCR (GMAC_GLOBAL_BASE + 0x70)
+
+#define CKG_LNKDN_GLB_STOP (0x03)
+
+#define MIB_CCR                 (GMAC_GLOBAL_BASE + 0x7c)
+#define MIB_CCR_MIB_ENABLE      (1 << 31)
+#define MIB_CCR_RX_OCT_CNT_GOOD (1 << 7)
+#define MIB_CCR_RX_OCT_CNT_BAD  (1 << 6)
+#define MIB_CCR_TX_OCT_CNT_GOOD (1 << 5)
+#define MIB_CCR_TX_OCT_CNT_BAD  (1 << 4)
+
+#define MIB_PCLR         (GMAC_GLOBAL_BASE + 0x88)
+#define MIB_PCLR_PORT(p) (1 << p)
+
+/* Fields of SGMII control */
+#define SGMII_BASE_ADDR (0x10220000)
+#define SGMII_PORT_OFFT (0x10000)
+
+#define FPGA_USED_ADDR(p) (0x1022A400 + (p * SGMII_PORT_OFFT))
+#define FPGA_USED_VAL     (0x01000000)
+
+#define PCS_CTRL(p)               (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT))
+#define REG_SGMII_AN_RESTART_OFFT (9)
+#define REG_SGMII_AN_RESTART_LENG (1)
+#define REG_SGMII_AN_OFFT         (12)
+#define REG_SGMII_AN_LENG         (1)
+
+#define PCS_ADV_ABILITY(p)             (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0x10)
+#define REG_TX_ABILITY_SGMII_OFFT      (0)
+#define REG_TX_ABILITY_SGMII_LENG      (1)
+#define REG_1000BASEX_FULL_DUPLEX_OFFT (5)
+
+/* CL37 tx ability*/
+#define REG_CL_FULL_DUPLEX_OFFT (5)
+#define REG_CL_HALF_DUPLEX_OFFT (6)
+#define REG_CL_PAUSE_OFFT       (7)
+#define REG_CL_PAUSE_LENG       (2)
+/* SGMII tx ability */
+#define REG_SG_SPEED_OFFT       (10)
+#define REG_SG_SPEED_LENG       (2)
+#define REG_SG_FULL_DUPLEX_OFFT (12)
+#define REG_SG_FULL_DUPLEX_LENG (1)
+
+#define SGMII_IF_MODE(p)       (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0x34)
+#define REG_IF_MODE_OFFT       (0)
+#define REG_IF_MODE_LENG       (6)
+#define REG_IF_MODE_1000BASEX  (0x22)
+#define REG_IF_MODE_SGMII      (0x23)
+#define REG_IF_MODE_FORCE      (0x09)
+#define REG_IF_MODE_AN_OFFT    (1)
+#define REG_IF_MODE_SPEED_OFFT (2)
+#define REG_IF_MODE_SPEED_LENG (2)
+/* 0:Full, 1:Half */
+#define REG_IF_MODE_FULL_DUPLEX_OFFT (4)
+#define REG_REMOTE_FAULT_OFFT        (8)
+
+#define HSGMII_PCS_CTRL_1(p)      (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0xA00)
+#define REG_HSGMII_AN_ENABLE_OFFT (10)
+
+#define HSGMII_PCS_CTRL(p)        (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0xA14)
+#define REG_SGMII_EN_OFFT         (0)
+#define REG_SGMII_EN_LENG         (1)
+#define REG_SGMII_RATEADAPT_OFFT  (1)
+#define REG_SGMII_RATEADAPT_LENG  (1)
+#define REG_SGMII_TX_EN_OFFT      (4)
+#define REG_SGMII_TX_EN_LENG      (1)
+#define REG_SGMII_FORCE_1000_OFFT (12)
+#define REG_SGMII_FORCE_1000_LENG (1)
+#define REG_SGMII_FORCE_100_OFFT  (13)
+#define REG_SGMII_FORCE_100_LENG  (1)
+#define REG_SGMII_FORCE_10_OFFT   (14)
+#define REG_SGMII_FORCE_10_LENG   (1)
+
+#define HSGMII_PCS_STATUS(p)    (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0xB04)
+#define REG_HSGMII_AN_DONE_OFFT (0)
+#define REG_HSGMII_RX_SYNC_OFFT (5)
+
+#define MII_RA_AN(p)       (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0x6300)
+#define REG_RA_AN_EN0_OFFT (0)
+
+#define SGMII_PHYA_11(p)    (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0xA02C)
+#define REG_TPHY_MODE_OFFT  (0)
+#define REG_TPHY_MODE_LENG  (2)
+#define REG_TPHY_SPEED_OFFT (2)
+#define REG_TPHY_SPEED_LENG (2)
+
+#define FPGA_CTRL(p) (SGMII_BASE_ADDR + (p * SGMII_PORT_OFFT) + 0xA400)
+
+#define PORT_TRUNK_OFFSET (0x0400)
+#define PTC               (REG_ARL_BASE_ADDRESS + (PORT_TRUNK_OFFSET + 0x00))
+/* fields of PTC */
+#define PTC_INFO_OFFT      (0)
+#define PTC_INFO_LEN       (7)
+#define PTC_INFO_SEL_SP    (1 << 0)
+#define PTC_INFO_SEL_SA    (1 << 1)
+#define PTC_INFO_SEL_DA    (1 << 2)
+#define PTC_INFO_SEL_SIP   (1 << 3)
+#define PTC_INFO_SEL_DIP   (1 << 4)
+#define PTC_INFO_SEL_SPORT (1 << 5)
+#define PTC_INFO_SEL_DPORT (1 << 6)
+
+#define PTC_HASH_CONTROL_OFFT (8)
+#define PTC_HASH_CONTROL_LEN  (2)
+
+#define PTSEED (REG_ARL_BASE_ADDRESS + (PORT_TRUNK_OFFSET + 0x04))
+
+#define PTGC                    (REG_ARL_BASE_ADDRESS + (PORT_TRUNK_OFFSET + 0x08))
+#define PTGC_GROUP_EN_OFFSET(g) (g)
+#define PTGC_GROUP_EN_LEN       (1)
+
+#define PTG_BASE (8)
+
+#define PTG_1(g)               (REG_ARL_BASE_ADDRESS + (PORT_TRUNK_OFFSET + 0x0C + ((g) * 0x8)))
+#define PTG_2(g)               (REG_ARL_BASE_ADDRESS + (PORT_TRUNK_OFFSET + 0x10 + ((g) * 0x8)))
+#define PTGN_PORT_OFFSET(p)    ((PTG_BASE * ((p) % 4)) + 0x0)
+#define PTGN_PORT_LEN          (5)
+#define PTGN_PORT_EN_OFFSET(p) ((PTG_BASE * ((p) % 4)) + 0x7)
+#define PTGN_PORT_EN_LEN       (1)
+
+/* Register of MIB Base address */
+#define MIB_BASE        (REG_ARL_BASE_ADDRESS + 0x14000)
+#define MIB_PORT_OFFSET 0x0200
+
+#define MIB_TCDPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x00)
+#define MIB_TCEPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x04)
+#define MIB_TUPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x08)
+#define MIB_TMPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x0C)
+#define MIB_TBPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x10)
+#define MIB_TCEC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x14)
+#define MIB_TSCEC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x18)
+#define MIB_TMCEC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x1C)
+#define MIB_TDEC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x20)
+#define MIB_TLCEC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x24)
+#define MIB_TXCEC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x28)
+#define MIB_TPPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x2C)
+#define MIB_TL64PC(p)   (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x30)
+#define MIB_TL65PC(p)   (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x34)
+#define MIB_TL128PC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x38)
+#define MIB_TL256PC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x3C)
+#define MIB_TL512PC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x40)
+#define MIB_TL1024PC(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x44)
+#define MIB_TL1519PC(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x48)
+#define MIB_TOCL(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x4C)
+#define MIB_TOCH(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x50)
+#define MIB_TODPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x54)
+
+#define MIB_RDPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x80)
+#define MIB_RFPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x84)
+#define MIB_RUPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x88)
+#define MIB_RMPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x8C)
+#define MIB_RBPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x90)
+#define MIB_RAEPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x94)
+#define MIB_RCEPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x98)
+#define MIB_RUSPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x9C)
+#define MIB_RFEPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xA0)
+#define MIB_ROSPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xA4)
+#define MIB_RJEPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xA8)
+#define MIB_RPPC(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xAC)
+#define MIB_RL64PC(p)   (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xB0)
+#define MIB_RL65PC(p)   (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xB4)
+#define MIB_RL128PC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xB8)
+#define MIB_RL256PC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xBC)
+#define MIB_RL512PC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xC0)
+#define MIB_RL1024PC(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xC4)
+#define MIB_RL1519PC(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xC8)
+#define MIB_ROCL(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xCC)
+#define MIB_ROCH(p)     (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xD0)
+#define MIB_RCDPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xD4)
+#define MIB_RIDPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xD8)
+#define MIB_RADPC(p)    (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xDC)
+
+#define MIB_TMIB_HF_STS(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0x7C)
+#define MIB_RMIB_HF_STS(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xFC)
+
+#define MIB_FCDPC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xE0)
+#define MIB_WRDPC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xE4)
+#define MIB_MRDPC(p)  (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xE8)
+#define MIB_RSFSPC(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xF4)
+#define MIB_RSFTPC(p) (MIB_BASE + (p) * MIB_PORT_OFFSET + 0xF8)
+
+/* Register of DoS Attack Prevention address */
+#define ATTACK_PREVENT_GLB         (REG_ARL_BASE_ADDRESS + 0x0540)
+#define ATTACK_PREVENT_GLB_EN_OFFT (0)
+#define ATTACK_PREVENT_GLB_EN_LENG (1)
+
+#define ATTACK_LENGTH_CFG       (ATTACK_PREVENT_GLB + 0x04)
+#define ATTACK_LENGTH_THLD_OFFT (0)
+#define ATTACK_LENGTH_THLD_LENG (16)
+
+#define ATTACK_TCP_FLAG_CFG        (ATTACK_PREVENT_GLB + 0x08)
+#define ATTACK_TCP_FLAG_MSK        (ATTACK_PREVENT_GLB + 0x0c)
+#define ATTACK_TCP_SETTING_OFFT(i) ((i) * (ATTACK_TCP_SETTING_LENG + 1))
+#define ATTACK_TCP_SETTING_LENG    (9)
+#define ATTACK_TCP_FLAG_SEL_NS     (1 << 8)
+#define ATTACK_TCP_FLAG_SEL_CWR    (1 << 7)
+#define ATTACK_TCP_FLAG_SEL_ECE    (1 << 6)
+#define ATTACK_TCP_FLAG_SEL_URG    (1 << 5)
+#define ATTACK_TCP_FLAG_SEL_ACK    (1 << 4)
+#define ATTACK_TCP_FLAG_SEL_PSH    (1 << 3)
+#define ATTACK_TCP_FLAG_SEL_RST    (1 << 2)
+#define ATTACK_TCP_FLAG_SEL_SYN    (1 << 1)
+#define ATTACK_TCP_FLAG_SEL_FIN    (1 << 0)
+
+#define ATTACK_CFG_DONE_OFFT  (31)
+#define ATTACK_CFG_DONE_LENG  (1)
+#define ATTACK_CFG_EN_OFFT    (0)
+#define ATTACK_CFG_WR_OFFT    (1)
+#define ATTACK_CFG_CLEAR_OFFT (2)
+
+#define ATTACK_ACTION_CFG           (ATTACK_PREVENT_GLB + 0x10)
+#define ATTACK_ACTION_CFG_PID_OFFT  (4)
+#define ATTACK_ACTION_CFG_PID_LENG  (5)
+#define ATTACK_ACTION_SRAM_WR_DATA0 (ATTACK_PREVENT_GLB + 0x18)
+#define ATTACK_ACTION_SRAM_WR_DATA1 (ATTACK_PREVENT_GLB + 0x1c)
+#define ATTACK_ACTION_RATE_ID_LENG  (7)
+#define ATTACK_ACTION_RATE_EN_LENG  (1)
+#define ATTACK_ACTION_DROP_LENG     (1)
+#define ATTACK_RATE_EN_OFFT(g)      ((g) + ATTACK_ACTION_RATE_ID_LENG)
+#define ATTACK_DROP_EN_OFFT(g)      ((g) + ATTACK_ACTION_RATE_ID_LENG + ATTACK_ACTION_RATE_EN_LENG)
+#define ATTACK_LAND_OFFT            (0)
+#define ATTACK_BLAT_OFFT            (9)
+#define ATTACK_LENGTH_OFFT          (18)
+#define ATTACK_TCP1_OFFT            (4)
+#define ATTACK_TCP2_OFFT            (13)
+#define ATTACK_PING_OFFT            (22)
+#define ATTACK_TCP0_RATE_ID_LO_OFFT (27)
+#define ATTACK_TCP0_RATE_ID_LO_LENG (5)
+#define ATTACK_TCP0_RATE_ID_HI_OFFT (0)
+#define ATTACK_TCP0_RATE_ID_HI_LENG (2)
+#define ATTACK_TCP0_RATE_EN_OFFT    (2)
+#define ATTACK_TCP0_DROP_OFFT       (3)
+#define ATTACK_ACTION_SRAM_RE_DATA0 (ATTACK_PREVENT_GLB + 0x20)
+#define ATTACK_ACTION_SRAM_RE_DATA1 (ATTACK_PREVENT_GLB + 0x24)
+
+#define ATTACK_RATE_CFG               (ATTACK_PREVENT_GLB + 0x30)
+#define ATTACK_RATE_CFG_RATE_ID_OFFT  (4)
+#define ATTACK_RATE_CFG_RATE_ID_LENG  (7)
+#define ATTACK_RATE_SRAM_WR_DATA0     (ATTACK_PREVENT_GLB + 0x38)
+#define ATTACK_RATE_SRAM_WR_DATA1     (ATTACK_PREVENT_GLB + 0x3c)
+#define ATTACK_RATE_WR_CFG_LENG       (16)
+#define ATTACK_RATE_WR_TICK_SEL_LENG  (1)
+#define ATTACK_RATE_TIME_SPAN_OFFT    (0)
+#define ATTACK_RATE_PKT_NUM_THLD_OFFT (16)
+#define ATTACK_RATE_BLOCK_TIME_OFFT   (0)
+#define ATTACK_RATE_TICK_SEL_OFFT     (16)
+#define ATTACK_RATE_SRAM_RE_DATA0     (ATTACK_PREVENT_GLB + 0x40)
+#define ATTACK_RATE_SRAM_RE_DATA1     (ATTACK_PREVENT_GLB + 0x44)
+
+#define ATTACK_DROP_CNT        (REG_ARL_BASE_ADDRESS + 0x0590)
+#define ATTACK_DROP_CNT_CLR    (ATTACK_DROP_CNT + 0x04)
+#define ATTACK_DROP_CNT_CLR_A0 (1 << 0)
+/* Register of ACL address */
+#define ARL_GLOBAL_CNTRL   (REG_ARL_BASE_ADDRESS + 0x00c)
+#define ACL_BASE           (REG_ARL_BASE_ADDRESS + 0x500)
+#define ACL_GLOBAL_CFG     (ACL_BASE + 0x00)
+#define ACL_PORT_EN        (ACL_BASE + 0x04)
+#define ACL_GROUP_CFG      (ACL_BASE + 0x08)
+#define ACL_MEM_CFG        (ACL_BASE + 0x0c)
+#define ACL_MEM_CFG_WDATA0 (ACL_BASE + 0x10)
+#define ACL_MEM_CFG_WDATA1 (ACL_BASE + 0x14)
+#define ACL_MEM_CFG_WDATA2 (ACL_BASE + 0x18)
+#define ACL_MEM_CFG_WDATA3 (ACL_BASE + 0x1c)
+#define ACL_MEM_CFG_RDATA0 (ACL_BASE + 0x20)
+#define ACL_MEM_CFG_RDATA1 (ACL_BASE + 0x24)
+#define ACL_MEM_CFG_RDATA2 (ACL_BASE + 0x28)
+#define ACL_MEM_CFG_RDATA3 (ACL_BASE + 0x2c)
+#define ACL_STATUS         (ACL_BASE + 0x30)
+#define ACL_MIB_CNT_CFG    (ACL_BASE + 0x34)
+#define ACL_MIB_CNT        (ACL_BASE + 0x38)
+#define ACL_TRTCM          (REG_ARL_BASE_ADDRESS + 0x100)
+#define ACL_TRTCMA         (REG_ARL_BASE_ADDRESS + 0x104)
+#define ACL_TRTCMW1        (REG_ARL_BASE_ADDRESS + 0x108)
+#define ACL_TRTCMW2        (REG_ARL_BASE_ADDRESS + 0x10C)
+#define ACL_TRTCMR1        (REG_ARL_BASE_ADDRESS + 0x110)
+#define ACL_TRTCMR2        (REG_ARL_BASE_ADDRESS + 0x114)
+#define ACLRMC             (REG_ARL_BASE_ADDRESS + 0x470)
+#define ACLRMD1            (REG_ARL_BASE_ADDRESS + 0x474)
+#define ACLRMD2            (REG_ARL_BASE_ADDRESS + 0x478)
+
+#define ACL_EN_MASK                (0x1)
+#define ACL_MEM_CFG_DONE_OFFSET    (31)
+#define ACL_MEM_CFG_RULE_ID_OFFSET (16)
+#define ACL_MEM_CFG_DATA_BN_OFFSET (8)
+#define ACL_MEM_CFG_MEM_SEL_OFFSET (4)
+#define ACL_MEM_CFG_RULE_SEL       (0U << 4)
+#define ACL_MEM_CFG_ACTION_SEL     (1U << 4)
+#define ACL_MEM_CFG_CLEAR          (1U << 2)
+#define ACL_MEM_CFG_WRITE          (1U << 1)
+#define ACL_MEM_CFG_READ           (0U << 1)
+#define ACL_MEM_CFG_EN             (1)
+#define ACL_ACT_GROUP_END_0_OFFSET (7)
+#define ACL_ACT_GROUP_END_1_OFFSET (15)
+#define ACL_ACT_GROUP_END_2_OFFSET (21)
+#define ACL_LAST_LINE_0_OFFSET     (0)
+#define ACL_LAST_LINE_1_OFFSET     (8)
+#define ACL_LAST_LINE_2_OFFSET     (16)
+#define ACL_LAST_LINE_3_OFFSET     (24)
+#define ACL_LAST_LINE_MASK         (0x1f)
+#define ACL_MIB_SEL_OFFSET         (4)
+#define ACL_MIB_CLEAR              (1)
+#define ACL_MIB_SEL_MASK           (0x3f)
+#define ACL_TRTCM_EN_OFFSET        (31)
+#define ACL_TRTCM_BUSY_OFFSET      (31)
+#define ACL_TRTCM_WRITE            (1U << 27)
+#define ACL_TRTCM_READ             (0U << 27)
+#define ACL_TRTCM_ID_OFFSET        (0)
+#define ACL_TRTCM_ID_MASK          (0x1f)
+#define ACL_TRTCM_CBS_OFFSET       (16)
+#define ACL_TRTCM_CBS_MASK         (0xffff)
+#define ACL_TRTCM_EBS_OFFSET       (0)
+#define ACL_TRTCM_EBS_MASK         (0xffff)
+#define ACL_TRTCM_CIR_OFFSET       (16)
+#define ACL_TRTCM_CIR_MASK         (0xffff)
+#define ACL_TRTCM_EIR_OFFSET       (0)
+#define ACL_TRTCM_EIR_MASK         (0xffff)
+#define ACL_RATE_BUSY_OFFSET       (31)
+#define ACL_RATE_WRITE             (1U << 30)
+#define ACL_RATE_READ              (0U << 30)
+#define ACL_RATE_ID_OFFSET         (20)
+#define ACL_RATE_ID_MASK           (0x1f)
+#define ACL_RATE_EN_OFFSET         (19)
+#define ACL_RATE_EN                (1U << 19)
+#define ACL_RATE_DIS               (0U << 19)
+#define ACL_RATE_TOKEN_MASK        (0xffff)
+
+#define ACL_UDF_BASE (REG_ARL_BASE_ADDRESS + 0x200)
+#define ACL_AUTC     (ACL_UDF_BASE + 0x00)
+#define ACL_AUTW0    (ACL_UDF_BASE + 0x08)
+#define ACL_AUTW1    (ACL_UDF_BASE + 0x0c)
+#define ACL_AUTW2    (ACL_UDF_BASE + 0x10)
+#define ACL_AUTR0    (ACL_UDF_BASE + 0x20)
+#define ACL_AUTR1    (ACL_UDF_BASE + 0x24)
+#define ACL_AUTR2    (ACL_UDF_BASE + 0x28)
+
+#define ACL_UDF_ACC_OFFSET (31)
+#define ACL_UDF_READ_MASK  (0x0)
+#define ACL_UDF_WRITE_MASK (0x1)
+#define ACL_UDF_CLEAR_MASK (0x2)
+#define ACL_UDF_CMD_OFFSET (28)
+#define ACL_UDF_READ       (ACL_UDF_READ_MASK << ACL_UDF_CMD_OFFSET)
+#define ACL_UDF_WRITE      (ACL_UDF_WRITE_MASK << ACL_UDF_CMD_OFFSET)
+#define ACL_UDF_CLEAR      (ACL_UDF_CLEAR_MASK << ACL_UDF_CMD_OFFSET)
+#define ACL_UDF_ADDR_MASK  (0xf)
+
+/*ACL rule field offset and width*/
+#define DMAC_KEY_OFFSET             (0)
+#define SMAC_KEY_OFFSET             (48)
+#define ETYPE_KEY_OFFSET            (96)
+#define STAG_KEY_OFFSET             (112)
+#define CTAG_KEY_OFFSET             (128)
+#define DIP_KEY_OFFSET              (144)
+#define SIP_KEY_OFFSET              (176)
+#define DSCP_KEY_OFFSET             (208)
+#define NEXT_HEADER_KEY_OFFSET      (216)
+#define FLOW_LABEL_KEY_OFFSET       (224)
+#define DPORT_KEY_OFFSET            (244)
+#define SPORT_KEY_OFFSET            (260)
+#define UDF_KEY_OFFSET              (276)
+#define DMAC_BYTE_MASK_OFFSET       (292)
+#define SMAC_BYTE_MASK_OFFSET       (298)
+#define ETYPE_BYTE_MASK_OFFSET      (304)
+#define STAG_BYTE_MASK_OFFSET       (306)
+#define CTAG_BYTE_MASK_OFFSET       (308)
+#define DIP_BYTE_MASK_OFFSET        (310)
+#define SIP_BYTE_MASK_OFFSET        (314)
+#define FLOW_LABEL_BYTE_MASK_OFFSET (318)
+#define DPORT_BYTE_MASK_OFFSET      (321)
+#define SPORT_BYTE_MASK_OFFSET      (323)
+#define UDF_BIT_MASK_OFFSET         (325)
+#define FIELD_TYPE_OFFSET           (341)
+#define FIELD_ENABLE_OFFSET         (354)
+#define IS_IPV6_RULE_OFFSET         (367)
+#define RULE_END_OFFSET             (368)
+#define RULE_ENABLE_OFFSET          (369)
+#define REVERSE_BIT_OFFSET          (370)
+#define PORTMAP_OFFSET              (371)
+
+#define DMAC_KEY_WIDTH             (8)
+#define SMAC_KEY_WIDTH             (8)
+#define ETYPE_KEY_WIDTH            (16)
+#define STAG_KEY_WIDTH             (16)
+#define CTAG_KEY_WIDTH             (16)
+#define DIP_KEY_WIDTH              (32)
+#define SIP_KEY_WIDTH              (32)
+#define DSCP_KEY_WIDTH             (8)
+#define NEXT_HEADER_KEY_WIDTH      (8)
+#define FLOW_LABEL_KEY_WIDTH       (20)
+#define DPORT_KEY_WIDTH            (16)
+#define SPORT_KEY_WIDTH            (16)
+#define UDF_KEY_WIDTH              (16)
+#define DMAC_BYTE_MASK_WIDTH       (6)
+#define SMAC_BYTE_MASK_WIDTH       (6)
+#define ETYPE_BYTE_MASK_WIDTH      (2)
+#define STAG_BYTE_MASK_WIDTH       (2)
+#define CTAG_BYTE_MASK_WIDTH       (2)
+#define DIP_BYTE_MASK_WIDTH        (4)
+#define SIP_BYTE_MASK_WIDTH        (4)
+#define FLOW_LABEL_BYTE_MASK_WIDTH (3)
+#define DPORT_BYTE_MASK_WIDTH      (2)
+#define SPORT_BYTE_MASK_WIDTH      (2)
+#define UDF_BIT_MASK_WIDTH         (16)
+#define FIELD_TYPE_WIDTH           (13)
+#define FIELD_ENABLE_WIDTH         (13)
+#define IS_IPV6_RULE_WIDTH         (1)
+#define RULE_END_WIDTH             (1)
+#define RULE_ENABLE_WIDTH          (1)
+#define REVERSE_BIT_WIDTH          (1)
+#define PORTMAP_WIDTH              (29)
+
+/*ACL action offset and width*/
+#define SA_INDEX_OFFSET       (0)
+#define DA_INDEX_OFFSET       (4)
+#define MAC_CHG_OFFSET        (12)
+#define ACL_VLAN_VID_OFFSET   (13)
+#define ACL_VLAN_HIT_OFFSET   (25)
+#define ACL_CLASS_IDX_OFFSET  (26)
+#define ACL_TCM_OFFSET        (31)
+#define ACL_TCM_SEL_OFFSET    (33)
+#define ACL_DROP_PCD_G_OFFSET (34)
+#define ACL_DROP_PCD_Y_OFFSET (37)
+#define ACL_DROP_PCD_R_OFFSET (40)
+#define CLASS_SLR_OFFSET      (43)
+#define CLASS_SLR_SEL_OFFSET  (46)
+#define DROP_PCD_SEL_OFFSET   (47)
+#define TRTCM_EN_OFFSET       (48)
+#define ACL_MANG_OFFSET       (49)
+#define LKY_VLAN_OFFSET       (50)
+#define LKY_VLAN_EN_OFFSET    (51)
+#define EG_TAG_OFFSET         (52)
+#define EG_TAG_EN_OFFSET      (55)
+#define PRI_USER_OFFSET       (56)
+#define PRI_USER_EN_OFFSET    (59)
+#define MIRROR_OFFSET         (60)
+#define FW_PORT_OFFSET        (64)
+#define PORT_FW_EN_OFFSET     (67)
+#define RATE_INDEX_OFFSET     (68)
+#define RATE_EN_OFFSET        (73)
+#define ATTACK_RATE_ID_OFFSET (74)
+#define ATTACK_RATE_EN_OFFSET (81)
+#define ACL_MIB_ID_OFFSET     (82)
+#define ACL_MIB_EN_OFFSET     (88)
+#define VLAN_PORT_SWAP_OFFSET (89)
+#define DST_PORT_SWAP_OFFSET  (90)
+#define PORT_OFFSET           (91)
+#define PORT_FORCE_OFFSET     (120)
+
+#define SA_INDEX_WIDTH       (4)
+#define DA_INDEX_WIDTH       (8)
+#define MAC_CHG_WIDTH        (1)
+#define ACL_VLAN_VID_WIDTH   (12)
+#define ACL_VLAN_HIT_WIDTH   (1)
+#define ACL_CLASS_IDX_WIDTH  (5)
+#define ACL_TCM_WIDTH        (2)
+#define ACL_TCM_SEL_WIDTH    (1)
+#define ACL_DROP_PCD_G_WIDTH (3)
+#define ACL_DROP_PCD_Y_WIDTH (3)
+#define ACL_DROP_PCD_R_WIDTH (3)
+#define CLASS_SLR_WIDTH      (3)
+#define CLASS_SLR_SEL_WIDTH  (1)
+#define DROP_PCD_SEL_WIDTH   (1)
+#define TRTCM_EN_WIDTH       (1)
+#define ACL_MANG_WIDTH       (1)
+#define LKY_VLAN_WIDTH       (1)
+#define LKY_VLAN_EN_WIDTH    (1)
+#define EG_TAG_WIDTH         (3)
+#define EG_TAG_EN_WIDTH      (1)
+#define PRI_USER_WIDTH       (3)
+#define PRI_USER_EN_WIDTH    (1)
+#define MIRROR_WIDTH         (4)
+#define FW_PORT_WIDTH        (3)
+#define PORT_FW_EN_WIDTH     (1)
+#define RATE_INDEX_WIDTH     (5)
+#define RATE_EN_WIDTH        (1)
+#define ATTACK_RATE_ID_WIDTH (7)
+#define ATTACK_RATE_EN_WIDTH (1)
+#define ACL_MIB_ID_WIDTH     (6)
+#define ACL_MIB_EN_WIDTH     (1)
+#define VLAN_PORT_SWAP_WIDTH (1)
+#define DST_PORT_SWAP_WIDTH  (1)
+#define PORT_WIDTH           (29)
+#define PORT_FORCE_WIDTH     (1)
+
+/*ACL UDF table offset and width*/
+#define UDF_RULE_EN_OFFSET  (0)
+#define UDF_PKT_TYPE_OFFSET (1)
+#define WORD_OFST_OFFSET    (4)
+#define CMP_SEL_OFFSET      (11)
+#define CMP_PAT_OFFSET      (32)
+#define CMP_MASK_OFFSET     (48)
+#define PORT_BITMAP_OFFSET  (64)
+
+#define UDF_RULE_EN_WIDTH  (1)
+#define UDF_PKT_TYPE_WIDTH (3)
+#define WORD_OFST_WIDTH    (7)
+#define CMP_SEL_WIDTH      (1)
+#define CMP_PAT_WIDTH      (16)
+#define CMP_MASK_WIDTH     (16)
+#define PORT_BITMAP_WIDTH  (29)
+
+/* Register of DPCR */
+#define BMU_PORT_BASE          (0x10204000)
+#define DPCR_COLOR_OFFSET      (0x20)
+#define DPCR_QUEUE_OFFSET      (0x4)
+#define FPC_RXCTRL(p)          (BMU_PORT_BASE + (p * PORT_CTRL_PORT_OFFSET) + 0x04)
+#define FPC_RXCTRL_FP_CNT_OFFT (0)
+#define FPC_RXCTRL_FP_CNT_LENG (3)
+#define DPCR_EN(p)             (BMU_PORT_BASE + (p * PORT_CTRL_PORT_OFFSET) + 0x08)
+#define DPCR_BASE              (BMU_PORT_BASE + 0x10)
+#define DPCR(p, c, q)          (DPCR_BASE + (p * PORT_CTRL_PORT_OFFSET) + (c * DPCR_COLOR_OFFSET) + (q * DPCR_QUEUE_OFFSET))
+
+#define DPCR_HIGH_THRSH_OFFSET (11)
+#define DPCR_PBB_OFFSET        (22)
+#define DPCR_LOW_THRSH_WIDTH   (0x7ff)
+#define DPCR_HIGH_THRSH_WIDTH  (0x7ff)
+#define DPCR_PBB_WIDTH         (0x3ff)
+#define DP_MFRM_EX_OFFSET      (24)
+/*Register of Min-Max shaper value*/
+/*SCH perport base addr*/
+#define REG_SCH_PORT_ADDRESS (REG_ARL_BASE_ADDRESS + 0xc000)
+
+#define MMSCR0_Q0(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p))
+#define MMSCR1_Q0(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x4)
+#define MMSCR0_Q1(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x8)
+#define MMSCR1_Q1(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0xc)
+#define MMSCR0_Q2(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x10)
+#define MMSCR1_Q2(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x14)
+#define MMSCR0_Q3(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x18)
+#define MMSCR1_Q3(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x1c)
+#define MMSCR0_Q4(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x20)
+#define MMSCR1_Q4(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x24)
+#define MMSCR0_Q5(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x28)
+#define MMSCR1_Q5(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x2c)
+#define MMSCR0_Q6(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x30)
+#define MMSCR1_Q6(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x34)
+#define MMSCR0_Q7(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x38)
+#define MMSCR1_Q7(p) (REG_SCH_PORT_ADDRESS + PORT_CTRL_PORT_OFFSET * (p) + 0x3c)
+
+/* Register of serial LED control */
+#define SLED_CTRL0 (0x1021803c)
+#define SLED_CTRL1 (0x10218040)
+/* Per port LED control b[23..8] */
+#define SLED_SRC_SEL (0x1021c018)
+
+/* fields of serial LED control register */
+#define SLED_SOURCE_NORMAL_MODE       (0)
+#define SLED_SOURCE_INTERLEAVING_MODE (1 << 0)
+#define SLED_NUM_LED0                 (1 << 1)
+#define SLED_NUM_LED0_LED1            (2 << 1)
+#define SLED_NUM_LED0_LED1_LED2       (3 << 1)
+#define SLED_OUTPUT_TRANSITION_MODE   (0)
+#define SLED_OUTPUT_CONTINUOUS_MODE   (1 << 3)
+#define SLED_FALLING_EDGE             (0)
+#define SLED_RISING_EDGE              (1 << 4)
+
+/* Register of parallel LED control */
+#define RG_LAN_LED_IOMUX  (0x10000088)
+#define RG_GPIO_EN_REG    (0x10000090)
+#define RG_GPIO_INVERSE   (0x10000010)
+#define PARALLEL_LED_MODE (0x00924249)
+#define PARALLEL_LED_PORT (0x00001d0f)
+
+/* GPIO flash map config*/
+#define RG_GPIO_FLASH_MODE_CFG (0x1000a334)
+#define RG_GPIO_RSP_MODE_CFG   (0x1000a338)
+#define RG_GPIO_FLASH_PRD_SET0 (0x1000a33c)
+#define RG_GPIO_FLASH_PRD_SET1 (0x1000a340)
+#define RG_GPIO_FLASH_PRD_SET2 (0x1000a344)
+#define RG_GPIO_FLASH_PRD_SET3 (0x1000a348) /* period 7 & 6 */
+
+#define RG_GPIO_FLASH_MAP_CFG0 (0x1000a34c)
+#define RG_GPIO_FLASH_MAP_CFG1 (0x1000a350) /* map 12,13,13,15 */
+#define RG_CYCLE_CFG_VALUE0    (0x1000a398)
+#define RG_CYCLE_CFG_VALUE1    (0x1000a39C)
+
+#define GPIO_WAVE_ACTIVE_LOW  (0x000000ff)
+#define GPIO_WAVE_ACTIVE_HIGH (0x00ff0000)
+
+#define GPIO_WAVE_LED_ON  (0xeeee0000)
+#define GPIO_WAVE_LED_OFF (0xffff0000)
+
+/* GPIO low byte TX Driving control */
+#define RG_I2C_E4_TX_DRIVING_CTRL    (0x10000014)
+#define I2C_IO_E4_BITS               (0x0000000F)
+#define RG_GPIO_L_E4_TX_DRIVING_CTRL (0x1000001c)
+#define GPIO_SPI_E4_BITS             (0x00780000)
+#define GPIO_SMI_E4_BITS             (0x00000030)
+
+/* Operation Register Base */
+#define REG_EFUSE_BASE_ADDRESS (0x10004000)
+#define EFUSE_CTRL             (REG_EFUSE_BASE_ADDRESS + 0x08)
+#define EFUSE_RDATA0           (REG_EFUSE_BASE_ADDRESS + 0x30)
+#define EFUSE_RDATA1           (REG_EFUSE_BASE_ADDRESS + 0x34)
+#define EFUSE_RDATA2           (REG_EFUSE_BASE_ADDRESS + 0x38)
+#define EFUSE_RDATA3           (REG_EFUSE_BASE_ADDRESS + 0x3C)
+
+/**************************************** SIF MODULE *****************************************/
+/* HW Trap Normal Mode Read Back Register, used for I2C Mode */
+#define REG_RGS_CPU_EN (0x100000A8UL)
+
+/* I2C Master Register Base */
+#define REG_SIF_MASTER0_BASE_ADDRESS (0x10008000UL)
+#define REG_SIF_MASTER1_BASE_ADDRESS (0x10022000UL)
+
+/* I2C Master Register Offset */
+#define SIF_SIFMCTL0 (0x40UL)
+#define SIF_SIFMCTL1 (0x44UL)
+#define SIF_SIFMD0   (0x50UL)
+#define SIF_SIFMD1   (0x54UL)
+
+/* SIFM Configuration Register 0 Mask */
+#define SIF_EN_MSK        (1UL)
+#define SIF_SDA_STATE_MSK (1UL)
+#define SIF_SCL_STATE_MSK (1UL)
+#define SIF_CLK_DIV_MSK   (0xfffUL)
+
+/* SIFM Configuration Register 1 Mask */
+#define SIF_TRI_MSK   (1UL)
+#define SIF_MODE_MSK  (0x7UL)
+#define SIF_PGLEN_MSK (0x7UL)
+#define SIF_ACK_MSK   (0xffUL)
+
+/* HW Trap Normal Mode Bit */
+#define CPU_I2C0_MODE_BIT (4UL)
+
+/* SIFM Configuration Register 0 Bit Position */
+#define SIF_EN_BIT        (1UL)
+#define SIF_SDA_STATE_BIT (2UL)
+#define SIF_SCL_STATE_BIT (3UL)
+#define SIF_CLK_DIV_BIT   (16UL)
+
+/* SIFM Configuration Register 1 Bit Position */
+#define SIF_TRI_BIT   (0UL)
+#define SIF_MODE_BIT  (4UL)
+#define SIF_PGLEN_BIT (8UL)
+#define SIF_ACK_BIT   (16UL)
+
+/* SIFM Configuration Register 0 Shifted Mask */
+#define SIF_EN_SM        ((SIF_EN_MSK) << (SIF_EN_BIT))
+#define SIF_SDA_STATE_SM ((SIF_SDA_STATE_MSK) << (SIF_SDA_STATE_BIT))
+#define SIF_SCL_STATE_SM ((SIF_SCL_STATE_MSK) << (SIF_SCL_STATE_BIT))
+#define SIF_CLK_DIV_SM   ((SIF_CLK_DIV_MSK) << (SIF_CLK_DIV_BIT))
+
+/* SIFM Configuration Register 1 Mask */
+#define SIF_TRI_SM   ((SIF_TRI_MSK) << (SIF_TRI_BIT))
+#define SIF_MODE_SM  ((SIF_MODE_MSK) << (SIF_MODE_BIT))
+#define SIF_PGLEN_SM ((SIF_PGLEN_MSK) << (SIF_PGLEN_BIT))
+#define SIF_ACK_SM   ((SIF_ACK_MSK) << (SIF_ACK_BIT))
+
+/**************************************** SIF MODULE *****************************************/
+
+/**************************************** PERIPHERAL *****************************************/
+/* peripheral register definition */
+#define REG_IOMUX_CONTROL1 (0x10000088UL)
+#define REG_IOMUX_CONTROL2 (0x1000008CUL)
+#define REG_IOMUX_CONTROL3 (0x10000090UL)
+
+#define IOMUX_CONTROL2_P_MDIO_MODE_RELMASK (1)
+#define IOMUX_CONTROL2_P_MDIO_MODE_OFFT    (1)
+#define IOMUX_CONTROL2_P_MDIO_MODE_MASK    (IOMUX_CONTROL2_P_MDIO_MODE_RELMASK << IOMUX_CONTROL2_P_MDIO_MODE_OFFT)
+
+/* GPIO Register definition */
+#define REG_GPIOCTRL  (0x1000A300UL)
+#define REG_GPIOCTRL1 (0x1000A320UL)
+
+#define REG_GPIODATA (0x1000A304UL)
+
+#define REG_GPIOOE (0x1000A314UL)
+
+#define REG_GPIOINT (0x1000A308UL)
+
+#define REG_GPIOINTEDG  (0x1000A30CUL)
+#define REG_GPIOINTEDG1 (0x1000A380UL)
+
+#define REG_GPIOINTLVL  (0x1000A310UL)
+#define REG_GPIOINTLVL1 (0x1000A38CUL)
+/**************************************** PERIPHERAL *****************************************/
+#define REG_BGPOR_CTRL1 (0x10000124UL)
+
+/* MACRO FUNCTION DECLARATIONS
+ */
+
+/* DATA TYPE DECLARATIONS
+ */
+
+/* EXPORTED SUBPROGRAM SPECIFICATIONS
+ */
+
+#endif /* HAL_SCO_REG_H */

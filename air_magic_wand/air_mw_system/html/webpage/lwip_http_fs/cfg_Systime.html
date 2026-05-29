@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+    width: 400px;
+}
+td.NORMAL_TAIL {
+    padding: 0;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(400%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    font-size: 12px;
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 21px;
+    width: 280px;
+}
+input.TEXT_TIME {
+    width: 40px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 150px;
+}
+option.OPTION_HIDE {
+    display: none;
+}
+TD.ALIGN_CENTER {
+    width:auto;
+}
+#sntptimezone {
+    margin-right: 10px;
+}
+</style>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--#sysTime-->
+<script type="text/javascript">
+var submitUrlString='';
+var HTML_STATUS_OK = 200;
+var XML_SEND_COMPLETE = 4;
+var year;
+var month;
+var day;
+var second = 0;
+var minute = 0;
+var hour  = 0;
+var ret;
+var pst;
+var str_timezone='';
+var g_timer;
+var g_count = 0;
+function docW(a)
+{
+    document.write(a);
+}
+function $id(a)
+{
+    return document.getElementById(a);
+}
+function ipVerify(r) {
+    if (0 == r.length)
+    {
+        return alert(js_ipVerify1 = parent.window.str_info.alt_ipverify1), !1;
+    }
+    if (true != (/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/.test(r)))
+    {
+        return alert(js_ipVerify2 = parent.window.str_info.alt_ipverify2), !1;
+    }
+    var a, e, t = [0, 0, 0, 0];
+    for (e = 0; e < 3; e++) {
+        var i = r.indexOf(".");
+        if(-1 == i)
+            return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+        t[e] = r.substring(0, i), r = a = r.substring(i + 1)
+    }
+    for (t[3] = a, e = 0; e < 4; e++)
+    {
+        if(t[e] < 0 || 255 < t[e])
+            return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+    }
+    if(t[0] == 0 && (t[1] != 0 || t[2] != 0 || t[3] != 0))
+        return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+    if(255 == t[0] && 255 == t[1] && 255 == t[2] && 255 == t[3])
+        return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+    if(127 == t[0])
+        return alert(js_ipVerify4 = parent.window.str_info.alt_ipverify4), !1;
+    if(224 <= t[0] && t[0] <= 239)
+        return alert(js_ipVerify5 = parent.window.str_info.alt_ipverify5), !1;
+}
+function appendString(param, value)
+{
+    if(param=="None")
+        return;
+    if(submitUrlString==''){
+        submitUrlString += "?"+param+"="+value ;
+    }else{
+        submitUrlString += "&"+param+"="+value ;
+    }
+}
+function doSubmit()
+{
+    if((timermode != $id("clkmode").value) && (99 != $id("clkmode").value))
+    {
+        appendString("clkmode", $id("clkmode").value)
+    }
+
+    /*Date and Time*/
+    if(0 == $id("clkmode").value)
+    {
+        if(($id("year").value == "")||($id("month").value == "")||($id("day").value == "")||($id("hour").value == "")||($id("minute").value == "")||($id("second").value == ""))
+        {
+            alert(parent.window.systime_info.alt_info1);
+            return;
+        }
+        if(($id("year").value < 1970 )||(($id("month").value > 12) || ($id("month").value < 0))||(($id("day").value) > 31 || $id("day").value < 0))
+        {
+            alert(parent.window.systime_info.alt_info2);
+            return;
+        }
+        if(($id("hour").value < 0 || $id("hour").value > 23 )||(($id("minute").value > 60) || ($id("minute").value < 0))||(($id("second").value) > 60 || $id("second").value < 0))
+        {
+            alert(parent.window.systime_info.alt_info2);
+            return;
+        }
+        appendString("year", $id("year").value);
+        appendString("month", $id("month").value);
+        appendString("day", $id("day").value);
+        appendString("hour", $id("hour").value);
+        appendString("minute", $id("minute").value);
+        appendString("second", $id("second").value);
+    }
+
+    /*SNTP server*/
+    if($id("ip0").value != "0.0.0.0" && $id("ip0").value.length != 0)
+    {
+        if(0 == ipVerify($id("ip0").value))
+        {
+            alert(pare1.window.str_info.alt_ipverify2)
+        }
+        else if(server1 != $id("ip0").value)
+        {
+            appendString("ip0", $id("ip0").value);
+        }
+    }
+    else
+    {
+        appendString("ip0", 0);
+    }
+    if($id("ip1").value != "0.0.0.0" && $id("ip1").value.length != 0)
+    {
+        if(0 == ipVerify($id("ip1").value))
+        {
+            alert(pare1.window.str_info.alt_ipverify2)
+        }
+        else if(server2 != $id("ip1").value)
+        {
+            appendString("ip1", $id("ip1").value);
+        }
+    }
+    else
+    {
+        appendString("ip1", 0);
+    }
+    if($id("ip2").value != "0.0.0.0" && $id("ip2").value.length != 0)
+    {
+        if(0 == ipVerify($id("ip2").value))
+        {
+            alert(pare1.window.str_info.alt_ipverify2)
+        }
+        else if(server3 != $id("ip2").value)
+        {
+            appendString("ip2", $id("ip2").value);
+        }
+    }
+    else
+    {
+        appendString("ip2", 0);
+    }
+    if(99 != $id("sntptimezone").value)
+    {
+        appendString("timezone", $id("sntptimezone").value);
+    }
+
+    if(""== submitUrlString) /* no change do nothing */
+        return (alert(parent.window.str_info.alt_nochange), !1);
+    else
+        return location.href = "system_sntp_set.cgi"+submitUrlString, !0;
+}
+
+function modechk()
+{
+    0 == $id("clkmode").value ? document.system_sntp_set.clkmode == 0 :
+    document.system_sntp_set.clkmode == 1;
+
+    if(1 == $id("clkmode").value)
+    {
+        $id("year").disabled = true;
+        $id("month").disabled = true;
+        $id("day").disabled = true;
+        $id("hour").disabled = true;
+        $id("minute").disabled = true;
+        $id("second").disabled = true;
+    }
+    else
+    {
+        $id("year").disabled = false;
+        $id("month").disabled = false;
+        $id("day").disabled = false;
+        $id("hour").disabled = false;
+        $id("minute").disabled = false;
+        $id("second").disabled = false;
+    }
+}
+
+function Webdisplay()
+{
+    g_count++;
+    if(g_count <= 5)
+    {
+        doXmlSend();
+        g_count = 0;
+    }
+    second++;
+    if(second > 59)
+    {
+        second = 0;
+        minute ++;
+        if(minute>59)
+        {
+            minute = 0;
+            hour++;
+            if(hour>=24)
+            {
+            hour = 0;
+            }
+        }
+    }
+    document.getElementById("t_currenttime").innerHTML = year.toString() + "/" + (m=month>9?month:"0"+month) + "/" + (d=day>9?day:"0"+day) + " " + (h=hour>9?hour:"0"+hour) + ":" + (min=minute>9?minute:"0"+minute) + ":" + (sec=second>9?second:"0"+second);
+}
+function background_timer()
+{
+    Webdisplay();
+    g_timer.postMessage(1000);
+}
+function TimeDisplay()
+{
+    if(XML_SEND_COMPLETE == curXml.readyState)
+    {
+        if (HTML_STATUS_OK == curXml.status)
+        {
+            pst = curXml.responseText.split(",");
+            year = parseInt(pst[0], 10);
+            month = parseInt(pst[1], 10);
+            day = parseInt(pst[2], 10);
+            hour = parseInt(pst[3], 10);
+            minute = parseInt(pst[4], 10);
+            second = parseInt(pst[5], 10);
+            document.getElementById("t_currenttime").innerHTML = pst[0] + "/" + (m=month>9?pst[1]:"0"+pst[1]) + "/" + (d=pst[2]>9?pst[2]:"0"+pst[2]) + " " + (h=pst[3]>9?pst[3]:"0"+pst[3]) + ":" + (min=pst[4]>9?pst[4]:"0"+pst[4]) + ":" + (sec=pst[5]>9?pst[5]:"0"+pst[5]);
+        }
+    }
+}
+
+function doXmlSend()
+{
+    curXml = parent.getXMLObject();
+    if(null != curXml)
+    {
+        curXml.onreadystatechange = TimeDisplay;
+        curXml.open("GET", "/timeCur.xml", true);
+        curXml.send(null);
+    }
+}
+
+function loadValue()
+{
+    if(timermode==0)
+    {
+        $id("t_clockmode").value = "LocalTime";
+    }
+    else
+    {
+        $id("t_clockmode").value = "SNTP";
+    }
+    $id("t_currenttime").innerHTML = curtime[0] + "/" + (m=curtime[1]>9?curtime[1]:"0"+curtime[1]) + "/" + (d=curtime[2]>9?curtime[2]:"0"+curtime[2]) + " " + (h=curtime[3]>9?curtime[3]:"0"+curtime[3]) + ":" + (min=curtime[4]>9?curtime[4]:"0"+curtime[4]) + ":" + (sec=curtime[5]>9?curtime[5]:"0"+curtime[5]);
+    year = curtime[0];
+    month = curtime[1];
+    day = curtime[2];
+    hour = curtime[3];
+    minute = curtime[4];
+    second = curtime[5];
+    if(0 <= timezone)
+    {
+        str_timezone = "UTC+" + timezone;
+    }
+    else
+    {
+        str_timezone = "UTC" + timezone;
+    }
+    $id("t_timezone").innerHTML = str_timezone;
+    if("0.0.0.0" != server1)
+    {
+        $id("ip0").value = server1;
+    }
+    if("0.0.0.0" != server2)
+    {
+        $id("ip1").value = server2;
+    }
+    if("0.0.0.0" != server3)
+    {
+        $id("ip2").value = server3;
+    }
+    $id("year").disabled = true;
+    $id("month").disabled = true;
+    $id("day").disabled = true;
+    $id("hour").disabled = true;
+    $id("minute").disabled = true;
+    $id("second").disabled = true;
+    if(window.Worker)
+    {
+        g_timer = new Worker("timerworker.js");
+        g_timer.postMessage(1000);
+        g_timer.onmessage = background_timer;
+    }
+    else
+    {
+        setTimeout(Webdisplay, 1000);
+    }
+    return true;
+}
+function onlyNum(e) {
+    e.target.value = e.target.value.replace(/[^\d]/g, '');
+}
+window.onload = () => {
+    $id("clkmode").onclick = () => modechk();
+    $id("year").onkeyup = (e) => onlyNum(e);
+    $id("month").onkeyup = (e) => onlyNum(e);
+    $id("day").onkeyup = (e) => onlyNum(e);
+    $id("hour").onkeyup = (e) => onlyNum(e);
+    $id("minute").onkeyup = (e) => onlyNum(e);
+    $id("second").onkeyup = (e) => onlyNum(e);
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+    $id("btn_apply").onclick = () => doSubmit();
+    loadValue();
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <fieldset>
+      <legend> <span class="NORMAL" id="systimeinfo"><script>docW(parent.window.systime_info.spn_timerinfo)</script></span></legend>
+      <table class="BORDER" width="800">
+         <tbody>
+            <tr>
+                <td colspan="2" align="center"  class="TD_FIRST_COL">
+                <span class="NORMAL"><script>docW(parent.window.systime_info.spn_curtime)</script></span>
+                </td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL">
+               <span class="NORMAL"><script>docW(parent.window.systime_info.spn_clockmode)</script></span>
+               </td>
+               <td class="NORMAL_TAIL" id="t_clockmode">
+               <span class="NORMAL"><script>
+               if(timermode ==0)
+               {
+                   docW("LocalTime")
+               }
+               else
+               {
+                   docW("SNTP")
+               }
+               </script></span>
+               </td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL">
+               <span class="NORMAL"><script>docW(parent.window.systime_info.spn_currenttime)</script></span>
+               </td>
+               <td class="NORMAL_TAIL">
+               <span class="NORMAL" id="t_currenttime"></span>
+               </td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL">
+               <span class="NORMAL"><script>docW(parent.window.systime_info.spn_timezone)</script></span>
+               </td>
+               <td class="NORMAL_TAIL">
+               <span class="NORMAL" id="t_timezone"></span>
+               </td>
+            </tr>
+            </tbody>
+    </table>
+    <form name="system_sntp_set" action="system_sntp_set.cgi" enctype="multipart/form-data" method="get">
+    <table class="BORDER" width="800">
+        <tbody>
+            <tr>
+               <td colspan="2" align="cneter" class="TD_FIRST_COL">
+               <span class="NORMAL" id="t_netmask"><script>docW(parent.window.systime_info.spn_timesetting)</script></span>
+               </td>
+            </tr>
+            <tr>
+                <td class="TD_FIRST_COL">
+                <span class="NORMAL" id="t_clockmode"><script>docW(parent.window.systime_info.spn_clockmode)</script></span>
+                </td>
+                <td>
+                <select class="SELECT_NORMAL" id="clkmode" name="groupId">
+                    <option id="hidmode" value="99" class="OPTION_HIDE"></option>
+                    <option id="lctimemode" value="0">LocalTime</option>
+                    <option id="sntpmode" value="1">SNTP</option>
+                </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="BORDER" width="800">
+        <tbody>
+            <tr>
+               <td colspan="2" align="center" class="TD_FIRST_COL">
+               <span class="NORMAL" id="t_localsetting"><script>docW(parent.window.systime_info.spn_localtimesetting)</script></span>
+               </td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL">
+               <span class="NORMAL" id="t_datesetting"><script>docW(parent.window.systime_info.spn_datesetting)</script></span>
+               </td>
+               <td class="NORMAL_TAIL">
+               <input class="TEXT_ENABLE TEXT_TIME" type="text" id="year" maxlength="4"></input>
+               <span class="NORMAL">/</span>
+               <input class="TEXT_ENABLE TEXT_TIME" type="text" id="month" maxlength="2"></input>
+               <span class="NORMAL">/</span>
+               <input class="TEXT_ENABLE TEXT_TIME" type="text" id="day" maxlength="2"></input>
+               </td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL" width="160">
+               <span class="NORMAL" id="t_timesetting"><script>docW(parent.window.systime_info.spn_timesettting)</script></span>
+               </td>
+               <td class="NORMAL_TAIL">
+               <input class="TEXT_ENABLE TEXT_TIME" type="text" id="hour" maxlength="2"></input>
+               <span class="NORMAL">:</span>
+               <input class="TEXT_ENABLE TEXT_TIME" type="text" id="minute" maxlength="2"></input>
+               <span class="NORMAL">:</span>
+               <input class="TEXT_ENABLE TEXT_TIME" type="text" id="second" maxlength="2"></input>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+      <table class="BORDER" width="800px">
+         <tbody>
+            <tr>
+               <td colspan="2" class="TD_FIRST_COL" align="center">
+               <span class="NORMAL" id="t_sntpinfo"><script>docW(parent.window.systime_info.spn_sntpsetting)</script></span>
+               </td>
+            </tr>
+        </tbody>
+         <tbody>
+            <td class="TD_FIRST_COL" align="left">
+                <span class="NORMAL" id="t_timezonesetting"><script>docW(parent.window.systime_info.spn_timezone)</script></span>
+                <td class="NORMAL_TAIL" >
+                <select class="SELECT_NORMAL" id="sntptimezone">
+                <script type="text/javascript">
+                var i = 0;
+                docW('<OPTION id="sntp_99" value="99" class="OPTION_HIDE"></OPTION>')
+                for (i = -12; i < 15; i++)
+                {
+                    if(i >= 0)
+                    {
+                        docW('<OPTION id="sntp_' + i + '" value=' + i + ">"+ "UTC" + " +" + i + " "+"</OPTION>");
+                    }
+                    else
+                    {
+                        docW('<OPTION id="sntp_' + i + '" value=' + i + ">"+ "UTC" + " " + i + " "+"</OPTION>");
+                    }
+                }
+                </script>
+                </select>
+               </td>
+         </tbody>
+        <tbody>
+            <tr>
+               <td class="TD_FIRST_COL" align="left">
+               <span class="NORMAL" id="t_sntpserverinfo0"><script>docW(parent.window.systime_info.spn_sntpserver + ' 1')</script></span>
+               <td class="NORMAL_TAIL">
+               <input class="TEXT_ENABLE" type="text" id="ip0"  maxlength="32"></input>
+               </td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL" align="left">
+               <span class="NORMAL" id="t_sntpserverinfo1"><script>docW(parent.window.systime_info.spn_sntpserver + ' 2')</script></span>
+               <td class="NORMAL_TAIL">
+               <input class="TEXT_ENABLE" type="text" id="ip1"  maxlength="32"></input>
+               </td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL" align="left">
+               <span class="NORMAL" id="t_sntpserverinfo2"><script>docW(parent.window.systime_info.spn_sntpserver + ' 3')</script></span>
+               <td class="NORMAL_TAIL">
+               <input class="TEXT_ENABLE" type="text" id="ip2"  maxlength="32"></input>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+       <table align="center" width="800">
+         <tbody>
+            <tr>
+                <td class="ALIGN_CENTER"><a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_apply"></a></td>
+            </tr>
+         </tbody>
+         </table>
+   </form>
+   </fieldset>
+</body>
+</html>

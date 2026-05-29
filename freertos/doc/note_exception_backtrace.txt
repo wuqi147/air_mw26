@@ -1,0 +1,151 @@
+/*
+ *  Note    : note_exception_backtrace
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.8.5
+ *  Update  : 2023-09-04
+ */
+
+(1) Overview
+    When user meet a exception occurs, there is a dump log for user
+    to narrow down the root casue of it. The purpose of this document is
+    to describe how to debug exception with dump log and more hints from
+    backtrace.
+
+(2) Dump log
+    Below is the format of dump log
+    PSW    :      *** | IPSW   :     ***| P_IPSW  :     ***
+    IVB    :      *** | EVA    :     ***| P_EVA   :     ***
+    ITYPE  :      *** | P_ITYPE:     ***| MERR    :     ***
+    IPC    :      *** | P_IPC  :     ***| OIPC    :     ***
+    r1     :      *** | r2     :     ***| r3      :     ***
+    r4     :      *** | r5     :     ***| r6      :     ***
+    r7     :      *** | r8     :     ***| r9      :     ***
+    r10    :      *** | fp     :     ***| gp      :     ***
+    sp     :      ***
+    ----> ***
+    ----> ***
+    ----> ***
+
+    StackDump:
+    *** *** *** ***
+    *** *** *** ***
+    *** *** *** ***
+
+    Use below cmd to dump more detail backtrace
+    add2line -e airRTOSSystem.elf -f -a -p -s *** *** *** ***
+    ========== END of dump log
+
+    *** is hex value
+
+    The most interest of dump log is interruption program counter (IPC).
+    This is the shadow register of the program counter. It is updated during
+    interruption stack level transition 0 to 1 by hardware. User can use IPC
+    to search airRTOSSystem.elf.txt to locate the address of potential error
+    code.
+
+    The ----> *** means it the caller address.
+    Multiple caller addresses are made up a backtrace. The order of caller
+    addresses is the order of callers. The backtrace will show code flow
+    so user can get more debug hints. In order to keep airRTOSSystem.img
+    as small as possible, the caller address is NOT 100% accurate. Sometimes
+    certain caller addresses are misleading. So a backtrace may include some
+    misleading callers. Please keep it in mind.
+
+    The StackDump is used as a debug diagnostic assistant. User can deep dive
+    to find local variables and parameter passing with de-asm elf file.
+
+    The cmd "add2line xxxx" is a generated command line to show backtrace
+    easily for user. User can simple copy and paste it in linux cmd shell
+    ( Please make sure current folder is your freertos/project ) then
+    execute the cmd. User will get a backtrace for the exception.
+    Below is the output format of backtrace
+    <function addr: function name at which file: LineNumber>
+    Example:
+            0x2002066c: test_exception at main.c:105
+            0x200207e6: main at main.c:267
+            0x20020536: cpu_bringup at startup-nds32.c:246
+
+(3) Exception Example
+    void test_exception(void)
+    {
+        printf(">>test_exception divide 0 \n");
+        volatile int x = 5;
+        x /= 0;
+        printf("<<test_exception\n");
+    }
+    main(void)
+    {
+        ...
+        test_exception();
+        ...
+    }
+
+    Below is dump log from uart console
+
+    PSW    :      7000a | IPSW   :      70008 | P_IPSW  :      70009
+    IVB    :   2002480b | EVA    :   20020678 | P_EVA   :          0
+    ITYPE  :      100e3 | P_ITYPE:          0 | MERR    :          0
+    IPC    :   20020678 | P_IPC  :   20005940 | OIPC    :          0
+    r1     :          0 | r2     :          5 | r3      :   20024e8a
+    r4     :          1 | r5     :          0 | r6      :      50044
+    r7     :          0 | r8     :          0 | r9      :          0
+    r10    :          0 | fp     :   ffffffff | gp      :   80017000
+    sp     :   80037bb4
+    -->         2002066c
+    -->         200207e6
+    -->         20020536
+    -->         20020474
+
+    StackDump:
+    00050044 ffffffff  80017000  20020670
+    00000005 00050044  00000005  00050044
+    ffffffff 80017000  200207ea  00050044
+    ffffffff 80017000  2002053a  00000000
+    00000000 80017000  20020478  d1748242
+    10872524 db805033  d43a9bc4  bb5c0cdd
+    8ddb0665 f039500f  bb3cbcb9  890603b6
+    4abc651c e00a2119  72623ba8  edb6fada
+    ed1fa75c bdff84e9  aef97e5e  48110c59
+    c96282c8 c0455134  258aec40  e7d739c2
+    c2ffd9e6 dce9bcd9  ab457fef  1c6a1881
+    623802c5 465aa533  d0cd940b  3b2bb9ab
+    cf9eebfd fabd0dc7  fec14cfc  e1100307
+    2e01c206 a8d1c321  24a16288  b2d8794e
+    7dde6dbb cffffec7  7dde9ded  a0305752
+    002838c5 5b32804d  9c20b484  f149dbff
+
+    Use below cmd to dump more detail backtrace
+    addr2line -e airRTOSSystem.elf -f -a -p -s 2002066c 200207e6 20020536
+
+    E7
+    ========== END of dump log
+
+    user can lookup airRTOSSystem.elf.txt by IPC(20020678) to
+    located test_exception()
+
+    // in airRTOSSystem.elf.txt
+    void test_exception(void)
+    {
+    20020664:   fc 01       push25 $r6,#8    ! {$r6, $fp, $gp, $lp}
+        printf(">>test_exception divide 0 \n");
+    20020666:   46 02 00 6d sethi $r0,#0x2006d
+    2002066a:   58 00 01 ec ori $r0,$r0,#0x1ec
+    2002066e:   f8 e3      ifcall9 20020834 <vApplicationStackOverflowHook+0xa>
+        volatile int x = 5;
+    20020670:   84 05       movi55 $r0,#0x5
+    20020672:   f0 81       swi37.sp $r0,[+#0x4]
+        x /= 0;
+    20020674:   f2 01       lwi37.sp $r2,[+#0x4]
+    20020676:   84 20       movi55 $r1,#0x0
+    20020678:   40 31 04 76 divsr $r3,$r3,$r2,$r1 <== exception occurs here
+        printf("<<test_exception\n");
+    2002067c:   46 02 00 6d sethi $r0,#0x2006d
+    20020680:   58 00 02 08 ori $r0,$r0,#0x208
+
+    User call use below cmd to get backtrace
+    addr2line -e airRTOSSystem.elf -f -a -p -s 2002066c 200207e6 20020536
+
+    ========== Below is cmd output
+    0x2002066c: test_exception at main.c:105
+    0x200207e6: main at main.c:267
+    0x20020536: cpu_bringup at startup-nds32.c:246

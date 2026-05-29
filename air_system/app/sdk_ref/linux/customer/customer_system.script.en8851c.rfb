@@ -1,0 +1,16 @@
+dbg set hal warn=on
+init start sdk unit=0 low-level
+init add sdk-port unit=0 port=0 max-speed=1000m type=cpu
+init add sdk-port unit=0 port=1 max-speed=1000m type=baset pkg-id=7
+init add sdk-port unit=0 port=2 max-speed=1000m type=baset pkg-id=6
+init add sdk-port unit=0 port=3 max-speed=1000m type=baset pkg-id=5
+init add sdk-port unit=0 port=4 max-speed=1000m type=baset pkg-id=4
+init add sdk-port unit=0 port=5 max-speed=1000m type=baset pkg-id=0
+init add sdk-port unit=0 port=6 max-speed=1000m type=baset pkg-id=1
+init add sdk-port unit=0 port=7 max-speed=1000m type=baset pkg-id=2
+init add sdk-port unit=0 port=8 max-speed=1000m type=baset pkg-id=3
+init add sdk-port unit=0 port=9 max-speed=2500m type=xsgmii xsgmii-id=0 pkg-id=0
+init apply sdk-port unit=0
+init start sdk unit=0 task-rsrc
+init start sdk unit=0 module
+init start sdk unit=0 task

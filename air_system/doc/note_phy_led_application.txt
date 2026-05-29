@@ -1,0 +1,154 @@
+/*
+ *  Note    : note_phy_led_application
+ *  Chip    : EN8851(E3)
+ *  SDK     : AIR_SDK_v2.8.1
+ *  Update  : 2023-02-24
+ */
+
+(1) Overview
+
+    PHY LED is used to indicate port link and traffic status. The specification
+    of PHY LED is decided by each user. SDK has provided mechanisms for user to
+    customized PHY LED behavior and APIs to force control LED. This note will
+    describe how to configure PHY LED and control it by SDK.
+
+(2) PHY LED Configuration
+
+(2.1) PHY LED Customized Configuration
+
+    SDK has provided one mechanism that users can customize the LED behavior to
+    meet their requirements. During SDK initialziation, SDK will get this PHY
+    LED customized configuration and initialize each LED accordingly. Those PHY
+    LED customized configuration are listed as below and please refer to
+    air_cfg.h on SDK for more information.
+    - AIR_CFG_TYPE_PHY_LED_TYPE: Configure PHY LED to be serial or parallel LED
+    - AIR_CFG_TYPE_PHY_LED_COUNT: Configure PHY LED count each port
+    - AIR_CFG_TYPE_PHY_LED_BEHAVIOR: Configure PHY LED on and blinking behavior
+
+    Please note that these PHY LED configuration highly depends on user's board
+    schematics and there is no SDK API to control above behavior. These PHY LED
+    attributes are only applied once during SDK initialization.
+
+(2.2) PHY LED Control Mode
+
+    Normally, PHY LED is controlled by PHY and its behavior will be the
+    configuration mentioned on session 2.1. In some cases, user might want to
+    control LED by software (SDK called it as force mode) to control PHY LED
+    to indicate something wrong. For examples, software detect loop occurence
+    on one port and control corresponding PHY LED to indicate this situation.
+    In order to force PHY LED controlled by software, SDK provides the API,
+    air_port_setPhyLedCtrlMode(), to configure each PHY LED is controlled by
+    PHY or sfotware. The PHY LED control mode on this API will have:
+    - AIR_PORT_PHY_LED_CTRL_MODE_PHY    : PHY LED controlled by PHY
+    - AIR_PORT_PHY_LED_CTRL_MODE_FORCE  : PHY LED controlled by software
+
+    If the PHY LED is controlled by PHY, the LED state will depend on PHY
+    state and the behavior will follow the configuration on session 2.1.
+
+(2.3) LED State on Force Control Mode
+
+    If the PHY LED is controlled by software (force mode), there is another
+    API, air_port_setPhyLedForceState(), could control force mode LED state.
+    Those force mode LED states will have:
+    - AIR_PORT_PHY_LED_STATE_FORCE_PATT : Force LED state to be force pattern,
+                                          The pattern is controlled by the API,
+                                          air_port_setPhyLedForcePattCfg()
+    - AIR_PORT_PHY_LED_STATE_OFF        : Force LED state to be OFF
+    - AIR_PORT_PHY_LED_STATE_ON         : Force LED state to be ON
+
+(2.4) LED Pattern Configuration on Force Control Mode
+
+    If the PHY LED is controlled by software (force mode), there is one option
+    to have a LED pattern on force mode. SDK provides one API,
+    air_port_setPhyLedForcePattCfg(), is used to configure this force mode
+    pattern. These patterns will have:
+    - AIR_PORT_PHY_LED_PATT_HZ_HALF : Blinking once every 2 seconds
+    - AIR_PORT_PHY_LED_PATT_HZ_ONE  : Blinking once per second
+    - AIR_PORT_PHY_LED_PATT_HZ_TWO  : Blinking twice per second
+
+    The LED of all ports which have the same LED index are use the same blinking
+    pattern. If air_port_setPhyLedForcePattCfg() was called twice with same LED
+    but different ports, the second one will be configured to all ports.
+
+(3) LED Usage Example
+
+(3.1) Using Serial LED with Per-Port 2 LEDs
+
+    If user wants to configure serial LED with following configuration:
+
+    The behavior of LED 0 on port 1:
+    - Turn on when 1G link up.
+    - Blink when 1G activity.
+
+    The behavior of LED 1 on port 1:
+    - Turn on when 100M or 10M link up.
+    - Blink when 100M or 10M activity.
+
+    Please configure following arguments to set up _customer_ref_cfg[] in
+    customer_ref.c:
+
+    (a) Set the LED type as Serial LED (value = 0):
+        {0, AIR_CFG_TYPE_PHY_LED_TYPE,              0,      0,        0},
+
+    (b) Set the LED count (value = 2):
+        {0, AIR_CFG_TYPE_PHY_LED_COUNT,             0,      0,        2},
+
+    (c) Configure the behavior of LED 0 on port 1:
+        {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          1,      0,     0x61},
+
+    (d) Configure the behavior of LED 1 on port 1:
+        {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          1,      1,    0x786},
+
+    (e) Configure each LED to be controlled by PHY:
+        air_port_setPhyLedCtrlMode(unit,1,0,AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+
+(3.2) Using PHY LED Force Mode on LED Diagnostic
+
+    If user wants to process LED diagnostic by force on/off LED, and the
+    default setting is controlled by PHY. Please follow those steps below:
+
+    (a) Configure the LED control mode to force mode:
+        air_port_setPhyLedCtrlMode(unit,port,0,AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
+        air_port_setPhyLedCtrlMode(unit,port,1,AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
+
+    (b) Configure all the LED state of LED 0 on each port to ON, and verify the
+        state of LED 0:
+        air_port_setPhyLedForceState(unit,port,0,AIR_PORT_PHY_LED_STATE_ON);
+
+    (c) Configure all the LED state of LED 1 on each port to ON, and verify the
+        state of LED 1:
+        air_port_setPhyLedForceState(unit,port,1,AIR_PORT_PHY_LED_STATE_ON);
+
+    (d) Configure all the LED state of LED 0 on each port to OFF, and verify the
+        state of LED 0:
+        air_port_setPhyLedForceState(unit,port,0,AIR_PORT_PHY_LED_STATE_OFF);
+
+    (e) Configure all the LED state of LED 1 on each port to OFF, and verify the
+        state of LED 1:
+        air_port_setPhyLedForceState(unit,port,1,AIR_PORT_PHY_LED_STATE_OFF);
+
+    (f) Recovery each LED to be controlled by PHY:
+        air_port_setPhyLedCtrlMode(unit,port,0,AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+        air_port_setPhyLedCtrlMode(unit,port,1,AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+
+(3.3) Using PHY LED Force Mode on Loop Dectection
+
+    If user wants to present port loop by blinking LED 0 once per second, and
+    the default setting is controlled by PHY. Please follow those steps below:
+
+    (a) Configure LED 0 on specific port to force pattern mode:
+        air_port_setPhyLedForceState(unit, port, 0,
+            AIR_PORT_PHY_LED_STATE_FORCE_PATT);
+
+    (b) Configure force mode pattern of LED 0 on any one port to blinking once
+        per second:
+        air_port_setPhyLedForcePattCfg(unit,port,0,AIR_PORT_PHY_LED_PATT_HZ_ONE);
+
+    (c) Configure the control mode of LED 0 on specific port to force mode when
+        detected port loop:
+        air_port_setPhyLedCtrlMode(unit,port,0,AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
+
+    (d) Recovery the control mode of LED 0 on specific port to PHY mode if port
+        loop is release:
+        air_port_setPhyLedCtrlMode(unit,port,0,AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+

@@ -1,0 +1,50 @@
+/*
+ *  Note    : note_tx_compliance_test
+ *  Chip    : EN8851/AN8855/AN8858
+ *  SDK     : AIR_SDK_v3.2.1
+ *  Update  : 2025-12-08
+ */
+
+(1) Overview
+    Ethernet device needs to have TX compliance testing. SDK provides built-in
+    test commands to support configuration for different TX compliance testing.
+    The purpose of this documenet is to describe how to use SDK diag shell to
+    perform this testing.
+
+(2) TX Compliance Command Syntax
+    Below is the TX compliance command syntax on SDK diag shell:
+
+    "diag test tx-compliance [ unit=<UINT> ] port=<UINT> type=<TYPE>"
+
+    - unit :
+        Device unit number.
+    - port :
+        Port number.
+    - type :
+        - 2500m-tm1
+        - 2500m-tm2
+        - 2500m-tm3
+        - 2500m-tm4 tone={ 1 | 2 | 3 | 4 | 5 }
+        - 2500m-tm5
+        - 1000m-tm6
+        - 1000m-tm1
+        - 1000m-tm2
+        - 1000m-tm3
+        - 1000m-tm4 pair={ a | b | c | d | all }
+        - 100m pair={ a | b } [ mode={ tradition | discrete } ]
+        - 10m-sine pair={ a | b }
+        - 10m-random pair={ a | b }
+        - 10m-nlp pair={ a | b }
+
+(3) TX Compliance Test Example
+    Below is an example to test TX compliance with type 1000M-TM1 on port 1.
+
+    sdk# diag test tx-compliance portlist=1 type=1000m-tm1
+
+(4) Notices
+    TX compliance configuration may modify the PHY setting and ifmon would also
+    access PHY too. After SDK v3.1.2, when using the TX compliance command, the
+    test port will be removed from the ifmon port list. This action is to avoid
+    influencing TX compliance test result. It is suggested to reboot the device
+    every time at the end of the TX compliance test, even if changing the type
+    only.

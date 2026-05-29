@@ -1,0 +1,1 @@
+obj-$(CONFIG_PDMA_COMMON) += pdma.o

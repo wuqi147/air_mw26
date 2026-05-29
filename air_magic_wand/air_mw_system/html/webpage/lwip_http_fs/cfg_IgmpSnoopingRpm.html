@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#igmp_snooping_info-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+TABLE.FRAMEWORK {
+    line-height: 25px;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_ROW {
+    font-size: 150%;
+    font-family: "Arial";
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+TD.SBLANK {
+    width: 21px;
+}
+TD.BLANK {
+    vertical-align: middle;
+}
+TD.FRAMEWORK_LEFT {
+    font-size: 150%;
+    font-family: "Arial";
+    text-align: left;
+    width: 400px;
+    padding: 0;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 150px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 50px;
+}
+td.HIDE{
+    display:none;
+}
+</style>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <script type="text/javascript">
+   var XML_SEND_COMPLETE = 4;
+   var HTML_STATUS_OK = 200;
+   var igmp_snp_cfg = {fchange:false, rchange:false, qchange:false, qechange:false, qvchange:false, qachange:false};
+   var urlString ='';
+   var xmlReq;
+   var cur_slect_idx = 0;
+   var state_strinfo = new Array(parent.window.str_info.opt_disable, parent.window.str_info.opt_enable),
+       querier_strinfo = new Array(parent.window.igmp_info.td_disable, parent.window.igmp_info.td_querier, parent.window.igmp_info.td_nonquerier),
+       version_strinfo = new Array(parent.window.igmp_info.spn_igmpquerierver3, parent.window.igmp_info.spn_igmpquerierver2);
+
+function docW(a) {
+    document.write(a)
+}
+function $id(a) {
+    return document.getElementById(a)
+}
+function initIgmpSnooping()
+{
+    if("undefined" == typeof(igmp_ds.querierState))
+    {
+        $id("igmpQuerier").style.display = "none";
+        $id("igmpQuerierStatus").style.display = "none";
+    }
+    else
+    {
+        if("undefined" == typeof(igmp_ds.querierVer))
+        {
+            $id("tdVer2").style.display = "none";
+            $id("tdVer3").style.display = "none";
+            $id("tdVerNo_v3").style.display = "table-cell";
+        }
+    }
+}
+
+function igmpStateInit() {
+    $id("igmpEn").checked = !!igmp_ds.state, $id("igmpDis").checked = !igmp_ds.state
+}
+
+function igmpReportMsgSuppressionInit()
+{
+    if(0 == igmp_ds.state)
+    {
+        $id("reportSuEn").disabled = true;
+        $id("reportSuDis").disabled = true;
+    }
+    else{
+        $id("reportSuEn").checked = !!igmp_ds.suppressionState, $id("reportSuDis").checked = !igmp_ds.suppressionState
+    }
+}
+
+function igmpFastLeaveInit()
+{
+    if(0 == igmp_ds.state)
+    {
+        $id("fastleaveEn").disabled = true;
+        $id("fastleaveDis").disabled = true;
+    }
+    else{
+        $id("fastleaveEn").checked = !!igmp_ds.fastleaveState, $id("fastleaveDis").checked = !igmp_ds.fastleaveState
+    }
+}
+function chkinput(input)
+{
+    if("" == input)
+    {
+        /* Empty input */
+        return 2;
+
+    }
+    else if (input.match(/^(\d{1,3}\.){3}\d{1,3}$/))
+    {
+        let parts = input.split(".");
+        for (let i = 0; i < parts.length; i++)
+        {
+            if (parseInt(parts[i]) > 255)
+            {
+                /* Invalid ip addr */
+                return 1;
+                break;
+            }
+        }
+        /* Valid IP except zero network, 127.X.X.X, multicast/local bcast */
+        if((0 == Number(parts[0])) ||
+           (127 == Number(parts[0])) ||
+           ((224 <= Number(parts[0]))) && (239 >= Number(parts[0])) ||
+           ((255 == Number(parts[0])) && (Number(parts[1]) == Number(parts[0])) && (Number(parts[2]) == Number(parts[1])) && (Number(parts[3]) == Number(parts[2]))))
+        {
+            return 1;
+        }
+        /* Valid IPv4 address */
+        return 0;
+    }
+    else
+    {
+        /* Invalid input */
+        return 3;
+    }
+}
+function igmpQuerierVlanInit()
+{
+    if("undefined" != typeof(igmp_ds.vids))
+    {
+        if((0 == igmp_ds.state))
+        {
+            $id("igmpQuerVlan_Select").disabled = true;
+        }
+        else{
+            $id("igmpQuerVlan_Select").disabled = false;
+        }
+    }
+}
+function igmpQuerierStateInit()
+{
+    if("undefined" != typeof(igmp_ds.querierState))
+    {
+        if(0 == igmp_ds.state)
+        {
+            $id("igmpQuerEn").disabled = true;
+            $id("igmpQuerDis").disabled = true;
+        }
+        else
+        {
+            $id("igmpQuerEn").disabled = false;
+            $id("igmpQuerDis").disabled = false;
+        }
+    }
+}
+function igmpQuerierElectInit()
+{
+    if("undefined" != typeof(igmp_ds.querierElect))
+    {
+        if((0 == igmp_ds.state) || (true ==  $id("igmpQuerDis").checked))
+        {
+            $id("igmpQuerElectEn").disabled = true;
+            $id("igmpQuerElectDis").disabled = true;
+        }
+        else{
+            $id("igmpQuerElectEn").disabled = false;
+            $id("igmpQuerElectDis").disabled = false;
+        }
+    }
+}
+function igmpquerierVersionInit()
+{
+    if("undefined" != typeof(igmp_ds.querierVer))
+    {
+        if((0 == igmp_ds.state) || (true ==  $id("igmpQuerDis").checked))
+        {
+            $id("querVer2").disabled = true;
+            $id("querVer3").disabled = true;
+        }
+        else
+        {
+            $id("querVer2").disabled = false;
+            $id("querVer3").disabled = false;
+        }
+    }
+}
+function igmpquerierAddrInit()
+{
+    if("undefined" != typeof(igmp_ds.querierAddr))
+    {
+        if((0 == igmp_ds.state) || (true ==  $id("igmpQuerDis").checked))
+        {
+            $id("querAddr").disabled = true;
+        }
+        else
+        {
+            $id("querAddr").disabled = false;
+        }
+    }
+}
+function igmpQuerierchange()
+{
+    if("undefined" != typeof(igmp_ds.querierState))
+    {
+        if((false ==  $id("igmpQuerEn").checked) || (false == $id("igmpEn").checked))
+        {
+            $id("igmpQuerElectEn").disabled = true;
+            $id("igmpQuerElectDis").disabled = true;
+            $id("querVer2").disabled = true;
+            $id("querVer3").disabled = true;
+            $id("querAddr").disabled = true;
+        }
+        else
+        {
+            $id("igmpQuerElectEn").disabled = false;
+            $id("igmpQuerElectDis").disabled = false;
+            $id("querVer2").disabled = false;
+            $id("querVer3").disabled = false;
+            $id("querAddr").disabled = false;
+        }
+
+        if(false == $id("igmpEn").checked)
+        {
+            $id("igmpQuerVlan_Select").disabled = true;
+        }
+        else
+        {
+            $id("igmpQuerVlan_Select").disabled = false;
+        }
+    }
+}
+function igmpQuerierCheckvid()
+{
+    let vid = 0;
+    let i = 0;
+    let addr = 0x0;
+    if(("undefined" == typeof(igmp_ds.vids)) || (true == $id("igmpDis").checked))
+    {
+        return;
+    }
+    vid = $id("igmpQuerVlan_Select").value;
+    for(i; i < igmp_ds.vids.length; i++)
+    {
+        if((0 != vid) && (vid == igmp_ds.vids[i]))
+        {
+            $id("igmpQuerEn").checked = !!(igmp_ds.querierState[i]), $id("igmpQuerDis").checked = !(igmp_ds.querierState[i]);
+            $id("igmpQuerElectEn").checked = !!(igmp_ds.querierElect[i]), $id("igmpQuerElectDis").checked = !(igmp_ds.querierElect[i]);
+            if("undefined" != typeof(igmp_ds.querierVer))
+            {
+                $id("querVer2").checked = !!(igmp_ds.querierVer[i]), $id("querVer3").checked = !(igmp_ds.querierVer[i]);
+            }
+            addr = ((0 == igmp_ds.querierAddr.length) ? "" : igmp_ds.querierAddr[i]);
+            if(0 == chkinput(addr))
+            {
+                $id("querAddr").value = addr;
+            }
+            else
+            {
+                $id("querAddr").value = "";
+            }
+            break;
+        }
+    }
+    cur_slect_idx = i;
+    igmpQuerierchange();
+    return;
+}
+function igmp_change()
+{
+    if(0 == $id("igmpEn").checked)
+    {
+        $id("fastleaveEn").disabled = true;
+        $id("fastleaveDis").disabled = true;
+        $id("reportSuEn").disabled = true;
+        $id("reportSuDis").disabled = true;
+        if("undefined" != typeof(igmp_ds.querierState))
+        {
+            $id("igmpQuerEn").disabled = true;
+            $id("igmpQuerDis").disabled = true;
+        }
+    }
+    else
+    {
+        $id("fastleaveEn").disabled = false;
+        $id("fastleaveDis").disabled = false;
+        $id("reportSuEn").disabled = false;
+        $id("reportSuDis").disabled = false;
+        if("undefined" != typeof(igmp_ds.querierState))
+        {
+            $id("igmpQuerEn").disabled = false;
+            $id("igmpQuerDis").disabled = false;
+        }
+    }
+    igmpQuerierchange();
+}
+
+function appendString(igmp_snp_cfg)
+{
+    if(true == igmp_snp_cfg.fchange)
+    {
+        if (1 == $id("fastleaveEn").checked)
+        {
+            urlString += "&fastleave_mode=1";
+        }
+        else
+        {
+            urlString += "&fastleave_mode=0";
+        }
+    }
+    if(true == igmp_snp_cfg.rchange)
+    {
+        if (1 == $id("reportSuEn").checked)
+        {
+            urlString += "&reportSu_mode=1";
+        }
+        else
+        {
+            urlString += "&reportSu_mode=0";
+        }
+    }
+
+    /* IGMP SNP Querier */
+    if("undefined" != typeof(igmp_ds.querierState))
+    {
+        if(true == igmp_snp_cfg.qchange)
+        {
+            if (1 == $id("igmpQuerEn").checked)
+            {
+                urlString += "&querier_mode=1";
+            }
+            else
+            {
+                urlString += "&querier_mode=0";
+            }
+        }
+        if(true == igmp_snp_cfg.qechange)
+        {
+            if (1 == $id("igmpQuerElectEn").checked)
+            {
+                urlString += "&querier_elect=1";
+            }
+            else
+            {
+                urlString += "&querier_elect=0";
+            }
+        }
+        if(("undefined" != typeof(igmp_ds.querierVer)) && (true == igmp_snp_cfg.qvchange))
+        {
+            if (1 == $id("querVer3").checked)
+            {
+                urlString += "&querier_ver=0";
+            }
+            else
+            {
+                urlString += "&querier_ver=1";
+            }
+        }
+        if(true == igmp_snp_cfg.qachange)
+        {
+            let rc = 0;
+            rc = chkinput($id("querAddr").value);
+            if(0 == rc)
+            {
+                /* Valid ip addr */
+                urlString += ("&querier_addr=" + $id("querAddr").value);
+            }
+            else if(2 == rc)
+            {
+                /* Empty input */
+                let default_addr = "192.168.0.200";
+                urlString += "&querier_addr=" + default_addr;
+                default_addr = "(" + default_addr + ") ";
+                return confirm(parent.window.igmp_info.alt_emptyaddress + "\n" + parent.window.igmp_info.alt_defaultaddress + default_addr + parent.window.igmp_info.alt_willbeuse + "" + "\n" + parent.window.igmp_info.alt_iscontinue,
+                        parent.window.igmp_info.btn_confirm,
+                        parent.window.igmp_info.btn_cancel);
+            }
+            else
+            {
+                /* Invalid ip addr */
+                alert(parent.window.igmp_info.alt_invalidaddress);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function igmp_reset()
+{
+    if(1 == $id("igmpDis").checked)
+    {
+        if(1 == $id("fastleaveEn").checked)
+        {
+            urlString += "&fastleave_mode=0";
+        }
+        if(1 == $id("reportSuEn").checked)
+        {
+            urlString += "&reportSu_mode=0";
+        }
+        return location.href = "igmpSnooping.cgi?igmp_mode=0" + urlString;
+    }
+    if($id("fastleaveEn").checked != igmp_ds.fastleaveState)
+    {
+        igmp_snp_cfg.fchange = true;
+    }
+    if($id("reportSuEn").checked != igmp_ds.suppressionState)
+    {
+        igmp_snp_cfg.rchange = true;
+    }
+
+    /* IGMP SNP Querier */
+    if("undefined" != typeof(igmp_ds.querierState))
+    {
+        urlString += "&vlan_id=" + $id("igmpQuerVlan_Select").value;
+        /* Check state */
+        if($id("igmpQuerEn").checked != !!igmp_ds.querierState[cur_slect_idx])
+        {
+            igmp_snp_cfg.qchange = true;
+        }
+        /* Check election */
+        if(($id("igmpQuerElectEn").checked != !!igmp_ds.querierElect[cur_slect_idx]) || (true == $id("igmpQuerElectDis").checked))
+        {
+            igmp_snp_cfg.qechange = true;
+        }
+        /* Check version */
+        if(("undefined" != typeof(igmp_ds.querierVer)) && ($id("querVer2").checked != !!igmp_ds.querierVer[cur_slect_idx]))
+        {
+            igmp_snp_cfg.qvchange = true;
+        }
+        /* Check address */
+        if("" == $id("querAddr").value)
+        {
+            if(true == $id("igmpQuerEn").checked)
+            {
+                igmp_snp_cfg.qachange = true;
+            }
+        }
+        else
+        {
+            if((("undefined" != typeof(igmp_ds.querierAddr[cur_slect_idx])) && ($id("querAddr").value != igmp_ds.querierAddr[cur_slect_idx])) ||
+                ("undefined" == typeof(igmp_ds.querierAddr[cur_slect_idx])))
+            {
+                igmp_snp_cfg.qachange = true;
+            }
+        }
+    }
+
+    if(true == appendString(igmp_snp_cfg))
+    {
+        return location.href = "igmpSnooping.cgi?igmp_mode=1" + urlString;
+    }
+    return;
+}
+var IgmpUtil = {
+    ipToStr: function (i) {
+    var s, t = parseInt(i, 16);
+    return s = (4278190080 & t) >>> 24, s += ".", s += (16711680 & t) >>> 16, s += ".", s += (65280 &
+        t) >>> 8, s += ".", s += 255 & t
+    },
+    pbmToStr: function (i) {
+    for (var s = "", t = parseInt(i, 16), n = 0, r = 1; r <= _trunk_info.length; ++r)
+    {
+        if ((t & 1 << r) && (0 == _trunk_info[r-1])) {
+            for (s += (r), n = r; t & 1 << r + 1;)
+            {
+                if(0 != _trunk_info[r])
+                    break;
+                r++;
+            }
+            n != r && (s += "-" + (r)), s += ","
+        }
+    }
+    if("," == s.charAt(s.length - 1))
+        s = s.substr(0, s.length - 1)
+    for(let [key, value] of _port_list.entries())
+    {
+        if(-1 != key.indexOf("Trunk"))
+        {
+            if(value & (t >> 1))
+            {
+                if(s.length)
+                    s += ",";
+                s += key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+
+            }
+        }
+    }
+    return s
+    }
+}
+
+function state_change()
+{
+    let i;
+    let data;
+    let entry_str, group_entry;
+    let start_index;
+    let per_req_cnt;
+    let return_cnt;
+    /*  expected xml string
+    *  0;
+    *  16;
+    *  01-00-5e-00-0e-6d,0x2&
+    *  01-00-5e-00-0e-6f,0x4&
+    *  01-00-5e-00-0e-6a,0x2&
+    *  01-00-5e-00-0e-6b,0x4&
+    *  01-00-5e-00-0e-6c,0x2&;
+    *  5
+    */
+
+    if((XML_SEND_COMPLETE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status))
+    {
+        data = xmlReq.responseText.split(";");
+        start_index = Number(data[0]);
+        per_req_cnt = Number(data[1]);
+        entry_str = (("" == data[2]) ? [] : data[2].split("&"));
+        return_cnt = Number(data[(data.length - 1)]);
+
+        if((0 != entry_str.length) && (0 != return_cnt))
+        {
+            for(i = 0; i < (entry_str.length - 1); i++)
+            {
+                index = start_index + i;
+                group_entry = entry_str[i].split(",");
+                $id("gentry_" + index).style.display = "table-row";
+                if(1 == igmp_ds.searchmacTab)
+                {
+                    /* igmp search MAC table */
+                    document.getElementById("addr_" + index).innerHTML = group_entry[0];
+                }
+                else
+                {
+                    /* igmp search IPMC table */
+                    document.getElementById("addr_" + index).innerHTML = IgmpUtil.ipToStr(group_entry[0]);
+                }
+                document.getElementById("vid_" + index).innerHTML = group_entry[1];
+                document.getElementById("port_" + index).innerHTML = IgmpUtil.pbmToStr(group_entry[2]);
+            }
+        }
+
+        /* Make sure have not missed any group entry */
+        if((start_index + per_req_cnt) >= igmp_ds.count)
+        {
+            /* Get querier info */
+            querierState();
+            setTimeout(igmpQuerierCheckvid, (500));
+        }
+        else
+        {
+            l2mcState();
+        }
+    }
+}
+
+function querier_state_change()
+{
+    let data;
+    let querier_str, querier_entry;
+    let start_index;
+    let per_req_cnt;
+    let return_cnt;
+    let vid, state, elect, ver, addr = "";
+
+    var ret;
+    let i, index = 0;
+    /*  expected xml string
+     *  0;
+     *  16;
+     *  1,0,1,0,192.168.0.200&
+     *  3,1,1,1,192.168.0.201&
+     *  4,1,0,0,192.168.0.202&
+     *  6,2,1,0,192.168.0.203&
+     *  7,1,0,1,0.0.0.0&;
+     *  5
+     */
+    if((XML_SEND_COMPLETE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status))
+    {
+        if("" == xmlReq.responseText)
+        {
+            return;
+        }
+        data = xmlReq.responseText.split(";");
+        start_index = Number(data[0]);
+        per_req_cnt = Number(data[1]);
+        querier_str = (("" == data[2]) ? [] : data[2].split("&"));
+        return_cnt = Number(data[(data.length - 1)]);
+
+        if((0 != querier_str.length) && (0 != return_cnt))
+        {
+            for(i = 0; i < (querier_str.length - 1); i++)
+            {
+                index = start_index + i;
+                querier_entry = querier_str[i].split(",");
+                /* update igmp_snp querier entry info */
+                igmp_ds.vids[index] = vid = Number(querier_entry[0]);
+                igmp_ds.querierState[index] = state = Number(querier_entry[1]);
+                igmp_ds.querierElect[index] = elect =  Number(querier_entry[2]);
+                if("undefined" != typeof(igmp_ds.querierVer))
+                {
+                    igmp_ds.querierVer[index] = ver = Number(querier_entry[3]);
+                }
+                else
+                {
+                    ver = 1;
+                }
+                igmp_ds.querierAddr[index] = addr = querier_entry[4];
+
+                $id("qentry_" + index).style.display = "table-row";
+                $id("qvid_" + index).innerHTML = vid;
+                $id("qstate_" + index).innerHTML = querier_strinfo[state];
+                $id("qelect_" + index).innerHTML = state_strinfo[elect];
+                $id("qver_" + index).innerHTML = version_strinfo[ver];
+                if(0 == chkinput(addr))
+                {
+                    $id("qaddr_" + index).innerHTML = addr;
+                }
+                else
+                {
+                    $id("qaddr_" + index).innerHTML = "---";
+                    igmp_ds.querierAddr[index] = "";
+                }
+
+            }
+        }
+
+        if((start_index + return_cnt) < igmp_ds.vlan_count)
+        {
+            querierState();
+        }
+        else
+        {
+            setTimeout(querierState, (10 * 1000));
+        }
+    }
+    return;
+}
+
+function l2mcState()
+{
+xmlReq = parent.getXMLObject();
+if(null != xmlReq)
+{
+    xmlReq.onreadystatechange = state_change;
+    xmlReq.open("GET", "/l2mcentry.xml", true);
+    xmlReq.send(null);
+}
+}
+
+function querierState()
+{
+    xmlReq = parent.getXMLObject();
+    if((null != xmlReq) && ("undefined" != typeof(igmp_ds.querierState)))
+    {
+        xmlReq.onreadystatechange = querier_state_change;
+        xmlReq.open("GET", "/igmp_snp_querier.xml", true);
+        xmlReq.send(null);
+    }
+}
+
+function igmpRouterInit()
+{
+    for(let [key, value] of _port_list.entries())
+    {
+        $id("static_"+key).checked = false;
+        $id("dynamic_"+key).checked = false;
+        $id("dynamic_"+key).disabled = true;
+        if(0 != (Number(value) & Number(igmp_ds.rstic)))
+        {
+            $id("static_"+key).checked = true;
+        }
+        else if((0 != (Number(value) & Number(igmp_ds.rdyna))) && (0 != igmp_ds.state))
+        {
+            $id("dynamic_"+key).checked = true;
+        }
+    }
+}
+function igmp_router()
+{
+    var portmap = 0;
+    for(let [key, value] of _port_list.entries())
+    {
+        if($id("static_"+key).checked == true)
+        {
+            portmap |= Number(value);
+        }
+    }
+    return location.href = "igmpSnooping.cgi?mrouter=" + portmap + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+}
+window.onload = function () {
+    $id("igmpEn").onclick = () => { return igmp_change(); };
+    $id("igmpDis").onclick = () => { return igmp_change(); };
+    igmpStateInit();
+    $id("fastleaveEn").onclick = () => { return igmp_change(); };
+    $id("fastleaveDis").onclick = () => { return igmp_change(); };
+    igmpFastLeaveInit();
+    $id("reportSuEn").onclick = () => { return igmp_change(); };
+    $id("reportSuDis").onclick = () => { return igmp_change(); };
+    igmpReportMsgSuppressionInit();
+    $id("igmpQuerVlan_Select").onclick = () => { return igmpQuerierCheckvid(); };
+    igmpQuerierVlanInit();
+    $id("igmpQuerEn").onclick = () => { return igmpQuerierchange(); };
+    $id("igmpQuerDis").onclick = () => { return igmpQuerierchange(); };
+    igmpQuerierStateInit();
+    $id("igmpQuerElectEn").onclick = () => { return igmpQuerierchange(); };
+    $id("igmpQuerElectDis").onclick = () => { return igmpQuerierchange(); };
+    igmpQuerierElectInit();
+    $id("querVer2").onclick = () => { return igmpQuerierchange(); };
+    $id("querVer3").onclick = () => { return igmpQuerierchange(); };
+    igmpquerierVersionInit();
+    $id("querAddr").onkeyup = (e) => { e.target.value = e.target.value; };
+    $id("querAddr").onafterpaste = (e) => { e.target.value = e.target.value; };
+    igmpquerierAddrInit();
+    $id("igsn_apply").onclick = () => { return igmp_reset(); };
+    $id("igsn_apply").value = parent.window.str_info.btn_apply;
+    $id("router_apply").onclick = () => { return igmp_router(); };
+    $id("router_apply").value = parent.window.str_info.btn_apply;
+    igmpRouterInit();
+    initIgmpSnooping()
+
+    if(igmp_ds.count)
+    {
+        l2mcState();
+    }
+    else
+    {
+        /* Get querier info */
+        querierState();
+        setTimeout(igmpQuerierCheckvid, (500));
+    }
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <fieldset>
+      <legend><span class="NORMAL"><script>docW(parent.window.igmp_info.lgd_igmpsnooping)</script></span></legend>
+      <div id="div_sec_title">
+         <form action="igmpSnooping.cgi" enctype="multipart/form-data">
+            <table class="FRAMEWORK">
+               <tbody>
+                  <tr>
+                     <td class="FRAMEWORK_LEFT"><script>docW(parent.window.igmp_info.spn_igmpsnooping)</script></td>
+                     <td><input name="igmp_mode" id="igmpEn" type="radio" value="1" class="RADIO_NORMAL"> <span
+                           class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span> </td>
+                     <td class="SBLANK"></td>
+                     <td><input name="igmp_mode" id="igmpDis" type="radio" value="0" class="RADIO_NORMAL" checked=""> <span
+                           class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span> </td>
+                     <td class="SBLANK"></td>
+                     <td class="BLANK">
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+            <table class="FRAMEWORK">
+               <tbody>
+                  <tr>
+                     <td class="FRAMEWORK_LEFT"><script>docW(parent.window.igmp_info.spn_igmpfastleave)</script></td>
+                     <td><input name="fastleave_mode" id="fastleaveEn" type="radio" value="1" class="RADIO_NORMAL"> <span
+                           class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span> </td>
+                     <td class="SBLANK"></td>
+                     <td><input name="fastleave_mode" id="fastleaveDis" type="radio" value="0" class="RADIO_NORMAL" checked=""> <span
+                           class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span> </td>
+                     <td class="SBLANK"></td>
+                     <td class="BLANK">
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+            <table class="FRAMEWORK">
+               <tbody>
+                  <tr>
+                     <td class="FRAMEWORK_LEFT"><script>docW(parent.window.igmp_info.spn_igmpreportsuppression)</script></td>
+                     <td> <input name="reportSu_mode" id="reportSuEn" type="radio" value="1" class="RADIO_NORMAL"> <span
+                           class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span> </td>
+                     <td class="SBLANK"></td>
+                     <td> <input name="reportSu_mode" id="reportSuDis" type="radio" value="0" class="RADIO_NORMAL" checked=""> <span
+                           class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span> </td>
+                     <td class="SBLANK"></td>
+                     <td class="BLANK"></td>
+                  </tr>
+               </tbody>
+            </table>
+            <div id="igmpQuerier">
+                <table class="BOTTOM_LINE">
+                    <tbody>
+                        <tr>
+                            <td class="BOTTOM_LINE"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW("VLAN ID")</script></td>
+                            <td><select id="igmpQuerVlan_Select" class="SELECT_NORMAL">
+                                <script>
+                                    let vid = 0;
+                                    let op_id = "";
+                                    if("undefined" != typeof(igmp_ds.vids))
+                                    {
+                                        for(let i = 0; i < igmp_ds.vids.length; i++)
+                                        {
+                                            op_id = "op_vid_" + i;
+                                            vid = igmp_ds.vids[i];
+                                            if(0 != vid)
+                                            {
+                                                docW("<option value=\'" + vid + "\' id=\'" + op_id + "\'>" + vid);
+                                            }
+                                        }
+                                    }
+                                </script>
+                             </select> </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.igmp_info.spn_igmpquerier)</script></td>
+                            <td> <input name="igmpQuer_mode" id="igmpQuerEn" type="radio" value="1" class="RADIO_NORMAL"> <span
+                                class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td> <input name="igmpQuer_mode" id="igmpQuerDis" type="radio" value="0" class="RADIO_NORMAL" checked=""> <span
+                                class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td class="BLANK">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.igmp_info.spn_igmpquerierelection)</script></td>
+                            <td> <input name="igmpQuerElect_mode" id="igmpQuerElectEn" type="radio" value="1" class="RADIO_NORMAL" checked=""> <span
+                                class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td> <input name="igmpQuerElect_mode" id="igmpQuerElectDis" type="radio" value="0" class="RADIO_NORMAL"> <span
+                                class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td class="BLANK">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.igmp_info.spn_igmpquerierversion)</script></td>
+                            <td id = "tdVer3"> <input name="querVer_mode" id="querVer2" type="radio" value="1" class="RADIO_NORMAL"> <span
+                                class="NORMAL"><script>docW(parent.window.igmp_info.spn_igmpquerierver2)</script></span> </td>
+                            <td class="NORMAL HIDE" id = "tdVerNo_v3"><span class="NORMAL"><script>docW(parent.window.igmp_info.spn_igmpquerierver2)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td class="SBLANK"></td>
+                            <td id = "tdVer2"> <input name="querVer_mode" id="querVer3" type="radio" value="0" class="RADIO_NORMAL"  checked=""> <span
+                                class="NORMAL"><script>docW(parent.window.igmp_info.spn_igmpquerierver3)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td class="BLANK"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.igmp_info.spn_igmpquerieraddr)</script></td>
+                            <td><input class="TEXT_ENABLE" type="text" id="querAddr"  maxlength="15" required = "required">
+                                <span class="NORMAL"><script>docW("("+ parent.window.igmp_info.alt_querieraddress + ")")</script></span>
+                            </td>
+                            <td class="SBLANK"></td>
+                            <td class="BLANK"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div><table class="BOTTOM_LINE">
+                <tbody>
+                    <tr>
+                        <td class="BOTTOM_LINE"></td>
+                    </tr>
+                </tbody>
+            </table></div>
+            <table>
+                <tbody>
+                    <tr>
+                        <td> <a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="igsn_apply"></a> </td>
+                    </tr>
+                </tbody>
+            </table>
+         </form>
+      </div>
+   </fieldset>
+   <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.igmp_info.lgd_igsn_entry)</script></span></legend>
+        <div>
+            <table class="BORDER" width="100%">
+                <tbody>
+                    <tr class="TABLE_HEAD">
+                        <td class="TD_FIRST_ROW">
+                            <script>igmp_ds.searchmacTab ? docW(parent.window.igmp_info.td_macaddress) : docW(parent.window.igmp_info.td_ipaddress)</script>
+                        </td>
+                        <td class="TD_FIRST_ROW" id="vlanid_switch"><script>docW(parent.window.igmp_info.td_vlanid)</script></td>
+                        <td class="TD_FIRST_ROW"><script>docW(parent.window.str_info.td_port)</script></td>
+                    </tr>
+                    <script type="text/javascript">
+                    for(var k = 0; k< igmp_ds.count; k++)
+                    {
+                        docW("<tr id=gentry_" + k + "><td><span class='NORMAL'><div id=addr_" + k + "></div></span></td><td><span class='NORMAL'><div id=vid_" + k + "></div></span></td><td><span class='NORMAL'><div id=port_" + k + "></div></span></td></tr>");
+                        $id("gentry_" + k).style.display = "none";
+                    }
+                    </script>
+                </tbody>
+            </table>
+        </div>
+   </fieldset>
+   <fieldset id="igmpQuerierStatus">
+        <legend><span class='NORMAL'><script>docW(parent.window.igmp_info.lgd_igsn_querier)</script></span></legend>
+            <table class="BORDER" width="100%">
+               <tbody>
+                  <tr class="TABLE_HEAD">
+                     <td class="TD_FIRST_ROW"><script>docW(parent.window.igmp_info.td_vlanid)</script></td>
+                     <td class="TD_FIRST_ROW"><script>docW(parent.window.igmp_info.td_state)</script></td>
+                     <td class="TD_FIRST_ROW"><script>docW(parent.window.igmp_info.td_electionmode)</script></td>
+                     <td class="TD_FIRST_ROW"><script>docW(parent.window.igmp_info.td_version)</script></td>
+                     <td class="TD_FIRST_ROW"><script>docW(parent.window.igmp_info.td_sourceaddress)</script></td>
+                  </tr>
+                  <script>
+                    for(let k = 0; k < igmp_ds.vlan_count; k++)
+                    {
+                        docW("<tr id=qentry_" + k + ">\
+                                    <td><span class='NORMAL'><div id=qvid_" + k + "></div></span></td>\
+                                    <td><span class='NORMAL'><div id=qstate_" + k + "></div></span></td>\
+                                    <td><span class='NORMAL'><div id=qelect_" + k + "></div></span></td>\
+                                    <td><span class='NORMAL'><div id=qver_" + k + "></div></span></td>\
+                                    <td><span class='NORMAL'><div id=qaddr_" + k + "></div></span></td></tr>");
+
+                        $id("qentry_" + k).style.display = "none";
+                    }
+                  </script>
+               </tbody>
+            </table>
+    </fieldset>
+    <fieldset>
+        <legend><span class='NORMAL'><script>docW(parent.window.igmp_info.router)</script></span></legend>
+        <div>
+        <table class="BORDER">
+        <tbody>
+          <tr class="TABLE_HEAD">
+            <td class="TD_FIRST_ROW"><script>docW(parent.window.str_info.td_port)</script></td>
+            <td class="TD_FIRST_ROW"><script>docW(parent.window.igmp_info.td_static)</script></td>
+            <td class="TD_FIRST_ROW"><script>docW(parent.window.igmp_info.td_dynamic)</script></td>
+          </tr>
+          <script>
+            for(let [key, value] of _port_list.entries())
+            {
+                docW("<tr>");
+                if(-1 == key.search("Trunk"))
+                    docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port + " " + key + "</span></td>");
+                else
+                    docW("<td><span class='NORMAL'>" + key.replace("Trunk", parent.window.trunk_info.opt_trunk) + "</span></td>");
+                docW("<td><input class='RADIO_NORMAL' type=checkbox id=static_" + key + "></td>");
+                docW("<td><input class='RADIO_NORMAL' type=checkbox id=dynamic_" + key + "></td>");
+                docW("</tr>");
+            }
+          </script>
+        </tbody>
+      </table>
+      <table>
+        <tbody><tr>
+          <td> <a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="router_apply"></a> </td>
+          <td class="SBLANK"></td>
+        </tr></tbody>
+      </table>
+      </div>
+    </fieldset>
+</body>
+</html>

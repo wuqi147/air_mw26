@@ -1,0 +1,61 @@
+/*
+ *  Note    : note_port_mode_change
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.7.0
+ *  Update  : 2022-10-03
+ */
+(1) Overview
+    The operation of port could be on AN mode(Auto-negotiation mode) or Force
+    mode. The AN mode means port speed and duplex will be chosen from the
+    auto-negotiation results. The Force mode means those port attributes
+    are set manually. SDK provides APIs for these two modes, but the change
+    between these two modes need to follow a specific flow. The purpose of this
+    document is to describe how to change port operation between AN mode and
+    Force mode.
+
+
+(2) AN Mode Change To Force Mode
+    If port mode change from AN mode to Force mode, it must disable port first
+    and did not enable the port until the port related setting is completed.
+
+    (a) Disable port
+        air_port_setAdminState(unit, port, FALSE);
+
+    (b) Configured port speed and duplex mode
+        air_port_setSpeed(unit, port, speed);
+        air_port_setDuplex(unit, port, duplex);
+
+    (c) Configured flow control or back pressure
+        Full-Duplex : air_port_setFlowCtrl(unit, port, dir, AIR_PORT_DIR_BOTH);
+        Half-Duplex : air_port_setBackPressure(unit, port, TRUE);
+
+    (d) Disable auto-negotiation
+        air_port_setPhyAutoNego(unit, port, AIR_PORT_PHY_AN_DISABLE);
+
+    (e) Enable port
+        air_port_setAdminState(unit, port, TRUE);
+
+
+(3) Force Mode Change To AN Mode
+    The port mode change from Force mode to AN mode also needs to disable the
+    port until auto-negotiaion advertisement setting is complected.
+
+    (a) Disable port
+        air_port_setAdminState(unit, port, FALSE);
+
+    (b) Configured local advertisement
+        adv.flags |= AIR_PORT_PHY_AN_ADV_FLAGS_10HFDX;
+        adv.flags |= AIR_PORT_PHY_AN_ADV_FLAGS_10FUDX;
+        adv.flags |= AIR_PORT_PHY_AN_ADV_FLAGS_100HFDX;
+        adv.flags |= AIR_PORT_PHY_AN_ADV_FLAGS_100FUDX;
+        adv.flags |= AIR_PORT_PHY_AN_ADV_FLAGS_1000FUDX;
+        adv.flags |= AIR_PORT_PHY_AN_ADV_FLAGS_SYM_PAUSE;
+        adv.flags |= AIR_PORT_PHY_AN_ADV_FLAGS_ASYM_PAUSE;
+        air_port_setPhyLocalAdvAbility(unit, port, &adv)
+
+    (c) Enable auto-negotiation
+        air_port_setPhyAutoNego(unit, port, AIR_PORT_PHY_AN_ENABLE);
+
+    (d) Enable port
+        air_port_setAdminState(unit, port, TRUE);
+

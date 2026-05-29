@@ -1,0 +1,7 @@
+---
+BasedOnStyle:    InheritParentConfig
+AlignArrayOfStructures: Left
+AlwaysBreakBeforeMultilineStrings: true
+ReflowComments:  false
+CommentPragmas:  '^ cmd:'
+...

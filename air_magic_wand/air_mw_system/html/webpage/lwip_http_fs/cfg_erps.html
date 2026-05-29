@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#erpsCfg-->
+<!--#loopprevention-->
+<!--#portTrunkInfo-->
+<!--#porttrunk-->
+<!--#pvlanconfig-->
+<script>
+<!--#stpinfo-->
+</script>
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+TABLE.FRAMEWORK {
+    line-height: 25px;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_ROW {
+    font-size: 150%;
+    font-family: "Arial";
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+
+table .TD_OTHER_ROW {
+    font-size: 150%;
+    font-family: "Arial";
+    padding: 0 5px;
+    width: 400px;
+}
+
+TD.SBLANK {
+    width: 21px;
+}
+TD.FRAMEWORK_LEFT {
+    font-size: 150%;
+    font-family: "Arial";
+    text-align: left;
+    width: 400px;
+    padding: 0;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN:hover input {
+    cursor: pointer;
+}
+.HOVER {
+    cursor: pointer;
+}
+
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 142px;
+}
+span.BOLDER {
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+span.BLUE {
+    color:#0000FF;
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 150px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var XML_SEND_COMPLETE = 4;
+var HTML_STATUS_OK = 200;
+var urlString ='';
+var xmlReq;
+var submitUrlString='';
+var west_port_idx = 0;
+var east_port_idx = 0;
+var west_port_role = 0;
+var east_port_role = 0;
+var is_edit = 0;
+
+const portRoleEnum = {
+    Transfer: 0,
+    Neighbor: 1,
+    Owner: 2,
+};
+
+const portStateEnum = {
+    Forwarding: 0x00,
+    Discarding: 0x01,
+};
+
+const instanceStateEnum = {
+    Idle: 0x00,
+    Protection: 0x01,
+    ManualSwitch: 0x02,
+    ForcedSwitch: 0x03,
+    Pending: 0x04,
+    Init: 0x05,
+};
+
+function docW(a) {
+    document.write(a)
+}
+function $id(a) {
+    return document.getElementById(a)
+}
+
+function onWestPortChangeState(r)
+{
+    var ele_east_role = $id("East_role"),
+    i = ("RPL-owner" == r || "RPL-neighbor" == r);
+
+    if(true == i)
+    {
+        ele_east_role.disabled = true;
+        ele_east_role.value = "Transfer";
+    }
+    else
+    {
+        ele_east_role.disabled = false;
+    }
+}
+
+function onEastPortChangeState(r)
+{
+    var ele_west_role = $id("West_role"),
+    i = ("RPL-owner" == r || "RPL-neighbor" == r);
+
+    if(true == i)
+    {
+        ele_west_role.disabled = true;
+        ele_west_role.value = "Transfer";
+    }
+    else
+    {
+        ele_west_role.disabled = false;
+    }
+}
+
+function westEastPortVerify()
+{
+
+    west_port_idx = $id("West_port").value;
+    east_port_idx = $id("East_port").value;
+
+    switch($id("West_role").value)
+    {
+        case "Transfer":
+            west_port_role = portRoleEnum.Transfer;
+            break;
+        case "RPL-neighbor":
+            west_port_role = portRoleEnum.Neighbor;
+            break;
+        case "RPL-owner":
+            west_port_role = portRoleEnum.Owner
+            break;
+    }
+
+    switch($id("East_role").value)
+    {
+        case "Transfer":
+            east_port_role = portRoleEnum.Transfer;
+            break;
+        case "RPL-neighbor":
+            east_port_role = portRoleEnum.Neighbor;
+            break;
+        case "RPL-owner":
+            east_port_role = portRoleEnum.Owner
+            break;
+    }
+
+    if (east_port_idx == west_port_idx)
+    {
+        return 1;
+    }
+    var i = 0, trunkid = 0;
+    var pStr = [trunk_conf.portStr_g1, trunk_conf.portStr_g2, trunk_conf.portStr_g3, trunk_conf.portStr_g4];
+    for (trunkid = 1; trunkid <= trunk_conf.maxTrunkNum; trunkid++)
+    {
+        var first = 1;
+        for(i = 0; i < trunk_conf.portNum; i++)
+        {
+            if ((0 != pStr[(trunkid - 1)][i] && i == (east_port_idx - 1)) ||
+                (0 != pStr[(trunkid - 1)][i] && i == (west_port_idx - 1)))
+                return 2;
+        }
+    }
+    return 0;
+}
+
+
+function ringIdVerify(r)
+{
+    if (0 == r.length || r < 1 || r > 255)
+    {
+        return false;
+    }
+    return true;
+}
+
+function ctrlVlanVerify(r)
+{
+    if (0 == r.length || r < 1 || r > 4094)
+    {
+        return 0;
+    }
+
+    if (-1 != currentVlanId.indexOf(parseInt(r, 10)))
+    {
+        return 1;
+    }
+
+    return 2;
+}
+
+function dataVlanVerify(r)
+{
+    if (0 == r.length || 16 < r.length)
+    {
+        return false;
+    }
+
+    var str = r.replace(/-/gi, ",");
+    var vlan_id_array = str.split(",");
+
+    var i = 0;
+    for (i = 0 ;i< vlan_id_array.length;i++)
+    {
+
+        if (true != (/^[0-9]{1,4}$/.test(vlan_id_array[i])))
+        {
+            return false;
+        }
+
+        if(parseInt(vlan_id_array[i],10) < 1 || parseInt(vlan_id_array[i],10) > 4094)
+        {
+            return false;
+        }
+
+        if (1 < i && parseInt(vlan_id_array[i-1]) >= parseInt(vlan_id_array[i]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function wtrTimerVerify(r)
+{
+    if (0 == r.length || r < 1 || r > 12)
+    {
+        return false;
+    }
+    return true;
+}
+
+function guardTimerVerify(r)
+{
+    if (0 == r.length || r < 10 || r > 2000)
+    {
+        return false;
+    }
+
+    if (parseInt(r)%10 != 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+function holdOffTimerVerify(r)
+{
+    if (0 == r.length || r < 0 || r > 10000)
+    {
+        return false;
+    }
+
+    if (parseInt(r)%100 != 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+function appendString(param, value)
+{
+    if('' == value)
+    {
+        submitUrlString += "&"+param+"=0";
+    }
+    else
+    {
+        submitUrlString += "&"+param+"="+value ;
+    }
+}
+
+function doSubmit()
+{
+
+    if (2 != currentVlanState)
+    {
+        alert(parent.window.erps_info.spn_eprs_enable_8021q_vlan_first);
+        return false;
+    }
+    if (1 == stpEn)
+    {
+        alert(parent.window.erps_info.spn_eprs_stp_enabled);
+        return false;
+    }
+    if (1 == lpEn)
+    {
+        alert(parent.window.erps_info.spn_eprs_lp_enabled);
+        return false;
+    }
+
+
+    if(false == ringIdVerify($id("ring_id_cfg").value))
+    {
+        alert(parent.window.erps_info.spn_eprs_invalid_ring_id);
+        return false;
+    }
+
+    if(0 == ctrlVlanVerify($id("ctrl_vlan_cfg").value))
+    {
+        alert(parent.window.erps_info.spn_eprs_invalid_ctrl_vlan);
+        return false;
+    }
+    else if(1 == ctrlVlanVerify($id("ctrl_vlan_cfg").value) && 0 == is_edit)
+    {
+        alert(parent.window.erps_info.spn_eprs_duplicated_ctrl_vlan);
+        return false;
+    }
+
+    if(false == dataVlanVerify($id("data_vlan_cfg").value))
+    {
+        alert(parent.window.erps_info.spn_eprs_invalid_data_vlan);
+        return false;
+    }
+
+    if(1 == westEastPortVerify())
+    {
+        alert(parent.window.erps_info.spn_eprs_invalid_west_east_port);
+        return false;
+    }
+    else if(2 == westEastPortVerify())
+    {
+        alert(parent.window.erps_info.spn_eprs_west_east_port_cant_be_trunk_port);
+        return false;
+    }
+
+    if(false == wtrTimerVerify($id("wtr_timer_cfg").value))
+    {
+        alert(parent.window.erps_info.spn_eprs_invalid_wtr_timer);
+        return false;
+    }
+
+    if(false == guardTimerVerify($id("guard_timer_cfg").value))
+    {
+        alert(parent.window.erps_info.spn_eprs_invalid_guard_timer);
+        return false;
+    }
+
+    if(false == holdOffTimerVerify($id("hold_off_timer_cfg").value))
+    {
+        alert(parent.window.erps_info.spn_eprs_invalid_hold_off_timer);
+        return false;
+    }
+
+    if (erpsInfo[0][0] != 0 &&
+        erpsInfo[0][1] != 0 &&
+        erpsInfo[0][2] != "0")
+    {
+        if (parseInt($id("ring_id_cfg").value) != erpsInfo[0][0] ||
+            parseInt($id("ctrl_vlan_cfg").value) != erpsInfo[0][1] ||
+            $id("data_vlan_cfg").value != erpsInfo[0][2])
+        {
+            if (0 == is_edit)
+            {
+                alert(parent.window.erps_info.spn_eprs_single_instance);
+                return false;
+            }
+            else if (1 == is_edit)
+            {
+                alert(parent.window.erps_info.spn_eprs_not_allow_modification);
+                return false;
+            }
+        }
+    }
+
+    submitUrlString='instanceId=1';
+
+    appendString("ringId", $id("ring_id_cfg").value);
+    appendString("ctrlVlan", $id("ctrl_vlan_cfg").value);
+    appendString("dataVlan", $id("data_vlan_cfg").value);
+
+    if (1 == $id("revertiveEn").checked)
+    {
+        appendString("revMode", $id("revertiveEn").value);
+    }
+    else if (1 == $id("revertiveDis").checked)
+    {
+        appendString("revMode", $id("revertiveDis").value);
+    }
+
+    appendString("westPort", parseInt(west_port_idx) << 2 | parseInt(west_port_role));
+    appendString("eastPort", parseInt(east_port_idx) << 2 | parseInt(east_port_role));
+    appendString("wtrTimer", $id("wtr_timer_cfg").value);
+
+    var guard_timer_cfg_str = $id("guard_timer_cfg").value;
+    appendString("guardTimer", guard_timer_cfg_str.substring(0, guard_timer_cfg_str.length - 1));
+
+    var hold_off_timer_cfg_str = $id("hold_off_timer_cfg").value;
+    appendString("holdOffTimer", hold_off_timer_cfg_str.substring(0, hold_off_timer_cfg_str.length - 2));
+
+    /* VLAN setting */
+
+    var portBitmap = (0x1 << parseInt(west_port_idx)) | (0x1 << parseInt(east_port_idx));
+    var vidx;
+    var i = 0, j = 0;
+    var str = $id("data_vlan_cfg").value;
+    var vlan_id_array = str.split(",");
+    let all_data_vlan_id = [];
+    var temp_id_array;
+    var vidx_bmp_for_fid;
+
+    for (i=0 ; vlan_id_array[i]!= undefined ; i++)
+    {
+        if (true == vlan_id_array[i].includes("-"))
+        {
+            temp_id_array = vlan_id_array[i].split("-");
+            for(j = parseInt(temp_id_array[0]) ; j <= parseInt(temp_id_array[1]) ; j++)
+            {
+                all_data_vlan_id.push(parseInt(j));
+            }
+        }
+        else
+        {
+            all_data_vlan_id.push(parseInt(vlan_id_array[i]));
+        }
+    }
+
+    if (all_data_vlan_id.includes(parseInt($id("ctrl_vlan_cfg").value)))
+    {
+        alert(parent.window.erps_info.spn_eprs_ctrl_vlan_outside_data_vlan);
+        return false;
+    }
+
+    for (i = 0 ;i < currentVlanId.length; i++)
+    {
+        if(all_data_vlan_id.includes(currentVlanId[i]) && currentVlanId[i] != erpsInfo[0][1])
+        {
+            vidx_bmp_for_fid |= 1 << (i);
+        }
+    }
+
+    if (0 == is_edit)
+    {
+        vidx = currentVlanId.indexOf(0);
+        if (vidx == -1)
+        {
+            alert(parent.window.erps_info.spn_eprs_max_vlan_entry_reached);
+            return;
+        }
+        appendString("action", "add");
+    }
+    else
+    {
+        vidx = currentVlanId.indexOf(erpsInfo[0][1]);
+        appendString("action", "mod");
+    }
+    appendString("vid", $id("ctrl_vlan_cfg").value);
+    appendString("vidx", vidx+1);
+    appendString("tagMbrs", portBitmap);
+    appendString("fidx", vidx_bmp_for_fid);
+
+
+    is_edit = 0;
+    return location.href = "erpsSetting.cgi?" + submitUrlString;
+}
+
+function getCurrent()
+{
+    if (0 == erpsInfo[0][0])
+    {
+        $id("status").style.display = "none";
+        return false;
+    }
+
+    $id("ring_id").innerHTML = erpsInfo[0][0];
+    $id("control_vlan").innerHTML = erpsInfo[0][1];
+    $id("data_vlan").innerHTML = erpsInfo[0][2];
+
+    if ((erpsInfo[0][4] & 0b00000011) ==  portRoleEnum.Neighbor ||
+        (erpsInfo[0][5] & 0b00000011) ==  portRoleEnum.Neighbor)
+    {
+        $id("node_type").innerHTML = parent.window.erps_info.spn_eprs_rpl_neighbor;
+    }
+    else if ((erpsInfo[0][4] & 0b00000011) ==  portRoleEnum.Owner ||
+        (erpsInfo[0][5] & 0b00000011) ==  portRoleEnum.Owner )
+    {
+        $id("node_type").innerHTML = parent.window.erps_info.spn_eprs_rpl_owner;
+    }
+    else
+    {
+        $id("node_type").innerHTML = parent.window.erps_info.spn_eprs_transfer;
+    }
+
+    if (erpsInfo[0][3] == 0)
+    {
+        $id("revertive_mode").innerHTML = parent.window.str_info.opt_disable;
+    }
+    else
+    {
+        $id("revertive_mode").innerHTML = parent.window.str_info.opt_enable;
+    }
+    $id("west_port").innerHTML = erpsInfo[0][4] >> 2;
+    if( erpsInfo[0][9] == portStateEnum.Forwarding)
+    {
+        $id("west_port_state").innerHTML = parent.window.erps_info.spn_eprs_forwarding;
+    }
+    else
+    {
+        $id("west_port_state").innerHTML = parent.window.erps_info.spn_eprs_discarding;
+    }
+    $id("east_port").innerHTML = erpsInfo[0][5] >> 2;
+    if( erpsInfo[0][10] == portStateEnum.Forwarding)
+    {
+        $id("east_port_state").innerHTML = parent.window.erps_info.spn_eprs_forwarding;
+    }
+    else
+    {
+        $id("east_port_state").innerHTML = parent.window.erps_info.spn_eprs_discarding;
+    }
+
+    switch(erpsInfo[0][11])
+    {
+        case instanceStateEnum.Protection:
+            $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_protection;
+            break;
+        case instanceStateEnum.ManualSwitch:
+            $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_manual_switch;
+            break;
+        case instanceStateEnum.ForcedSwitch:
+            $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_forced_switch;
+            break;
+        case instanceStateEnum.Pending:
+            $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_pending;
+            break;
+        case instanceStateEnum.Init:
+            $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_init;
+            break;
+        default:
+        case instanceStateEnum.Idle:
+            $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_idle;
+            break;
+    }
+}
+
+function doEdit()
+{
+    is_edit = 1;
+
+    $id("ring_id_cfg").value = erpsInfo[0][0];
+    $id("ctrl_vlan_cfg").value = erpsInfo[0][1];
+    $id("data_vlan_cfg").value = erpsInfo[0][2];
+    if (1 == erpsInfo[0][3])
+        $id("revertiveEn").checked = 1;
+    else
+        $id("revertiveDis").checked = 1;
+
+    var i = 0;
+
+    var westPort = erpsInfo[0][4] >> 2;
+    var westPortRole = erpsInfo[0][4] & 0x03;
+    var eastPort = erpsInfo[0][5] >> 2;
+    var eastPortRole = erpsInfo[0][5] & 0x03;
+
+    let wp = $id("West_port");
+    let wpr = $id("West_role");
+    let ep = $id("East_port");
+    let epr = $id("East_role");
+
+    wp.innerHTML = "";
+    wpr.innerHTML = "";
+    ep.innerHTML = "";
+    epr.innerHTML = "";
+
+    for (i = 0 ; i < erpsPort.length; i++)
+    {
+        if (westPort == erpsPort[i])
+            wp.innerHTML+=("<option value=" + erpsPort[i] + " selected>Port " + erpsPort[i] + "</option>")
+        else
+            wp.innerHTML+=("<option value=" + erpsPort[i] + ">Port " + erpsPort[i] + "</option>")
+    }
+
+    if( westPortRole == portRoleEnum.Transfer )
+    {
+        wpr.innerHTML += ('<option value= "Transfer" id = "transfer" selected>' + parent.window.erps_info.spn_eprs_transfer);
+        wpr.innerHTML += ('<option value= "RPL-neighbor" id = "neighbor">' + parent.window.erps_info.spn_eprs_rpl_neighbor);
+        wpr.innerHTML += ('<option value= "RPL-owner" id = "owner">' + parent.window.erps_info.spn_eprs_rpl_owner);
+        epr.disabled = false;
+    }
+    else if ( westPortRole == portRoleEnum.Neighbor )
+    {
+        wpr.innerHTML += ('<option value= "Transfer" id = "transfer">' + parent.window.erps_info.spn_eprs_transfer);
+        wpr.innerHTML += ('<option value= "RPL-neighbor" id = "neighbor" selected>' + parent.window.erps_info.spn_eprs_rpl_neighbor);
+        wpr.innerHTML += ('<option value= "RPL-owner" id = "owner">' + parent.window.erps_info.spn_eprs_rpl_owner);
+        epr.disabled = true;
+    }
+    else if ( westPortRole == portRoleEnum.Owner )
+    {
+        wpr.innerHTML += ('<option value= "Transfer" id = "transfer">' + parent.window.erps_info.spn_eprs_transfer);
+        wpr.innerHTML += ('<option value= "RPL-neighbor" id = "neighbor">' + parent.window.erps_info.spn_eprs_rpl_neighbor);
+        wpr.innerHTML += ('<option value= "RPL-owner" id = "owner" selected>' + parent.window.erps_info.spn_eprs_rpl_owner);
+        epr.disabled = true;
+    }
+
+    for (i = 0 ; i < erpsPort.length; i++)
+    {
+        if (eastPort == erpsPort[i])
+            ep.innerHTML+=("<option value=" + erpsPort[i] + " selected>Port " + erpsPort[i] + "</option>")
+        else
+            ep.innerHTML+=("<option value=" + erpsPort[i] + ">Port " + erpsPort[i] + "</option>")
+    }
+
+    if( eastPortRole == portRoleEnum.Transfer )
+    {
+        epr.innerHTML += ('<option value= "Transfer" id = "transfer" selected>' + parent.window.erps_info.spn_eprs_transfer);
+        epr.innerHTML += ('<option value= "RPL-neighbor" id = "neighbor">' + parent.window.erps_info.spn_eprs_rpl_neighbor);
+        epr.innerHTML += ('<option value= "RPL-owner" id = "owner">' + parent.window.erps_info.spn_eprs_rpl_owner);
+        wpr.disabled = false;
+    }
+    else if ( eastPortRole == portRoleEnum.Neighbor )
+    {
+        epr.innerHTML += ('<option value= "Transfer" id = "transfer">' + parent.window.erps_info.spn_eprs_transfer);
+        epr.innerHTML += ('<option value= "RPL-neighbor" id = "neighbor" selected>' + parent.window.erps_info.spn_eprs_rpl_neighbor);
+        epr.innerHTML += ('<option value= "RPL-owner" id = "owner">' + parent.window.erps_info.spn_eprs_rpl_owner);
+        wpr.disabled = true;
+    }
+    else if ( eastPortRole == portRoleEnum.Owner )
+    {
+        epr.innerHTML += ('<option value= "Transfer" id = "transfer">' + parent.window.erps_info.spn_eprs_transfer);
+        epr.innerHTML += ('<option value= "RPL-neighbor" id = "neighbor">' + parent.window.erps_info.spn_eprs_rpl_neighbor);
+        epr.innerHTML += ('<option value= "RPL-owner" id = "owner" selected>' + parent.window.erps_info.spn_eprs_rpl_owner);
+        wpr.disabled = true;
+    }
+
+    $id("wtr_timer_cfg").value = erpsInfo[0][6];
+    $id("guard_timer_cfg").value = erpsInfo[0][7];
+    $id("hold_off_timer_cfg").value = erpsInfo[0][8];
+
+}
+
+function doDelete()
+{
+    var vidx = currentVlanId.indexOf(erpsInfo[0][1]);
+
+    var westPort = erpsInfo[0][4] >> 2;
+    var eastPort = erpsInfo[0][5] >> 2;
+
+    var portBitmap = (0x1 << parseInt(westPort)) | (0x1 << parseInt(eastPort));
+
+    submitUrlString='instanceId=1';
+    appendString("action", "del");
+    appendString("ringId", erpsInfo[0][0]);
+    appendString("ctrlVlan", "0");
+    appendString("vid", erpsInfo[0][1]);
+    appendString("vidx", vidx+1);
+    appendString("tagMbrs", portBitmap);
+
+    return location.href = "erpsSetting.cgi?" + submitUrlString;
+}
+
+function curState()
+{
+
+    var state;
+    if ((XML_SEND_COMPLETE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status)) {
+
+        state = xmlReq.responseText.split(",");
+
+        if( parseInt(state[0]) == portStateEnum.Forwarding)
+        {
+            $id("west_port_state").innerHTML = parent.window.erps_info.spn_eprs_forwarding;
+        }
+        else
+        {
+            $id("west_port_state").innerHTML = parent.window.erps_info.spn_eprs_discarding;
+        }
+
+
+        if( parseInt(state[1]) == portStateEnum.Forwarding)
+        {
+            $id("east_port_state").innerHTML = parent.window.erps_info.spn_eprs_forwarding;
+        }
+        else
+        {
+            $id("east_port_state").innerHTML = parent.window.erps_info.spn_eprs_discarding;
+        }
+
+        switch(parseInt(state[2]))
+        {
+            case instanceStateEnum.Idle:
+                $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_idle;
+                break;
+            case instanceStateEnum.Protection:
+                $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_protection;
+                break;
+            case instanceStateEnum.ManualSwitch:
+                $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_manual_switch;
+                break;
+            case instanceStateEnum.ForcedSwitch:
+                $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_forced_switch;
+                break;
+            case instanceStateEnum.Pending:
+                $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_pending;
+                break;
+            case instanceStateEnum.Init:
+                $id("instance_state").innerHTML = parent.window.erps_info.spn_eprs_init;
+                break;
+        }
+    }
+}
+
+function doUpdate()
+{
+    xmlReq = parent.getXMLObject();
+    if(null != xmlReq)
+    {
+        xmlReq.onreadystatechange = curState;
+        xmlReq.open("GET", "/erpsState.xml", true);
+        xmlReq.send(null);
+    }
+}
+function onlyNum(e) {
+    e.target.value = e.target.value.replace(/[^0-9]/g,'');
+}
+window.onload = function () {
+    $id("ring_id_cfg").onkeyup = (e) => { onlyNum(e); };
+    $id("ctrl_vlan_cfg").onkeyup = (e) => { onlyNum(e); };
+    $id("West_role").onchange = (e) => { onWestPortChangeState(e.target.value); };
+    $id("East_role").onchange = (e) => { onEastPortChangeState(e.target.value); };
+    $id("wtr_timer_cfg").onkeyup = (e) => { onlyNum(e); };
+    $id("guard_timer_cfg").onkeyup = (e) => { onlyNum(e); };
+    $id("hold_off_timer_cfg").onkeyup = (e) => { onlyNum(e); };
+    $id("btn_apply").onclick = () => { doSubmit(); };
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+    $id("edit_1").onclick = () => { doEdit(); };
+    $id("delete_1").onclick = () => { doDelete(); };
+    $id("update_1").onclick = () => { doUpdate(); };
+    getCurrent();
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <fieldset>
+      <legend><span class="NORMAL"><script>docW(parent.window.erps_info.spn_eprs_instance_cfg)</script></span></legend>
+      <div id="div_sec_title">
+         <form name="erps_set" enctype="multipart/form-data">
+            <div id="erpsConfig">
+                <!-- Ring ID -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_ring_id)</script></td>
+                            <td><input class="TEXT_ENABLE" type="number" min="1" max="255" id="ring_id_cfg">
+                                <span class="NORMAL"><script>docW("(1~255)")</script></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Control VLAN ID -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_control_vlan)</script></td>
+                            <td><input class="TEXT_ENABLE" type="number" min="1" id="ctrl_vlan_cfg"><span class="NORMAL"><script>docW("(1~4094)")</script></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Data VLAN ID -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_data_vlan)</script></td>
+                            <td><input class="TEXT_ENABLE" type="text" id="data_vlan_cfg" maxlength="16"><span class="NORMAL"><script>docW(parent.window.erps_info.spn_eprs_vlan_format)</script></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Revertive mode -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_revertive_mode)</script></td>
+                            <td> <input type="radio" value="1" class="RADIO_NORMAL" checked="" name="revertive" id = "revertiveEn"> <span
+                                class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td> <input type="radio" value="0" class="RADIO_NORMAL" name="revertive" id = "revertiveDis"> <span
+                                class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span> </td>
+                            <td class="SBLANK"></td>
+                            <td class="BLANK" valign="middle">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- West port -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_west_port_role)</script></td>
+                            <td><select id="West_port" class="SELECT_NORMAL" name="West_port">
+                            <script type="text/javascript">
+                            var i = 0;
+                            for (i = 0 ; i < erpsPort.length; i++)
+                            {
+                                docW("<option value=" + erpsPort[i] + ">Port " + erpsPort[i] + "</option>")
+                            }
+                            </script>
+                            </select> </td>
+                            <td><select id="West_role" class="SELECT_NORMAL">
+                                <option value= "Transfer" id = "transfer"><script>docW(parent.window.erps_info.spn_eprs_transfer)</script></option>
+                                <option value= "RPL-neighbor" id = "neighbor"><script>docW(parent.window.erps_info.spn_eprs_rpl_neighbor)</script></option>
+                                <option value= "RPL-owner" id = "owner"><script>docW(parent.window.erps_info.spn_eprs_rpl_owner)</script></option>
+                            </select> </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- East port -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_east_port_role)</script></td>
+                            <td><select id="East_port" class="SELECT_NORMAL">
+                            <script type="text/javascript">
+                            var i = 0;
+                            for (i = 0 ; i < erpsPort.length; i++)
+                            {
+                                docW("<option value=" + erpsPort[i] + ">Port " + erpsPort[i] + "</option>")
+                            }
+                            </script>
+                            </select> </td>
+                            <td><select id="East_role" class="SELECT_NORMAL">
+                                <option value= "Transfer" id = "transfer"><script>docW(parent.window.erps_info.spn_eprs_transfer)</script></option>
+                                <option value= "RPL-neighbor" id = "neighbor"><script>docW(parent.window.erps_info.spn_eprs_rpl_neighbor)</script></option>
+                                <option value= "RPL-owner" id = "owner"><script>docW(parent.window.erps_info.spn_eprs_rpl_owner)</script></option>
+                            </select> </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- WTR Timer -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_wtr_timer)</script></td>
+                            <td><input class="TEXT_ENABLE" type="number" value="5" min="1" max="12" step="1" id="wtr_timer_cfg">
+                                <span class="NORMAL"><script>docW("(<1~12>min, Default: 5min, Step is 1min)")</script></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Guard Timer -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_guard_timer)</script></td>
+                            <td><input class="TEXT_ENABLE" type="number" value="500" min="10" max="2000" step="10" id="guard_timer_cfg">
+                                <span class="NORMAL"><script>docW("(<10~2000>ms, Default: 500ms, Step is 10ms)")</script></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Hold-off Timer -->
+                <table class="FRAMEWORK">
+                    <tbody>
+                        <tr>
+                            <td class="FRAMEWORK_LEFT"><script>docW(parent.window.erps_info.spn_eprs_hold_off_timer)</script></td>
+                            <td><input class="TEXT_ENABLE" type="number" value="0" min="0" max="10000" step="100" id="hold_off_timer_cfg">
+                                <span class="NORMAL"><script>docW("(<0~10000>ms, Default: 0ms, Step is 100ms)")</script></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div><table width="100%">
+                <tbody>
+                    <tr>
+                        <td class="BOTTOM_LINE"></td>
+                    </tr>
+                </tbody>
+            </table></div>
+            <!-- applay -->
+            <table class="BTN_WRAPPER" align="center">
+                <tbody>
+                    <tr>
+                        <td class="BTN_WRAPPER"> <a class="BTN"><input type="button" id="btn_apply" class="BTN_NORMAL_BTN"></a> </td>
+                    </tr>
+                </tbody>
+            </table>
+         </form>
+      </div>
+   </fieldset>
+
+   <!-- instance status -->
+   <fieldset>
+        <legend><span class='NORMAL'><script>docW(parent.window.erps_info.spn_eprs_instance_state)</script></span></legend>
+            <table class="BORDER" width="100%">
+               <tbody>
+                  <tr class="TABLE_HEAD">
+                     <!-- <td class="TD_FIRST_ROW" width="10%"><script>docW("Select")</script></td> -->
+                     <td class="TD_FIRST_ROW" width="20px"><script>docW(parent.window.erps_info.spn_eprs_ring_id)</script></td>
+                     <td class="TD_FIRST_ROW" width="20px"><script>docW(parent.window.erps_info.spn_eprs_control_vlan)</script></td>
+                     <td class="TD_FIRST_ROW" width="20px"><script>docW(parent.window.erps_info.spn_eprs_data_vlan)</script></td>
+                     <td class="TD_FIRST_ROW" width="30px"><script>docW(parent.window.erps_info.spn_eprs_node_type)</script></td>
+                     <td class="TD_FIRST_ROW" width="30px"><script>docW(parent.window.erps_info.spn_eprs_revertive_mode)</script></td>
+                      <!-- West port -->
+                     <td colspan="2" class="TD_FIRST_ROW" width="80px"><script>docW(parent.window.erps_info.spn_eprs_west_port)</script></td>
+                     <!-- East port -->
+                     <td colspan="2" class="TD_FIRST_ROW" width="80px"><script>docW(parent.window.erps_info.spn_eprs_east_port)</script></td>
+                     <td class="TD_FIRST_ROW" width="30px"><script>docW(parent.window.erps_info.spn_eprs_state)</script></td>
+                     <td class="TD_FIRST_ROW" width="auto"><script>docW(parent.window.erps_info.spn_eprs_setting)</script></td>
+                  </tr>
+                  <!-- status  -->
+                  <tr id="status">
+                    <!-- <td><input class='RADIO_NORMAL' type=checkbox name="sel_erps"></td> -->
+                    <td width="20px"><span class = "TD_OTHER_ROW" id = "ring_id"></span></td>
+                    <td width="20px"><span class = "TD_OTHER_ROW" id = "control_vlan"></span></td>
+                    <td width="20px"><span class = "TD_OTHER_ROW" id = "data_vlan"></span></td>
+                    <td width="30px"><span class = "TD_OTHER_ROW" id = "node_type"></span></td>
+                    <td width="30px"><span class = "TD_OTHER_ROW" id = "revertive_mode"></span></td>
+                    <!-- West port -->
+                    <td width="20px"><span class = "TD_OTHER_ROW" id = "west_port"></span></td>
+                    <td width="60px"><span class = "TD_OTHER_ROW" id = "west_port_state"></span></td>
+                    <!-- East port -->
+                    <td width="20px"><span class = "TD_OTHER_ROW" id = "east_port"></span></td>
+                    <td width="60px"><span class = "TD_OTHER_ROW" id = "east_port_state"></span></td>
+                    <td width="30px"><span class = "TD_OTHER_ROW" id = "instance_state"></span></td>
+                    <td width="auto" class="HOVER">
+                        <span class='NORMAL BLUE' id="edit_1"><script>docW(parent.window.erps_info.spn_eprs_edit)</script></span>
+                        <span class='NORMAL' ><script>docW(" | ")</script></span>
+                        <span class='NORMAL BLUE' id="delete_1"><script>docW(parent.window.erps_info.spn_eprs_delete)</script></span>
+                        <span class='NORMAL' ><script>docW(" | ")</script></span>
+                        <span class='NORMAL BLUE' id="update_1"><script>docW(parent.window.erps_info.spn_eprs_update_state)</script></span>
+                    </td>
+                 </tr>
+               </tbody>
+            </table>
+            <table width="100%">
+            <tbody>
+               <tr>
+                  <td class="BOTTOM_LINE"></td>
+               </tr>
+            </tbody>
+            </table>
+            <table width="100%">
+            <tbody>
+                <tr>
+                    <td align="left"><span id="t_note_title" class="NORMAL BOLDER"><script>docW(parent.window.str_info.spn_attention)</script></span></td>
+                </tr>
+                <tr>
+                    <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.erps_info.spn_erps_note1)</script></span></td>
+                </tr>
+            </tbody>
+            </table>
+    </fieldset>
+</body>
+</html>

@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html>
+<!--#ipSetting-->
+<!--#pvlanconfig-->
+<!--#erpsCfg-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+    width: 400px;
+}
+td.NORMAL_TAIL {
+    padding: 0;
+    width: 400px;
+}
+tr.TABLE_HEAD {
+    height: 22px;
+}
+table.BORDER td,th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    font-size: 12px;
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 32px;
+    width: 400px;
+}
+.SELECT_NORMAL {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 32px;
+    width: 200px;
+}
+td.MANUAL_IP6_ADDR_TAIL {
+    padding: 0;
+    width: 350px;
+}
+td.MANUAL_IP6_PREFIX_TAIL {
+    padding: 0;
+    width: 400px;
+}
+input.IP6_ADDR {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 32px;
+    width: 317px;
+}
+input.IP6_PREFIX {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 32px;
+    width: 56px;
+}
+input.IP6_GW {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 32px;
+    width: 400px;
+}
+span.SEP {
+    font-family: "Arial";
+    font-size: 200%;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+}
+TD.BOTTOM_LINE {
+    background-color: #005564; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+TABLE.FRAMEWORK {
+    line-height: 25px;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0;
+}
+TD.FRAMEWORK_LEFT {
+    font-size: 150%;
+    font-family: "Arial";
+    text-align: left;
+    width: 500px;
+    padding: 0;
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+TD.BTN_WRAPPER {
+    width: 70px;
+    height: 75px;
+}
+.CHECK_NORMAL {
+    width: 30px;
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+</style>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function ip6Verify(r)
+{
+    var value = String(r.value).trim();
+
+    var ipv6_reg = new RegExp(
+        '^(?:' +
+        '([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}' +
+        '|(([0-9A-Fa-f]{1,4}:){1,7}:)' +
+        '|(([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4})' +
+        '|(([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2})' +
+        '|(([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3})' +
+        '|(([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4})' +
+        '|(([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5})' +
+        '|(([0-9A-Fa-f]{1,4}:){1}(:[0-9A-Fa-f]{1,4}){1,6})' +
+        '|:((:[0-9A-Fa-f]{1,4}){1,7}|:)' +
+        '|fe80:(:[0-9A-Fa-f]{0,4}){0,4}%[0-9A-Za-z]{1,}' +
+        '|::(ffff(:0{1,4}){0,1}:){0,1}' +
+            '((25[0-5]|(2[0-4]|1{0,1}[0-9])?[0-9])\.){3}' +
+            '(25[0-5]|(2[0-4]|1{0,1}[0-9])?[0-9])' +
+        '|([0-9A-Fa-f]{1,4}:){1,4}:' +
+            '((25[0-5]|(2[0-4]|1{0,1}[0-9])?[0-9])\.){3}' +
+            '(25[0-5]|(2[0-4]|1{0,1}[0-9])?[0-9])' +
+        ')$'
+    );
+
+    /* All 0 */
+    if (!ipv6_reg.test(value) || /^[0:.]+$/.test(value))
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* Normalize IPv6 address for verification */
+    var normalized = NormalizeIpv6(value);
+    if (!normalized)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    var parts = normalized.split(":");
+    if (parts.length !== 8)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    var first  = parseInt(parts[0], 16);
+    var second = parseInt(parts[1], 16);
+
+    /* Loopback address: ::1 */
+    if (normalized === "0000:0000:0000:0000:0000:0000:0000:0001")
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* Multicast address: ff00::/8 */
+    if ((first & 0xff00) === 0xff00)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* Site-local unicast address(abandoned): fec0::/10 */
+    if ((first & 0xffc0) === 0xfec0)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* IPv4-mapped address: ::ffff:0:0/96 */
+    if (parts[0] === "0000" && parts[1] === "0000" && parts[2] === "0000" &&
+        parts[3] === "0000" && parts[4] === "0000" && parts[5] === "ffff")
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* IPv4-compatible address(abandoned) ::/96 not all 0 and not ::1 */
+    if (parts[0] === "0000" && parts[1] === "0000" && parts[2] === "0000" &&
+        parts[3] === "0000" && parts[4] === "0000" && parts[5] === "0000" &&
+        (parts[6] !== "0000" || parts[7] !== "0000") &&
+        normalized !== "0000:0000:0000:0000:0000:0000:0000:0001")
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* Discard prefix address: 100::/64 */
+    if (first === 0x0100)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* Teredo address: 2001::/32 */
+    if (first === 0x2001 && second === 0x0000)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* NAT 6to4 address: 2002::/16 */
+    if (first === 0x2002)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* ORCHID/ORCHIDv2 address: 2001:20::/28 */
+    if (first === 0x2001 && ((second & 0xfff0) === 0x0020))
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    /* NAT64 Well-Known Prefix address: ff9b::/96 和 64:ff9b:1::/48 */
+    if (first === 0x0064 && second === 0xff9b)
+    {
+        return alert(parent.window.str_info.alt_ip6verify2), !1;
+    }
+
+    return !0;
+}
+function ip6PrefixVerify(r)
+{
+    var str = String(r.value).trim();
+
+    if(!/^[0-9]+$/.test(str))
+    {
+        alert(parent.window.str_info.alt_ip6prefixverify1);
+        return false;
+    }
+
+    var prefix = parseInt(r.value, 10);
+
+    if(isNaN(prefix))
+    {
+        alert(parent.window.str_info.alt_ip6prefixverify1);
+        return false;
+    }
+
+    if(prefix < 0 || prefix == 0 || prefix > 128)
+    {
+        alert(parent.window.str_info.alt_ip6prefixverify1);
+        return false;
+    }
+
+    return true;
+}
+function ip6GwVerify(r1)
+{
+    let gw = r1.value.trim();
+    let nGw = NormalizeIpv6(gw);
+
+    if (!nGw)
+    {
+        alert(parent.window.str_info.alt_ip6verify2);
+        return false;
+    }
+
+    let hexGw = nGw.replace(/:/g, "");
+
+    if (hexGw.length !== 32)
+    {
+        alert(parent.window.str_info.alt_ip6verify2);
+        return false;
+    }
+
+    return true;
+}
+function ipVerify(r) {
+    if (0 == r.length)
+    {
+        return alert(js_ipVerify1 = parent.window.str_info.alt_ipverify1), !1;
+    }
+    if (true != (/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/.test(r)))
+    {
+        return alert(js_ipVerify2 = parent.window.str_info.alt_ipverify2), !1;
+    }
+    var a, e, t = [0, 0, 0, 0];
+    for (e = 0; e < 3; e++) {
+        var i = r.indexOf(".");
+        if(-1 == i)
+            return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+        t[e] = r.substring(0, i), r = a = r.substring(i + 1)
+    }
+    for (t[3] = a, e = 0; e < 4; e++)
+    {
+        if(t[e] < 0 || 255 < t[e])
+            return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+    }
+    if(t[0] == 0)
+        return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+    if(255 == t[0] && 255 == t[1] && 255 == t[2] && 255 == t[3])
+        return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+    if(127 == t[0])
+        return alert(js_ipVerify4 = parent.window.str_info.alt_ipverify4), !1;
+    if(224 <= t[0] && t[0] <= 239)
+        return alert(js_ipVerify5 = parent.window.str_info.alt_ipverify5), !1;
+}
+function gatewayVerify(r)
+{
+    if (0 == r.length)
+    {
+        return alert(js_ipVerify1 = parent.window.str_info.alt_gatewayerr), !1;
+    }
+    if (true != (/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/.test(r)))
+    {
+        return alert(js_ipVerify2 = parent.window.str_info.alt_gatewayerr), !1;
+    }
+    var a, e, t = [0, 0, 0, 0];
+    for (e = 0; e < 3; e++) {
+        var i = r.indexOf(".");
+        if(-1 == i)
+        {
+            return alert(js_ipVerify3 = parent.window.str_info.alt_gatewayerr), !1;
+        }
+        t[e] = r.substring(0, i), r = a = r.substring(i + 1)
+    }
+    for (t[3] = a, e = 0; e < 4; e++)
+    {
+        if((t[e] < 0) || (255 < t[e]))
+        {
+            return alert(js_ipVerify3 = parent.window.str_info.alt_gatewayerr), !1;
+        }
+    }
+    if((t[0] == 0) || (127 == t[0]))
+    {
+        return alert(js_ipVerify3 = parent.window.str_info.alt_gatewayerr), !1;
+    }
+    if((255 == t[0]) && (255 == t[1]) && (255 == t[2]) && (255 == t[3]))
+    {
+        return alert(js_ipVerify3 = parent.window.str_info.alt_gatewayerr), !1;
+    }
+    if((224 <= t[0]) && (t[0] <= 239))
+    {
+        return alert(js_ipVerify4 = parent.window.str_info.alt_gatewayerr), !1;
+    }
+}
+function maskVerify(r) {
+    if (0 == r.length)
+    {
+        return alert(js_maskVerify1 = parent.window.str_info.alt_maskverify1), !1;
+    }
+    if (true != (/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/.test(r)))
+    {
+        return alert(js_maskVerify2 = parent.window.str_info.alt_maskverify2), !1;
+    }
+    var a, e, t, i = [0, 0, 0, 0];
+    for (e = 0; e < 3; e++) {
+        var s = r.indexOf(".");
+        if(-1 == s)
+            return alert(js_maskVerify2 = parent.window.str_info.alt_maskverify2), !1;
+        i[e] = r.substring(0, s), r = a = r.substring(s + 1)
+    }
+    for (i[3] = a, e = 0; e < 4; e++)
+        if (i[e] < 0 || 255 < i[e]) return alert(js_maskVerify2 = parent.window.str_info.alt_maskverify2), !1;
+    var n = !1;
+    if ((t = parseInt(parseInt(parseInt(i[0]) << 24) + parseInt(parseInt(i[1]) << 16) + parseInt(parseInt(i[2]) <<
+                        8) + parseInt(i[3]))) == parseInt(0)) return alert(js_maskVerify2 =
+                parent.window.str_info.alt_maskverify2), !1;
+    if (t == parseInt(-1)) return alert(js_maskVerify2 = parent.window.str_info.alt_maskverify2), !1;
+    for (e = 0; e < 32; ++e) {
+        if (parseInt(t & 1 << 31 - e) == parseInt(0)) n = !0;
+        else if (1 == n) return alert(js_maskVerify2 = parent.window.str_info.alt_maskverify2), !1
+    }
+    return !0
+}
+function dnsVerify(dns_ip)
+{
+    if ((true != (/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/.test(dns_ip))) && ("" != dns_ip))
+    {
+        return alert(js_dns_err = parent.window.str_info.alt_dnserr), false;
+    }
+    var parts = dns_ip.split('.');
+    for(i = 0; i < 4; i++)
+    {
+        if(parts[i] < 0 || parts[i] > 255)
+        {
+            return alert(js_dns_err = parent.window.str_info.alt_dnserr), false;
+        }
+    }
+    if ((parts[0] === '0') || (parts[0] === '127'))
+    {
+        return alert(js_dns_err = parent.window.str_info.alt_dnserr), false;
+    }
+    if ("" === dns_ip)
+    {
+        $id("txt_dns").value = "0.0.0.0";
+    }
+    return true;
+}
+function isNetworkOrBroadcastAddress(ip, mask)
+{
+    var ipParts = ip.split('.').map(Number);
+    var maskParts = mask.split('.').map(Number);
+    var networkParts = ipParts.map((part, index) => part & maskParts[index]);
+    var broadcastParts = networkParts.map((part, index) => part | (~maskParts[index] & 255));
+
+    var isNetworkAddress = ipParts.every((part, index) => part === networkParts[index]);
+    var isBroadcastAddress = ipParts.every((part, index) => part === broadcastParts[index]);
+
+    if(isNetworkAddress || isBroadcastAddress)
+    {
+        return true;
+    }
+    return false;
+}
+function loadValue()
+{
+    $id("check_dhcp").value = (1 <= ip_ds.state) ? "1" : "0", onChangeState($id("check_dhcp").value);
+    $id("check_autoDNS").value = (1 <= ip_ds.autodnsstate) ? "1" : "0", AutoDnsChangeState($id("check_autoDNS").value);
+    $id("txt_addr").value = ip_ds.ipStr;
+    $id("txt_mask").value = ip_ds.netmaskStr;
+    $id("txt_gateway").value = ip_ds.gatewayStr;
+    $id("txt_dns").value = ip_ds.dnsStr;
+
+    $id("mgmt_vlan_tr").style.display = "none";
+
+    if((0 != ip_ds.mgmt_vlan) && (1 == vlanState || 2 == vlanState))
+    {
+        $id("mgmt_vlan_tr").style.display = "";
+        $id("mgmt_vlan").value = ip_ds.mgmt_vlan;
+    }
+    $id("btn_submit").value = parent.window.str_info.btn_apply;
+    $id("btn_submit").onclick = () => { return doSubmit(); };
+}
+function loadValueIpv6()
+{
+    if(1 == ip_ds.ip6ConfigMode)
+    {
+        /* if last time config is auto, then enter manual mode */
+        $id("ip6_manual_config").checked = true;
+        $id("ip6_auto_config").checked = false;
+        $id("txt_ip6_addr").disabled = false;
+        $id("txt_ip6_prefix").disabled = false;
+        $id("txt_ip6_gw").disabled = false;
+        /* hide auto IPv6 address row when in manual mode */
+        if ($id("ip6_autoaddr2_tr"))
+        {
+            $id("ip6_autoaddr2_tr").style.display = "none";
+        }
+    }
+    else
+    {
+        /* if last time config is manual, then enter auto mode */
+        $id("ip6_manual_config").checked = false;
+        $id("ip6_auto_config").checked = true;
+        $id("txt_ip6_addr").disabled = true;
+        $id("txt_ip6_prefix").disabled = true;
+        $id("txt_ip6_gw").disabled = true;
+        /* show auto IPv6 address row when in auto mode */
+        if ($id("ip6_autoaddr2_tr"))
+        {
+            $id("ip6_autoaddr2_tr").style.display = "";
+        }
+    }
+    if("" == ip_ds.ip6ManualAddr)
+    {
+        $id("txt_ip6_addr").value = "";
+    }
+    else
+    {
+        $id("txt_ip6_addr").value = ip_ds.ip6ManualAddr;
+    }
+    if ((0 == ip_ds.ip6PrefixLen) || (0 == ip_ds.ip6ConfigMode))
+    {
+        $id("txt_ip6_prefix").value = "";
+    }
+    else
+    {
+        $id("txt_ip6_prefix").value = ip_ds.ip6PrefixLen;
+    }
+    if("" == ip_ds.ip6GwStr)
+    {
+        $id("txt_ip6_gw").value = "";
+    }
+    else
+    {
+        $id("txt_ip6_gw").value = ip_ds.ip6GwStr;
+    }
+
+    $id("ip6_manual_config").onclick = () => { return Ipv6MmodeChange(); };
+    $id("ip6_auto_config").onclick = () => { return Ipv6MmodeChange(); };
+
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+    $id("btn_apply").onclick = () => { return doSubmit2(); };
+}
+function ValueIsChange()
+{
+    let dhcpchange = (1 <= ip_ds.state) ? 1:0;
+    if(
+        (dhcpchange == $id("check_dhcp").value) &&
+        (ip_ds.autodnsstate == $id("check_autoDNS").value) &&
+        (ip_ds.ipStr == $id("txt_addr").value) &&
+        (ip_ds.netmaskStr == $id("txt_mask").value) &&
+        (ip_ds.gatewayStr == $id("txt_gateway").value) &&
+        (ip_ds.dnsStr == $id("txt_dns").value) &&
+        (ip_ds.mgmt_vlan == $id("mgmt_vlan").value)
+    )
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
+function ValueIsChangeIp6()
+{
+    if(
+        (1 == ip_ds.ip6ConfigMode) &&
+        (true == $id("ip6_manual_config").checked) &&
+        (ip_ds.ip6PrefixLen == $id("txt_ip6_prefix").value) &&
+        (ip_ds.ip6ManualAddr == $id("txt_ip6_addr").value) &&
+        (ip_ds.ip6GwStr == $id("txt_ip6_gw").value) ||
+        (0 == ip_ds.ip6ConfigMode) &&
+        (true == $id("ip6_manual_config").checked) &&
+        (0 == ip_ds.ip6PrefixLen) &&
+        ("" == ip_ds.ip6ManualAddr) &&
+        ("" == ip_ds.ip6GwStr) &&
+        ("" == $id("txt_ip6_prefix").value) &&
+        ("" == $id("txt_ip6_addr").value) &&
+        ("" == $id("txt_ip6_gw").value) ||
+        (0 == ip_ds.ip6ConfigMode) &&
+        (true == $id("ip6_auto_config").checked)
+    )
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
+function Ipv6MmodeChange()
+{
+    if($id("ip6_manual_config").checked)
+    {
+        $id("txt_ip6_addr").disabled = false;
+        $id("txt_ip6_prefix").disabled = false;
+        $id("txt_ip6_gw").disabled = false;
+        /* hide auto IPv6 address row when manual mode selected */
+        if ($id("ip6_autoaddr2_tr"))
+        {
+            $id("ip6_autoaddr2_tr").style.display = "none";
+        }
+    }
+    else
+    {
+        $id("txt_ip6_addr").disabled = true;
+        $id("txt_ip6_prefix").disabled = true;
+        $id("txt_ip6_gw").disabled = true;
+        $id("txt_ip6_addr").value = "";
+        $id("txt_ip6_prefix").value = "";
+        $id("txt_ip6_gw").value = "";
+        /* show auto IPv6 address row when auto mode selected */
+        if ($id("ip6_autoaddr2_tr"))
+        {
+            $id("ip6_autoaddr2_tr").style.display = "";
+        }
+    }
+}
+function NormalizeIpv6(addr)
+{
+    if (!addr)
+    {
+        console.log("addr is null");
+        return null;
+    }
+
+    addr = addr.toLowerCase();
+    let parts = addr.split("::");
+
+    if (parts.length > 2) return null;
+
+    let left = parts[0] ? parts[0].split(":") : [];
+    let right = (parts.length === 2 && parts[1]) ? parts[1].split(":") : [];
+
+    let missingGroups = 8 - (left.length + right.length);
+    if (missingGroups < 0) return null;
+
+    let full = [];
+
+    for (let g of left) full.push(g.padStart(4, "0"));
+    for (let i = 0; i < missingGroups; i++) full.push("0000");
+    for (let g of right) full.push(g.padStart(4, "0"));
+
+    return full.join(":");
+}
+function isIpv6Equal(a, b)
+{
+    let na = NormalizeIpv6(a);
+    let nb = NormalizeIpv6(b);
+
+    if (na === null || nb === null) return 1;
+    return na === nb ? 0 : 1;
+}
+function stripIpv6Brackets(host)
+{
+    if (host.charAt(0) === '[' && host.charAt(host.length - 1) === ']')
+    {
+        return host.substring(1, host.length - 1);
+    }
+
+    return host;
+}
+function CompareIpv6()
+{
+    let host = stripIpv6Brackets(window.location.hostname);
+    let addr = ip_ds.ip6ManualAddr[0];
+
+    console.log("host: " + host);
+    console.log("addr: " + addr);
+
+    return isIpv6Equal(host, addr);
+}
+var dhcpXml;
+var dhcpCount = 0;
+var XML_SEND_COMPLETE = 4;
+var HTML_STATUS_OK = 200;
+var dhcpFlag = DHCP_END;
+var dhcpState = 1;
+var DHCP_START = 0;
+var DHCP_WAIT = 1;
+var DHCP_DONE = 2;
+var DHCP_END = 3;
+var newIp;
+var dadXml;
+var dadCount = 0;
+var DAD_INIT = 0;
+var DAD_START = 1;
+var DAD_WAIT = 2;
+var DAD_END = 3;
+var dadFlag = DAD_INIT;
+var INVALID = "0";
+var TENTATIVE = "8";
+var TENTATIVE_1 = "9";
+var TENTATIVE_2 = "10";
+var TENTATIVE_3 = "11";
+var TENTATIVE_4 = "12";
+var TENTATIVE_5 = "13";
+var TENTATIVE_6 = "14";
+var TENTATIVE_7 = "15";
+var VALID = "16";
+var PREFERRED = "48";
+var DUPLICATED = "64";
+function doSubmit()
+{
+    if(0 == ValueIsChange())
+    {
+        return (alert(parent.window.str_info.alt_nochange), !1);
+    }
+    if (1 == $id("check_dhcp").value)
+    {
+        if(0 == $id("check_autoDNS").value)
+        {
+            if(false == dnsVerify($id("txt_dns").value))
+            {
+                return  $id("txt_dns").focus(),!1;
+            }
+            if(1 <= ip_ds.state)
+            {
+                /*for last DHCP state was enable,but now set static DNS*/
+               location.href = "/ip_setting.cgi?autodnsSetting=0&ip_dns=" + $id("txt_dns").value + "&mgmt_vlan=" + $id("mgmt_vlan").value;
+               return !0;
+            }
+        }
+        else if((1 == $id("check_autoDNS").value) && (1 <= ip_ds.state))
+        {
+             /*for last DHCP state was enable,but now enable auto DNS*/
+            location.href = "/ip_setting.cgi?autodnsSetting=1" + "&mgmt_vlan=" + $id("mgmt_vlan").value;
+            return !0;
+        }
+        if(true == confirm(js_ipmode1 = parent.window.str_info.cfm_ipmode1))
+        {
+            dhcpFlag = DHCP_START;
+            dhcpCount = 0;
+            setTimeout(doDhcpPoll, 1000);
+        }
+        else
+        {
+            if ("0.0.0.0" === $id("txt_dns").value)
+            {
+                $id("txt_dns").value = "";
+            }
+            return 0;
+        }
+    }
+    else
+    {
+        if (!("0.0.0.0" == $id("txt_addr").value && "0.0.0.0" == $id("txt_mask").value))
+        {
+            if(0 == ipVerify($id("txt_addr").value))
+                return $id("txt_addr").focus(), !1;
+            if(0 == maskVerify($id("txt_mask").value))
+                return $id("txt_mask").focus(), !1;
+            if(true == isNetworkOrBroadcastAddress($id("txt_addr").value,$id("txt_mask").value))
+                return alert(parent.window.str_info.alt_ip_mask_verify),!1;
+            var r = $id("txt_gateway").value;
+            if("" === r)
+            {
+                $id("txt_gateway").value = "0.0.0.0";
+            }
+            else if(false == gatewayVerify(r))
+            {
+                if ("0.0.0.0" === $id("txt_dns").value)
+                {
+                    $id("txt_dns").value = "";
+                }
+                return $id("txt_gateway").focus(),!1;
+            }
+            if(false == dnsVerify($id("txt_dns").value))
+            {
+                if ("0.0.0.0" === $id("txt_gateway").value)
+                {
+                    $id("txt_gateway").value = "";
+                }
+                return $id("txt_dns").focus(),!1;
+            }
+        }
+        else
+        {
+            alert(parent.window.str_info.alt_ipverify1);
+            return !1;
+        }
+        if (false == confirm(js_ipParam = parent.window.str_info.cfm_ipparam))
+        {
+            if ("0.0.0.0" === $id("txt_gateway").value)
+            {
+                $id("txt_gateway").value = "";
+            }
+            if ("0.0.0.0" === $id("txt_dns").value)
+            {
+                $id("txt_dns").value = "";
+            }
+            return false;
+        }
+        if(-1 == window.location.href.indexOf($id("txt_addr").value))
+        {
+            if(-1 == window.location.href.indexOf("https"))
+            {
+                window.top.location.href = "http://" + $id("txt_addr").value;
+            }
+            else
+            {
+                window.top.location.href = "https://" + $id("txt_addr").value;
+            }
+        }
+        return document.ip_setting.submit(), !0
+    }
+}
+function doSubmit2()
+{
+    if(0 == ValueIsChangeIp6())
+    {
+        return (alert(parent.window.str_info.alt_ip6verify3), !1);
+    }
+
+    if(DAD_END != dadFlag)
+    {
+        if(!getDadResult())
+        {
+            return (alert(parent.window.str_info.alt_ip6verify7), !1);
+        }
+    }
+
+    if(true == $id("ip6_manual_config").checked)
+    {
+        $id("ip6_manual_config").value = "1";
+
+        if("" != $id("txt_ip6_addr").value)
+        {
+            if(0 == ip6Verify($id("txt_ip6_addr")))
+            {
+                return $id("txt_ip6_addr").focus(), !1;
+            }
+            if(0 == ip6PrefixVerify($id("txt_ip6_prefix")))
+            {
+                return $id("txt_ip6_prefix").focus(), !1;
+            }
+        }
+        else
+        {
+            if (0 != $id("txt_ip6_prefix").value && 0 == ip_ds.ip6PrefixLen)
+            {
+                return (alert(parent.window.str_info.alt_ip6verify1), !1);
+            }
+        }
+
+        /* gateway is valid only when manual ip6_addr and prefix_len exist */
+        if("" != $id("txt_ip6_gw").value && "" != $id("txt_ip6_addr").value && 0 != $id("txt_ip6_prefix").value)
+        {
+            if(0 == ip6Verify($id("txt_ip6_gw")))
+            {
+                return $id("txt_ip6_gw").focus(), !1;
+            }
+
+            if(0 == ip6GwVerify($id("txt_ip6_gw")))
+            {
+                return $id("txt_ip6_gw").focus(), !1;
+            }
+        }
+        else if("" != $id("txt_ip6_gw").value && "" == $id("txt_ip6_addr").value)
+        {
+            return (alert(parent.window.str_info.alt_ip6verify1), !1);
+        }
+
+        if("" != $id("txt_ip6_addr").value && $id("txt_ip6_addr").value != ip_ds.ip6ManualAddr && CompareIpv6())
+        {
+            localStorage.setItem("dad_check_needed", "1");
+        }
+        else
+        {
+            localStorage.removeItem("dad_check_needed");
+        }
+
+        document.ip6_setting.submit();
+
+        return !0;
+    }
+    else if(true == $id("ip6_auto_config").checked)
+    {
+        $id("ip6_auto_config").value = "0";
+
+        document.ip6_setting.submit();
+    }
+}
+function getDadResult()
+{
+    var dadIsOver = false;
+
+    dadXml = parent.getXMLObject();
+    if(null == dadXml)
+    {
+        return;
+    }
+
+    dadXml.open("GET", "/dadResult.xml", false);
+
+    dadXml.onreadystatechange = function () {
+        if(XML_SEND_COMPLETE == dadXml.readyState)
+        {
+            if(HTML_STATUS_OK == dadXml.status)
+            {
+                var text = dadXml.responseText;
+
+                text = text.trim();
+
+                if(text == TENTATIVE)
+                {
+                    dadIsOver = false;
+                }
+                else
+                {
+                    dadIsOver = true;
+                }
+            }
+        }
+    }
+
+    dadXml.send(null);
+
+    return dadIsOver;
+}
+function doDadPoll()
+{
+    if(DAD_INIT == dadFlag)
+    {
+        dadFlag = DAD_START;
+        doDadClient();
+    }
+
+    dadCount++;
+    if(DAD_END != dadFlag)
+    {
+        parent.window.document.getElementById("blockbg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").innerHTML = "Wait for get DAD result ... " + dadCount;
+        setTimeout(doDadPoll, 1000);
+    }
+}
+function doDadClient()
+{
+    if(DAD_END == dadFlag)
+    {
+        return;
+    }
+
+    dadXml = parent.getXMLObject();
+    if(null == dadXml)
+    {
+        dadFlag = DAD_INIT;
+        return;
+    }
+
+    var temp_send_str = "/dadResult.xml";
+    if(DAD_START == dadFlag)
+    {
+        dadFlag = DAD_WAIT;
+    }
+    dadXml.open("GET", temp_send_str, true);
+
+    dadXml.onreadystatechange = dadRespon;
+
+    dadXml.onerror = function () {
+        console.log("onerror: " + temp_send_str);
+    };
+
+    dadXml.ontimeout = function () {
+        dadFlag = DAD_INIT;
+    };
+
+    dadXml.send(null);
+}
+function dadRespon()
+{
+    if(XML_SEND_COMPLETE == dadXml.readyState)
+    {
+        if(HTML_STATUS_OK == dadXml.status)
+        {
+            var text = dadXml.responseText;
+
+            text = text.trim();
+
+            if(DAD_WAIT == dadFlag)
+            {
+                if(text == TENTATIVE)
+                {
+                    dadFlag = DAD_INIT;
+                    return;
+                }
+                else if(text == VALID || text == PREFERRED)
+                {
+                    dadFlag = DAD_END;
+                    parent.window.document.getElementById("blockbg").style.display = "none";
+                    parent.window.document.getElementById("blockmsg").style.display = "none";
+                    return;
+                }
+                else if(text == DUPLICATED || text == INVALID)
+                {
+                    dadFlag = DAD_END;
+                    parent.window.document.getElementById("blockbg").style.display = "none";
+                    parent.window.document.getElementById("blockmsg").style.display = "none";
+
+                    alert("DAD failed! Please check the IPv6 address.");
+                    return;
+                }
+                else
+                {
+                    console.log("Unknwon DAD value: " + text);
+                }
+            }
+            dadFlag = DAD_INIT;
+        }
+    }
+}
+function doDhcpPoll()
+{
+    if(dhcpState)
+    {
+        dhcpState = 0;
+        doDhcpClient();
+    }
+    dhcpCount++;
+    if(DHCP_END != dhcpFlag)
+    {
+        parent.window.document.getElementById("blockbg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").innerHTML = "Wait for get DHCP address ... " + dhcpCount;
+        setTimeout(doDhcpPoll, 1000);
+    }
+}
+function doDhcpClient()
+{
+    if(DHCP_END != dhcpFlag)
+    {
+        dhcpXml = parent.getXMLObject();
+        var temp_send_str = "";
+        if(null != dhcpXml)
+        {
+            if(DHCP_START == dhcpFlag)
+            {
+                if (1 == $id("check_autoDNS").value)
+                {
+                    temp_send_str = "/ip_setting.cgi?dhcpSetting=2&autodnsSetting=1";
+                    dhcpXml.open("GET", temp_send_str, true);
+                }
+                else
+                {
+                    var dns = $id("txt_dns").value;
+                    temp_send_str = "/ip_setting.cgi?dhcpSetting=2&autodnsSetting=0&ip_dns=";
+                    dhcpXml.open("GET", temp_send_str + dns, true);
+                }
+            }
+            if(DHCP_DONE == dhcpFlag)
+            {
+                temp_send_str = "/ip_setting.cgi?dhcpSetting=4";
+                dhcpXml.open("GET", temp_send_str, true);
+            }
+            if(DHCP_WAIT == dhcpFlag)
+            {
+                temp_send_str = "/dhcpState.xml";
+                dhcpXml.open("GET", temp_send_str, true);
+            }
+            dhcpXml.onreadystatechange = dhcpRespon;
+            dhcpXml.onerror = function (){
+                console.log("onerror:"+ temp_send_str);
+            }
+            dhcpXml.ontimeout = function (){
+                dhcpState = 1;
+            };
+            dhcpXml.send(null);
+        }
+        else
+        {
+            dhcpState = 1;
+        }
+    }
+}
+function dhcp_refresh_web()
+{
+    if(-1 == window.location.href.indexOf("https"))
+    {
+        parent.window.document.getElementById("blockmsg").innerHTML = "Redirect to new IP address : http://" + newIp;
+        window.top.location.href = "http://" + newIp;
+    }
+    else
+    {
+        parent.window.document.getElementById("blockmsg").innerHTML = "Redirect to new IP address : https://" + newIp;
+        window.top.location.href = "https://" + newIp;
+    }
+}
+function dhcpRespon()
+{
+    if(XML_SEND_COMPLETE == dhcpXml.readyState)
+    {
+        if( DHCP_DONE == dhcpFlag )
+        {
+            dhcpFlag = DHCP_END;
+            dhcp_refresh_web();
+        }
+        if (HTML_STATUS_OK == dhcpXml.status)
+        {
+            if(DHCP_WAIT == dhcpFlag)
+            {
+                if(-1 == dhcpXml.responseText.indexOf("0.0.0.0"))
+                {
+                    var rule = /,dhcp_enable:/;
+                    var dhcp_list = dhcpXml.responseText.split(rule);
+                    var dhcp_ip = "";
+                    var dhcp_enable = 0;
+                    if(dhcp_list.length >= 2)
+                    {
+                        dhcp_enable = parseInt(dhcp_list[1],10);
+                    }
+                    dhcp_ip = dhcp_list[0];
+                    if(0 == dhcp_enable)
+                    {
+                        dhcpFlag = DHCP_END;
+                        window.location.reload();
+                        alert(parent.window.str_info.alt_dhcp_err + dhcp_ip);
+                        parent.window.document.getElementById("blockbg").style.display = "none";
+                        parent.window.document.getElementById("blockmsg").style.display = "none";
+                    }
+                    else
+                    {
+                        newIp = dhcp_ip;
+                        dhcpFlag = DHCP_DONE;
+                    }
+                }
+            }
+            else if(DHCP_START == dhcpFlag)
+            {
+                dhcpFlag = DHCP_WAIT;
+            }
+            dhcpState = 1;
+        }
+    }
+}
+function onChangeState(r)
+{
+    var a = $id("txt_addr"),
+        e = $id("txt_mask"),
+        t = $id("txt_gateway"),
+        ele_select_dns = $id("check_autoDNS"),
+        i = "1" == r;
+        a.disabled = i, e.disabled = i, t.disabled = i;
+
+        if(true == i)
+        {
+            ele_select_dns.disabled = false;
+        }
+        else
+        {
+            ele_select_dns.disabled = true;
+            ele_select_dns.value = "0";
+            AutoDnsChangeState("0")
+        }
+}
+function AutoDnsChangeState(dns_select_input)
+{
+    let s_ele_txt_dns = $id("txt_dns")
+    s_ele_txt_dns.className = "TEXT_ENABLE";
+    if("1" == dns_select_input)
+    {
+        s_ele_txt_dns.disabled = true;
+    }
+    else
+    {
+        s_ele_txt_dns.disabled = false;
+    }
+}
+window.onload = () => {
+    /* Check last time dad result */
+    if(localStorage.getItem("dad_check_needed") == "1")
+    {
+        dadFlag = DAD_INIT;
+        dadCount = 0;
+        setTimeout(doDadPoll, 1000);
+        localStorage.removeItem("dad_check_needed");
+    }
+    loadValueIpv6();
+    loadValue();
+    $id("check_dhcp").onchange = (e) => onChangeState(e.target.value);
+    $id("check_autoDNS").onchange = (e) => AutoDnsChangeState(e.target.value);
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <fieldset>
+      <legend> <span id="ipAddressSetting" class="NORMAL"><script>docW(parent.window.str_info.spn_ipaddresssetting)</script></span> </legend>
+      <div id="div_sec_title">
+         <form name="ip_setting" method="get" action="ip_setting.cgi" enctype="multipart/form-data ">
+            <table class="BORDER">
+               <tbody>
+                  <tr class="TABLE_HEAD">
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_dhcpsetting)</script></span></td>
+                     <td><select class="SELECT_NORMAL" name="dhcpSetting" id="check_dhcp">
+                           <option value="0"><span class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span></option>
+                           <option value="1"><span class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span></option>
+                        </select> </td>
+                  </tr>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.spn_ipaddress)</script></span></td>
+                     <td class="NORMAL_TAIL"><input id="txt_addr" name="ip_address" class="TEXT_ENABLE" size="32"
+                        maxlength="31" value=""> </td>
+                  </tr>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.spn_netmask)</script></span></td>
+                     <td class="NORMAL_TAIL"> <input id="txt_mask" name="ip_netmask" class="TEXT_ENABLE" size="32"
+                        maxlength="31" value=""> </td>
+                  </tr>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.spn_gateway)</script></span></td>
+                     <td class="NORMAL_TAIL"> <input id="txt_gateway" name="ip_gateway" class="TEXT_ENABLE" size="32"
+                        maxlength="31" value=""></td>
+                  </tr>
+                  <tr class="TABLE_HEAD">
+                    <td class="TD_FIRST_COL">
+                        <span class="NORMAL"><script>docW(parent.window.str_info.td_autodnssetting)</script></span>
+                    </td>
+                    <td>
+                        <select class="SELECT_NORMAL" name="autodnsSetting" id="check_autoDNS">
+                            <option value="0">
+                                <script>docW(parent.window.str_info.opt_disable)</script>
+                            </option>
+                            <option value="1">
+                                <script>docW(parent.window.str_info.opt_enable)</script>
+                            </option>
+                        </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="TD_FIRST_COL">
+                        <span class="NORMAL"><script>docW(parent.window.str_info.spn_dns)</script></span>
+                    </td>
+                    <td class="NORMAL_TAIL"> <input id="txt_dns" name="ip_dns" class="TEXT_ENABLE" size="32" maxlength="31" value="">
+                    </td>
+                  </tr>
+                  <tr id="mgmt_vlan_tr">
+                     <td class="TD_FIRST_COL"><span class="NORMAL" id="t_managementVlan"><script>docW(parent.window.str_info.mgmt_vlan)</script></span></td>
+                          <td><select id="mgmt_vlan" class="SELECT_NORMAL" name="mgmt_vlan">
+                          <script type="text/javascript">
+                          var i = 0;
+                          if (0 != ip_ds.mgmt_vlan)
+                          {
+                              for (i = 0 ; i <  currentVlanId.length;  i++)
+                              {
+                                  if (0 != currentVlanId[i])
+                                  {
+                                      if ((typeof erpsInfo === "undefined") || (erpsInfo[0][1] != currentVlanId[i]))
+                                      {
+                                          docW("<option value=" + currentVlanId[i] + ">VLAN " + currentVlanId[i] + "</option>")
+                                      }
+                                  }
+                              }
+                          }
+                          </script>
+                          </select> </td>
+                  </tr>
+               </tbody>
+            </table>
+         </form>
+         <table class="BTN_WRAPPER" align="center">
+            <tbody>
+               <tr>
+                  <td class="BTN_WRAPPER"> <a class="BTN"><input id="btn_submit" type="button" name="submit" class="BTN_NORMAL_BTN"></a> </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </fieldset>
+   <fieldset>
+      <legend> <span id="ipAddressSetting" class="NORMAL"><script>docW(parent.window.str_info.spn_ip6addresssetting)</script></span> </legend>
+      <div id="div_sec_title">
+        <form name="ip6_setting" method="get" action="ip_setting.cgi" enctype="multipart/form-data ">
+            <table class="FRAMEWORK">
+               <tbody>
+                  <tr>
+                     <td class="FRAMEWORK_LEFT"><script>docW(parent.window.str_info.td_ip6generationmode)</script></td>
+                     <td><input name="ipv6_mode" id="ip6_manual_config" type="radio" value="1" class="RADIO_NORMAL">
+                           <span class="NORMAL"><script>docW(parent.window.str_info.td_manualmode)</script></span> </td>
+                     <td><input name="ipv6_mode" id="ip6_auto_config" type="radio" value="0" class="RADIO_NORMAL" checked="">
+                           <span class="NORMAL"><script>docW(parent.window.str_info.td_automode)</script></span> </td>
+                  </tr>
+               </tbody>
+            </table>
+            <table class="BORDER">
+               <tbody>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_ip6setting)</script></span></td>
+                     <td class="MANUAL_IP6_PREFIX_TAIL">
+                            <input id="txt_ip6_addr" name="manual_ip6_address" class="IP6_ADDR" size="128" maxlength="127" value="" />
+                            <span class="SEP"> / </span>
+                            <input id="txt_ip6_prefix" name="manual_ip6_prefix_len" class="IP6_PREFIX" size="32" maxlength="31" value="" />
+                    </td>
+                  </tr>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_ip6gwsetting)</script></span></td>
+                     <td class="MANUAL_IP6_PREFIX_TAIL">
+                            <input id="txt_ip6_gw" name="manual_ip6_gw" class="IP6_GW" size="128" maxlength="127" value="" />
+                    </td>
+                  </tr>
+               </tbody>
+            </table>
+        </form>
+        <table class="BORDER">
+            <tbody>
+                <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_ip6linklocalsetting)</script></span></td>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(ip_ds.ip6LinkLocalStr)</script></span></td>
+                </tr>
+                <tr>
+                    <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_ip6setting)</script></span></td>
+                    <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(ip_ds.ip6AutoAddr_1)</script></span></td>
+                </tr>
+                <tr id="ip6_autoaddr2_tr">
+                    <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_ip6setting)</script></span></td>
+                    <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(ip_ds.ip6AutoAddr_2)</script></span></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="BTN_WRAPPER" align="center">
+            <tbody>
+                <tr>
+                    <td class="BTN_WRAPPER"> <a class="BTN"><input id="btn_apply" type="button" name="submit" class="BTN_NORMAL_BTN"></a> </td>
+                </tr>
+            </tbody>
+        </table>
+        <table width="100%">
+            <tbody>
+                <tr>
+                    <td class="BOTTOM_LINE"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table width="100%">
+            <tbody>
+                <tr>
+                    <td align="left"><span id="t_note_title" class="BOLDER"><script>docW(parent.window.str_info.td_note)</script></span></td>
+                </tr>
+                <tr>
+                    <td align="left"><span id="t_note_title" class="NORMAL"><script>docW(parent.window.str_info.spn_noteofip6)</script></span></td>
+                </tr>
+            </tbody>
+        </table>
+      </div>
+   </fieldset>
+</body>
+</html>

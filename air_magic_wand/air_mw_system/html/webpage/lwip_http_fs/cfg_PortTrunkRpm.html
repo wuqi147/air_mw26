@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#porttrunk-->
+<!--#erpsCfg-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+table.BORDER td, th {
+    border: 1px solid  <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+TD.BTN_WRAPPER {
+    width: 70px;
+    height: 75px;
+}
+TD.SBLANK {
+    width: 21px;
+}
+TD.MBLANK {
+width: 50px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 150px;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+.CHECK_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript">
+var portNumPerTrunk = trunk_conf.maxportNumPerTrunk;
+var selState = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var port_bit = 0;
+var pStr = [trunk_conf.portStr_g1, trunk_conf.portStr_g2, trunk_conf.portStr_g3, trunk_conf.portStr_g4];
+var pAggStr = [trunk_conf.portAggStr_g1, trunk_conf.portAggStr_g2, trunk_conf.portAggStr_g3, trunk_conf.portAggStr_g4];
+var pMode = [trunk_conf.mode_g1, trunk_conf.mode_g2, trunk_conf.mode_g3, trunk_conf.mode_g4];
+var groupBit = 0;
+var TRUNK_DIFFTYPE = 1;
+var TRUNK_UNKNOWN = 2;
+var timeout = 500;
+var timeout_cnt = 0;
+var attention_note_idx = 1;
+
+function docW(a)
+{
+    document.write(a)
+}
+
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+function chkSel(event) {
+    let portSel_options = document.getElementById("portSel").options,
+    port_index = 0;
+
+    for (port_index = 0; port_index < trunk_conf.portNum; port_index++)
+    {
+        selState[port_index] = portSel_options[port_index].selected;
+        if(selState[port_index])
+        {
+            port_bit |= 1 << port_index;
+        }
+        else
+        {
+            port_bit &= ~(1 << port_index);
+        }
+    }
+}
+
+function chkResult()
+{
+    if(TRUNK_DIFFTYPE == trunk_conf.result)
+    {
+        alert(parent.window.trunk_info.alt_differentType);
+    }
+    else if(TRUNK_UNKNOWN == trunk_conf.result)
+    {
+        alert(parent.window.trunk_info.alt_unknownType);
+    }
+    trunk_conf.result = 0;
+}
+
+function trunkChk()
+{
+    var n = $id("portSel").options;
+    var r = $id("trunkSel").value;
+    var p = 0;
+    port_bit = 0;
+
+    if ("none" != $id("td_trunkmodesel").style.display)
+    {
+        $id("trunkModeSel").value = pMode[r-1] ? pMode[r-1] : 1;
+        if (0 != pMode[r-1])
+        {
+            $id("trunkModeSel").disabled = true;
+        }
+        else
+        {
+            $id("trunkModeSel").disabled = false;
+        }
+    }
+
+    for(p = 0; p < trunk_conf.portNum; ++p)
+    {
+        n[p].selected = !1;
+        selState[p] = 0;
+    }
+    for(p = 0; p < trunk_conf.portNum; p++)
+    {
+        n[p].disabled = false;
+        for(i = 0; i < trunk_conf.maxTrunkNum; i++)
+        {
+            if(0 != pStr[i][p])
+            {
+                n[p].disabled = true;
+                break;
+            }
+            if ("undefined" != typeof(erpsInfo))
+            {
+                var west_port = (erpsInfo[0][4] >> 2);
+                var east_port = (erpsInfo[0][5] >> 2);
+                if(((p == west_port - 1) && (0 != west_port)) ||
+                    ((p == east_port - 1) && (0 != east_port)))
+                {
+                    n[p].disabled = true;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+function do_selall()
+{
+    for (var e = 1, t = 1; t <= trunk_conf.maxTrunkNum; t++)
+    {
+        var n = "chk" + t;
+        0 == $id(n).checked && (e = 0), $id(n).checked = !0, groupBit  = 15
+    }
+    if (0 < e)
+    {
+        for (t = 1; t <= trunk_conf.maxTrunkNum; t++)
+        {
+            n = "chk" + t;
+            $id(n).checked = !1,
+            groupBit = 0;
+        }
+    }
+}
+
+function checkPortSel(groupIdx)
+{
+    var groupID = "chk" + groupIdx;
+    if($id(groupID).checked == true )
+    {
+        groupBit |= (1<<(groupIdx-1));
+    }
+    else
+    {
+        groupBit &= ~(1<<(groupIdx-1));
+    }
+}
+
+function get_port_bitmap_by_trunk_id(trunk_id)
+{
+    if (0 < trunk_id && trunk_id <= trunk_conf.maxTrunkNum)
+    {
+        for (let [key, value] of _port_list.entries())
+        {
+            if ((-1 != key.indexOf("Trunk")) && (trunk_id == key.replace("Trunk", "")))
+            {
+                return value;
+            }
+        }
+    }
+
+    return 0;
+}
+
+function check_port_used_by_port_mirror(port_bitmap)
+{
+    var i, j;
+
+    if (0 != port_bitmap)
+    {
+        for (i = 0; i < max_mirror_num; i++)
+        {
+            if (mirr_info.mirrEn[i])
+            {
+                if (0 < mirr_info.mirrPort[i] && ((1 << (mirr_info.mirrPort[i] - 1)) & port_bitmap))
+                {
+                    return true;
+                }
+                for (j = 0; j < trunk_conf.portNum; j++)
+                {
+                    if (((1 << j) & port_bitmap) && (((1 << i) & mirr_info.ingress[j]) || ((1 << i) & mirr_info.egress[j])))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function SafeReload() {
+    if(parent.window.document.getElementById("blockbg").style.display == "none" ||
+       parent.window.document.getElementById("blockmsg").style.display == "none") {
+        location.reload();
+    }
+}
+
+function checkProcessState() {
+    var xhr = parent.getXMLObject();
+    if (!!xhr) {
+        xhr.timeout = 1000;
+
+        xhr.onerror = function () {
+            console.log('xhr onerror triggered');
+            setTimeout(checkProcessState, timeout);
+        };
+        xhr.ontimeout = function () {
+            console.log('xhr ontimeout triggered');
+            setTimeout(checkProcessState, timeout);
+        };
+        xhr.onreadystatechange = function () {
+            if ((this.readyState == 4) && (this.status == 200)) {
+                let oper_info = this.responseText.split(",");
+                let oper_state = oper_info[0];
+                let oper_result = oper_info[1];
+                if(TRUNK_DIFFTYPE == oper_result){
+                    parent.window.document.getElementById("blockbg").style.display = "none";
+                    parent.window.document.getElementById("blockmsg").style.display = "none";
+                    alert(parent.window.trunk_info.alt_differentType);
+                    return;
+                }
+                else if(TRUNK_UNKNOWN == oper_result){
+                    parent.window.document.getElementById("blockbg").style.display = "none";
+                    parent.window.document.getElementById("blockmsg").style.display = "none";
+                    alert(parent.window.trunk_info.alt_unknownType);
+                    return;
+                }
+                else {
+                    if(oper_state == "1") {
+                        if(timeout <= 1000){
+                            timeout += 250 * (timeout_cnt++);
+                        }
+                        setTimeout(checkProcessState, timeout);
+                    }
+                    else if(oper_state == "0"){
+                        parent.window.document.getElementById("blockbg").style.display = "none";
+                        parent.window.document.getElementById("blockmsg").style.display = "none";
+                        SafeReload();
+                    }
+                }
+            }
+        };
+
+        xhr.open("GET", "/lagProcState.xml", true);
+        xhr.send();
+    }
+}
+
+function do_submit1()
+{
+    var e, t, n = 0,
+    r = 1, trunkMode =1,
+    name = "";
+    for (e = 1; e <= trunk_conf.maxTrunkNum; e++)
+        t = "trunk_" + e, 1 == $id(t).selected && (r = e);
+    for (e = 1; e <= trunk_conf.portNum; e++)
+    {
+        if (t = "port_" + e, 1 == $id(t).selected)
+        {
+            name = "portlist_" + e;
+            $id(name).value = "1";
+        }
+        t = "port_" + e, 1 == $id(t).selected && n++;
+    }
+
+    var port_bitmap = get_port_bitmap_by_trunk_id($id("trunkSel").value);
+    if ("none" != $id("td_trunkmodesel").style.display)
+    {
+        trunkMode = $id("trunkModeSel").value;
+    }
+
+    if (check_port_used_by_port_mirror(port_bitmap) ||
+        check_port_used_by_port_mirror(port_bit))
+    {
+        return (alert(parent.window.trunk_info.alt_mirrorPort), !1);
+    }
+
+    if(n > portNumPerTrunk)
+    {
+        return (alert(parent.window.trunk_info.alt_maxportNumPerTrunkPart1+portNumPerTrunk+parent.window.trunk_info.alt_maxportNumPerTrunkPart2), !1);
+    }
+    else if(n < 1)
+    {
+        return (alert(parent.window.trunk_info.alt_minportNumPerTrunk), !1);
+    }
+    else
+    {
+        var p = 0;
+        var different = false;
+        for(p = 0; p < trunk_conf.portNum; p++)
+        {
+            for(i = 0; i < trunk_conf.maxTrunkNum; i++)
+            {
+                if((i + 1) == $id("trunkSel").value)
+                {
+                    if(selState[p] != pStr[i][p])
+                    {
+                        different = true;
+                    }
+                }
+            }
+        }
+        if(false == different)
+        {
+            return (alert(parent.window.str_info.alt_nochange), !1);
+        }
+        for(i = 0; i < trunk_conf.portNum; i++)
+        {
+            if(_trunk_info[i] == $id("trunkSel").value)
+            {
+                _trunk_info[i] = 0;
+            }
+            if(port_bit & (0x01 << i))
+            {
+                _trunk_info[i] = $id("trunkSel").value;
+            }
+        }
+        re_g_trunk();
+        parent.window.document.getElementById("blockbg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").innerHTML = parent.window.trunk_info.loading + " ... ";
+        var calReq = parent.getXMLObject();
+        var trunkset = "port_trunk_set.cgi?groupId=" + $id("trunkSel").value + "&portBit=" + port_bit + "&trunkMode=" + trunkMode;
+        if(null != calReq)
+        {
+            calReq.open("GET", trunkset, true);
+            calReq.send(null);
+        }
+        timeout_cnt = 0;
+        timeout = 500;
+        setTimeout(checkProcessState, timeout);
+    }
+}
+
+function do_submit2()
+{
+    var i = 0, port_bitmap = 0, valid_group_exist = 0;
+
+    if(groupBit == 0)
+    {
+        return alert(parent.window.trunk_info.alt_deleteinfo);
+    }
+
+    for(i = 1; i <= trunk_conf.maxTrunkNum; i++)
+    {
+        if(groupBit & (0x01 << (i - 1)))
+        {
+            port_bitmap = get_port_bitmap_by_trunk_id(i);
+            if (check_port_used_by_port_mirror(port_bitmap))
+            {
+                return (alert(parent.window.trunk_info.alt_mirrorPort), !1);
+            }
+            if(port_bitmap != 0)
+            {
+                valid_group_exist = 1;
+            }
+        }
+    }
+
+    if(!valid_group_exist)
+    {
+        return (alert(parent.window.trunk_info.alt_group_not_exist), !1);
+    }
+
+    for(i = 1; i <= trunk_conf.maxTrunkNum; i++)
+    {
+        if(groupBit & (0x01 << (i - 1)))
+        {
+            for(t = 0; t < trunk_conf.portNum; t++)
+            {
+                if(_trunk_info[t] == i)
+                {
+                    _trunk_info[t] = 0;
+                }
+            }
+        }
+    }
+    re_g_trunk();
+    parent.window.document.getElementById("blockbg").style.display = "block";
+    parent.window.document.getElementById("blockmsg").style.display = "block";
+    parent.window.document.getElementById("blockmsg").innerHTML = parent.window.trunk_info.loading + " ... ";
+    var calReq = parent.getXMLObject();
+    var trunkdel = "port_trunk_delete.cgi?index=" + groupBit;
+    if(null != calReq)
+    {
+        calReq.open("GET", trunkdel, true);
+        calReq.send(null);
+    }
+    timeout_cnt = 0;
+    timeout = 500;
+    setTimeout(checkProcessState, timeout);
+}
+
+function re_g_trunk()
+{
+    var member = 0;
+    _port_list.clear();
+    for(i = 0; i < trunk_conf.portNum; i++)
+    {
+        if(0 == _trunk_info[i])
+        {
+            _port_list.set(String((i + 1)), (0x01 << i));
+        }
+    }
+    for(i = 1; i <= trunk_conf.maxTrunkNum; i++)
+    {
+        member = 0;
+        for(t = 0; t < trunk_conf.portNum; t++)
+        {
+            if(i == _trunk_info[t])
+            {
+                member |= (0x01 << t);
+            }
+        }
+        if(0 != member)
+        {
+            _port_list.set(("Trunk" + i), member);
+        }
+    }
+}
+function trunkAlgoInit()
+{
+    $id("trunkAlgoSel").value = trunk_conf.algo;
+}
+function do_submit3()
+{
+    var pStr;
+
+    if($id("trunkAlgoSel").value != trunk_conf.algo)
+    {
+        pStr = "algorithm=" + $id("trunkAlgoSel").value;
+    }
+    else
+    {
+        return (alert(parent.window.str_info.alt_nochange), !1);
+    }
+
+    return location.href = "port_trunk_algo_set.cgi?" + pStr;
+}
+function checkSupLag()
+{
+    var trunkid = 0;
+    if (1 == trunk_conf.supportLag)
+    {
+        $id('tb_trunkmodesel').style.display = 'run-in';
+        $id('td_trunkmodesel').style.display = 'run-in';
+        $id('tb_trunkmode').style.display = 'run-in';
+        $id('tb_trunkaggregated').style.display = 'run-in';
+    }
+    else
+    {
+        $id('tb_trunkmodesel').style.display = 'none';
+        $id('td_trunkmodesel').style.display = 'none';
+        $id('tb_trunkmode').style.display = 'none';
+        $id('tb_trunkaggregated').style.display = 'none';
+    }
+}
+
+window.onload = () => {
+    $id("btn_submit1").value = parent.window.str_info.btn_apply;
+    $id("btn_submit1").onclick = () => { return do_submit1(); };
+    $id("btn_submit3").value = parent.window.str_info.btn_apply;
+    $id("btn_submit3").onclick = () => { return do_submit3(); };
+    $id("btn_selectall").value = parent.window.trunk_info.btn_selectall;
+    $id("btn_selectall").onclick = () => { return do_selall(); };
+    $id("btn_delete").value = parent.window.trunk_info.btn_delete;
+    $id("btn_delete").onclick = () => { return do_submit2(); };
+
+    for (let trunkid = 1; trunkid <= trunk_conf.maxTrunkNum; trunkid++)
+    {
+        var chk_id = "chk" + trunkid;
+        var lag_mode_id = "lag_mode_" + trunkid;
+        var ports_agg_id = "ports_agg_" + trunkid;
+        $id(chk_id).value = trunkid;
+        $id(chk_id).onclick = () => { return checkPortSel(trunkid); };
+        if(trunk_conf.supportLag == 0) {
+            $id(lag_mode_id).style.display = "none";
+            $id(ports_agg_id).style.display = "none";
+        }
+    }
+
+    $id("trunkSel").onclick = () => { return trunkChk(); };
+    $id("portSel").onclick = (event) => { return chkSel(event); };
+
+    chkResult();
+    checkSupLag();
+    trunkChk();
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.trunk_info.lgd_trunksetting)</script></span></legend>
+        <form action="port_trunk_set.cgi">
+            <script type="text/javascript">
+                var i = 0;
+                for (i = 1; i <= trunk_conf.portNum; i++)
+                    document.write('<input type=hidden id="portlist_' + i + '" value="0"' +  '>')
+            </script>
+            <table cellspacing="1" border="0.5" class="BORDER">
+            <tbody>
+                <tr class="TABLE_HEAD">
+                    <td class="TD_FIRST_COL" id="tb_trunkgroup"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_trunkgroup)</script></span></td>
+                    <div><td class="TD_FIRST_COL" id="tb_trunkmodesel"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_trunkmode)</script></span></td></div>
+                    <td class="TD_FIRST_COL" id="tb_trunkport"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_transmitport)</script></span></td>
+                </tr>
+                <tr align="center">
+                    <td>
+                        <select class="SELECT_NORMAL" id="trunkSel">
+                            <script type="text/javascript">
+                                var i = 0;
+                                for (i = 1; i <= trunk_conf.maxTrunkNum; i++)
+                                {
+                                    document.write('<OPTION id="trunk_' + i + '" value=' + i + ">"+ parent.window.trunk_info.opt_trunk + " " + i + "</OPTION>");
+                                }
+                            </script>
+                        </select>
+                    </td>
+                    <div><td id="td_trunkmodesel">
+                        <select class="SELECT_NORMAL" id="trunkModeSel">
+                            <script type="text/javascript">
+                                document.write('<OPTION id="trunkmode_' + 1 + '" value=' + 1 + ">"+ parent.window.trunk_info.opt_modestatic + "</OPTION>");
+                                document.write('<OPTION id="trunkmode_' + 2 + '" value=' + 2 + ">"+ parent.window.trunk_info.opt_modeactive + "</OPTION>");
+                                document.write('<OPTION id="trunkmode_' + 3 + '" value=' + 3 + ">"+ parent.window.trunk_info.opt_modepassive + "</OPTION>");
+                            </script>
+                        </select>
+                    </td></div>
+                    <td>
+                        <select class="SELECT_PORTLIST" id="portSel" multiple="" size="4" overflow="scroll">
+                            <script type="text/javascript">
+                                var i = 0;
+                                for (i = 1; i <= trunk_conf.portNum; i++)
+                                {
+                                    document.write('<OPTION id="port_' + i + '" value=' + i + ">"+ parent.window.str_info.td_port + " " + i + "</OPTION>");
+                                }
+                                </script>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+            <table class="BTN_WRAPPER" align="center">
+                <tbody>
+                    <tr>
+                        <td class="BTN_WRAPPER">
+                            <a class="BTN"><input id="btn_submit1" type="button" class="BTN_NORMAL_BTN"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+
+        <form action="port_trunk_algo.cgi">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td class="BOTTOM_LINE"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td width="40%" align="right"><span id="t_algo_title" class="BOLDER"><script>docW(parent.window.trunk_info.spn_algoname)</script></span></td>
+                        <td aligh="center" width="21%">
+                            <select class="SELECT_NORMAL" id="trunkAlgoSel">
+                                <script type="text/javascript">
+                                document.write('<OPTION id="trunkalgo_' + 1 + '" value=' + 0 + ">"+ parent.window.trunk_info.opt_algomacsada + "</OPTION>");
+                                document.write('<OPTION id="trunkalgo_' + 2 + '" value=' + 1 + ">"+ parent.window.trunk_info.opt_algomacda + "</OPTION>");
+                                document.write('<OPTION id="trunkalgo_' + 3 + '" value=' + 2 + ">"+ parent.window.trunk_info.opt_algomacsa + "</OPTION>");
+                                trunkAlgoInit();
+                                </script>
+                            </select>
+                        </td>
+                        <td>
+                            <table class="BTN_WRAPPER" align="left">
+                            <tbody> <td>
+                                <a class="BTN"><input id="btn_submit3" type="button" class="BTN_NORMAL_BTN"></a>
+                                </td></tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td class="SBLANK"></td></tr>
+                    <tr><td class="SBLANK"></td></tr>
+                </tbody>
+            </table>
+        </form>
+
+        <form action="port_trunk_delete.cgi">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td class="BOTTOM_LINE"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="BORDER">
+                <tbody>
+                    <tr class="TABLE_HEAD">
+                        <td id="tb_trunkgroup" class="TD_FIRST_COL" width="20%"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_trunkgroup)</script></span></td>
+                        <td id="tb_trunkmode"  class="TD_FIRST_COL" width="20%"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_trunkmode)</script></span></td>
+                        <td id="tb_trunkmember" class="TD_FIRST_COL" width="20%"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_trunkmember)</script></span></td>
+                        <td id="tb_trunkaggregated" class="TD_FIRST_COL" width="20%"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_trunkaggregated)</script></span></td>
+                        <td id="tb_trunkselect" class="TD_FIRST_COL" width="20%"><span class="NORMAL"><script>docW(parent.window.trunk_info.td_selection)</script></span></td>
+                    </tr>
+                    <script type="text/javascript">
+                        var i = 0, trunkid = 0;
+                        for (trunkid = 1; trunkid <= trunk_conf.maxTrunkNum; trunkid++)
+                        {
+                            var first = 1;
+                            document.write("<tr><td><span class='NORMAL'>" + parent.window.trunk_info.opt_trunk + " " + trunkid + "</td>");
+                            document.write("<td id=lag_mode_" + trunkid + "><span class='NORMAL'>" +
+                            (pMode[(trunkid - 1)] == 1 ? parent.window.trunk_info.opt_modestatic :
+                            pMode[(trunkid - 1)] == 2 ? parent.window.trunk_info.opt_modeactive :
+                            pMode[(trunkid - 1)] == 3 ? parent.window.trunk_info.opt_modepassive : "-") + "</td>");
+                            document.write("</span><td><span class='NORMAL'>")
+                            for(i = 0; i < trunk_conf.portNum; i++)
+                            {
+                                0 != pStr[(trunkid - 1)][i] && (first ? (document.write(i + 1), first = 0) : document.write("," + (i + 1)));
+                            }
+                            first && document.write("-");
+                            document.write("</span></td>");
+                            document.write("</span><td id=ports_agg_" + trunkid + "><span class='NORMAL'>")
+                            for(i = 0, first = 1; i < trunk_conf.portNum; i++)
+                            {
+                                0 != pAggStr[(trunkid - 1)][i] && (first ? (document.write(i + 1), first = 0) : document.write("," + (i + 1)));
+                            }
+                            first && document.write("-"),
+                            document.write("</span></td>"),
+                            document.write('<td><input class="CHECK_NORMAL" type="checkbox" id="chk' + trunkid + '" value="' + trunkid + '"/></td></tr>')
+                        }
+                    </script>
+                </tbody>
+            </table>
+            <table class="BTN_WRAPPER" align="center">
+                <tbody>
+                    <tr>
+                        <td class="BTN_WRAPPER">
+                            <a class="BTN"><input id="btn_selectall" type="button" class="BTN_NORMAL_BTN"></a>
+                        </td>
+                        <td class="MBLANK"></td>
+                        <td class="BTN_WRAPPER">
+                            <a class="BTN"><input id="btn_delete" type="button" class="BTN_NORMAL_BTN"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="BOTTOM_LINE">
+                <tbody>
+                    <tr>
+                        <td class="BOTTOM_LINE"> </td>
+                    </tr>
+                    <tr>
+                        <td><span id="t_cantion_title" class="BOLDER"><script>docW(parent.window.trunk_info.spn_attention)</script></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="NORMAL">
+                            <script type="text/javascript">
+                                docW((attention_note_idx++) + '. ' + parent.window.trunk_info.spn_note1.replace("--", trunk_conf.maxTrunkNum))
+                            </script>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="NORMAL">
+                            <script type="text/javascript">
+                                docW((attention_note_idx++) + '. ' + parent.window.trunk_info.spn_note2.replace("--", portNumPerTrunk))
+                            </script>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="NORMAL">
+                            <script type="text/javascript">
+                                docW((attention_note_idx++) + '. ' + parent.window.trunk_info.spn_note3)
+                            </script>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="NORMAL">
+                            <script type="text/javascript">
+                                if (0 == trunk_conf.supportLag)
+                                {
+                                    docW((attention_note_idx++) + '. ' + parent.window.trunk_info.spn_note4)
+                                }
+                            </script>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </fieldset>
+</body>
+</html>

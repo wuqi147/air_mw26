@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#lldpneighbor-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1300px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+    table-layout: fixed;
+    width: 100%;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+    word-break: break-all;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+.TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    font-size: 150%;
+    font-family: Arial;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var XML_SEND_COMPLETE = 4; /* 0:not init;1:loading;2:loaded;3:interact;4:complete */
+var get_cnt = 0;
+var end_flag = 0;
+var xmlReq;
+var displayId = 0;
+function docW(a) {
+    document.write(a)
+}
+function $id(a) {
+    return document.getElementById(a)
+}
+
+function state_change()
+{
+    var num;
+    var ret;
+    var i;
+
+    if(XML_SEND_COMPLETE == xmlReq.readyState)
+    {
+        get_cnt++;
+        num = xmlReq.responseText.split(";");
+        if(num.length >= 2)
+        {
+            for(i = 0; i < (num.length - 1); i++)
+            {
+                if(num[i] == 888)
+                {
+                    end_flag = 1;
+                    break;
+                }
+                ret = num[i].split("&");
+                $id("clientInfo_" + ret[0]).style.display = "table-row";
+                $id("port_" + ret[0]).innerHTML = ret[1];
+                $id("chassisid_" + ret[0]).innerHTML = ret[2];
+                $id("portid_" + ret[0]).innerHTML = ret[3];
+                $id("sysname_" + ret[0]).innerHTML = ret[4];
+                $id("ttl_" + ret[0]).innerHTML = ret[5];
+                $id("medcap_" + ret[0]).innerHTML = ret[6];
+                $id("meddevice_" + ret[0]).innerHTML = ret[7];
+                $id("network_" + ret[0]).innerHTML = ret[8];
+                $id("extendedpow_" + ret[0]).innerHTML = ret[9];
+            }
+        }
+        if(end_flag == 0)
+        {
+           lldpNeighborInfo();
+        }
+        else
+        {
+            end_flag = 0;
+        }
+    }
+}
+
+function lldpNeighborInfo()
+{
+    xmlReq = parent.getXMLObject();
+    if(null != xmlReq)
+    {
+        xmlReq.onreadystatechange = state_change;
+        xmlReq.open("GET", "/lldpNeighborInfo.xml", true);
+        xmlReq.send(null);
+    }
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.lldp_neighbor.lgd_lldpneighbor)</script></span></legend>
+        <div id="div_sec_title">
+            <table class="BORDER">
+                <tbody>
+                    <tr>
+                        <td class="TD_FIRST_COL" width="65px"><script>docW(parent.window.lldp_neighbor.spn_localport)</script></td>
+                        <td class="TD_FIRST_COL" width="120px"><script>docW(parent.window.lldp_neighbor.spn_chassisid)</script></td>
+                        <td class="TD_FIRST_COL" width="120px"><script>docW(parent.window.lldp_neighbor.spn_portid)</script></td>
+                        <td class="TD_FIRST_COL" width="120px"><script>docW(parent.window.lldp_neighbor.spn_sysname)</script></td>
+                        <td class="TD_FIRST_COL" width="50px"><script>docW(parent.window.lldp_neighbor.spn_ttl)</script></td>
+                        <td class="TD_FIRST_COL" width="120px"><script>docW(parent.window.lldp_neighbor.spn_medcap)</script></td>
+                        <td class="TD_FIRST_COL" width="120px"><script>docW(parent.window.lldp_neighbor.spn_meddevice)</script></td>
+                        <td class="TD_FIRST_COL" width="120px"><script>docW(parent.window.lldp_neighbor.spn_network)</script></td>
+                        <td class="TD_FIRST_COL" width="120px"><script>docW(parent.window.lldp_neighbor.spn_extendedpow)</script></td>
+                    </tr>
+                    <script type="text/javascript">
+                        for (var i = 1; i <= 28; i++)
+                        {
+                            docW("<tr id=clientInfo_" + i + ">\
+                                <td><span class='NORMAL'><div id=port_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=chassisid_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=portid_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=sysname_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=ttl_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=medcap_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=meddevice_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=network_" + i + "></div></span></td>\
+                                <td><span class='NORMAL'><div id=extendedpow_" + i + "></div></span></td></tr>");
+                            $id("clientInfo_" + i).style.display = "none";
+                        }
+                        if ((lldp_global_cfg == 1) && (lldp_neighbor_num != 0))
+                        {
+                            displayId = setTimeout(lldpNeighborInfo, 10);
+                        }
+                    </script>
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+</body>
+</html>

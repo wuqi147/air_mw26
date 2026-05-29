@@ -1,0 +1,1 @@
+obj-$(CONFIG_SLED_EN8851) += sled.o

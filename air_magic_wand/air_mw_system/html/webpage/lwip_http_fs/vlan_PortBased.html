@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#pvlanconfig-->
+<!--#pvlanconfigextra-->
+<!--#erpsCfg-->
+<!--#ipSetting-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+  font-size: 12px;
+  width: 1000px;
+  margin: 1em auto;
+  padding: 1em;
+  border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+  font-weight: bold;
+  font-size: 150%;
+  color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+  font-family: Arial;
+}
+table {
+  margin: 1em auto;
+  border-collapse: collapse;
+  text-align: center;
+}
+table td {
+  height: 32px;
+  line-height: 21px;
+}
+tr.TABLE_HEAD {
+  height: 22px;
+}
+table.BORDER td, th {
+  border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+  background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+  padding: 0 5px;
+  font-size: 150%;
+  font-family: Arial;
+  width: 200px;
+}
+table .TD_SECOND_COL {
+  background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+  padding: 0 5px;
+  width: 600px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.RADIO_WIDTH {
+    width: 120px;
+}
+.CHKBOX_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+TD.FRAMEWORK_LEFT {
+    font-size: 150%;
+    font-family: "Arial";
+    text-align: left;
+    width: 300px;
+    padding: 0;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 25px;
+    width: 60px;
+}
+.SBLANK {
+ width: 50px;
+}
+.ALIGN_LEFT {
+  float: left;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+function docW(a)
+{
+  document.write(a);
+}
+
+function $id(a)
+{
+  return document.getElementById(a);
+}
+
+function initvlan()
+{
+  if (vlanState == 1)
+  {
+    $id("pvlan_en").checked = true;
+    $id("pvlan_dis").checked = false;
+    $id("port_vlan_div").style.display = "";
+  }
+  else if ((vlanState == 2) || (vlanState == 3))
+  {
+    $id("pvlan_en").checked = false;
+    $id("pvlan_dis").checked = true;
+    $id("port_vlan_div").style.display = "none";
+  }
+  get_xml();
+}
+
+function do_mode_submit() {
+  var click_state = (1 == $id("pvlan_en").checked)? 1 : 2;
+
+  if (((vlanState == 1) && (click_state == 1)) || ((vlanState == 2) && (click_state == 2))) {
+    alert(parent.window.str_info.alt_nochange);
+    return;
+  }
+  var confirm_val;
+  if ("undefined" != typeof(erpsInfo)) {
+    for (var i=0 ; i<erpsInfo.length ; i++) {
+      if (0 != erpsInfo[i][0]) {
+        alert(parent.window.vlan_common_info.alt_info3); /* "Cannot change mode due to ERPS enabled." */
+        return;
+      }
+    }
+  }
+  if (click_state == 1) {
+    if ((vlanState == 2) && ((voiceinfo.state == 1) || (surveilinfo.state == 1))) {
+      alert(parent.window.vlan_common_info.alt_info2); /* "Cannot change mode due to voice VLAN or surveilinfo VLAN enable." */
+      return;
+    }
+    confirm_val = confirm(parent.window.vlan_portbased_info.alt_info4); /* "Port-based VLAN will be enabled ... */
+  }
+  else if (click_state == 2) {
+    confirm_val = confirm(parent.window.vlan_portbased_info.alt_info3); /* "Port-based VLAN will be disabled ... */
+  }
+  if (0 == confirm_val) {
+    return;
+  }
+  var i, defIdx = 0, changeVbmp = 0;
+  for (i = 0; i < vlan_ds.count; i++) {
+    if (vlan_ds.vlan_info[i].vid == 1) {
+      defIdx = vlan_ds.vlan_info[i].idx;
+    }
+    else {
+      changeVbmp |= (1 << (vlan_ds.vlan_info[i].idx - 1));
+    }
+  }
+  return location.href = "pvlanModeSet.cgi?vlan_mode=" + click_state + "&changeVbmp=" + changeVbmp + "&defVidx=" + defIdx;
+}
+
+function selTrunkMbrsByFlag(trunk_p) {
+  let trunk_idx = trunk_p.split("_")[1];
+  var flag = ($id("trunk_" + trunk_idx).checked == true)? true : false;
+  for (var port = 0; port < portMaxNum; port++) {
+    if (1 == trunk_conf.info[trunk_idx-1].mbrs[port]) {
+      $id("port_" + (port+1)).checked = flag;
+    }
+  }
+}
+
+function selPortsByPbmHandleTrunk(id_Name, pbm) {
+  pbm = (typeof pbm !== 'undefined')? pbm : ((1 << portMaxNum) - 1);
+  for (var len = 0; len < trunk_conf.maxTrunkNum; len++) {
+    if (1 == trunk_conf.info[len].valid) {
+      trunkpbm = portArrToBmp(trunk_conf.info[len].mbrs);
+      if ((pbm & trunkpbm) == trunkpbm) {
+        $id("trunk_" + (len + 1)).checked = true;
+      }
+      else {
+        $id("trunk_" + (len + 1)).checked = false;
+      }
+    }
+  }
+
+  for (var port = 0, pbit = 1; port <= portMaxNum; port++) {
+    if ($id(id_Name + port) != null && typeof($id(id_Name + port)) != 'undefined') {
+      $id(id_Name + port).checked = (pbit & pbm)? true : false;
+    }
+    pbit <<= 1;
+  }
+}
+
+function selMbrPorts_p() {
+  var in_vlan = Number($id("t_vid").value);
+
+  if (1 <= in_vlan && in_vlan <= vlanMaxNum) {
+    for (var i = 0; i < portMaxNum; i++) {
+      if (in_vlan == vlan_ds.vlan_info[i].vid) {
+        selPortsByPbmHandleTrunk("port_", vlan_ds.vlan_info[i].mbrs);
+        return;
+      }
+    }
+  }
+  selPortsByFlag("port_", false);
+  selTrunkByFlag("trunk_", false);
+}
+
+function pvlanAdd() {
+  var i, check, res = false;
+  var idx = 0;
+  var matrixChange;
+  if (vlanState != 1) {
+    alert(parent.window.vlan_portbased_info.alt_info1); /* Port VLAN should be enabled before setting the port group */
+    return false;
+  }
+  if (false == chkVlanRange($id("t_vid").value, 1, vlanMaxNum)) {
+    alert(parent.window.vlan_portbased_info.alt_info2 + vlanMaxNum + "!"); /* VLAN ID range 1- */
+    return false;
+  }
+  var sel_port = getSelPortCntIdxPbmById("port_", portMaxNum);
+  var sel_trunk = getSelPortCntIdxPbmById("trunk_", trunk_conf.maxTrunkNum);
+  if (sel_port.count == 0 && sel_trunk.count == 0) {
+    alert(parent.window.vlan_common_info.alt_info1); /* "Please select at least one port." */
+    return false;
+  }
+  var sel_portbmp = sel_port.portBmp | sel_trunk.portBmp;
+  var change_vlan = isModifyVlan($id("t_vid").value, vlan_ds);
+  var sel_portArr = portBmpToNumArr(sel_portbmp);
+  var tmp_vlan_portArr;
+  if (true == change_vlan.res) { /* modify */
+    idx = vlan_ds.vlan_info[change_vlan.idx].idx;
+    if (vlan_ds.vlan_info[change_vlan.idx].mbrs == sel_portbmp)
+    {
+      alert(parent.window.str_info.alt_nochange); /* "Configuration no change." */
+      return false;
+    }
+    return location.href = "pvlanSet.cgi?action=mod"+ "&vid=" + $id("t_vid").value + "&vidx="+ idx + "&newVidPbmp="+ sel_portbmp
+    + "&oldVidPbmp=" + vlan_ds.vlan_info[change_vlan.idx].mbrs + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+  }
+  else { /* add */
+    idx = findVlanTblFirstEmptyIdx(vlan_ds.vlan_info);
+    if(idx == 0) {
+      alert(parent.window.vlan_portbased_info.alt_info6); /* "Exceeded the maximum number of configurable VLANs." */
+      return false;
+    }
+    for (i = 0; i < portMaxNum; i++) {
+      if ((vlan_ds.vlan_info[i].vid == $id("t_vid").value) || (vlan_ds.vlan_info[i].mbrs == 0)) {
+        continue;
+      }
+      tmp_vlan_portArr = portBmpToNumArr(vlan_ds.vlan_info[i].mbrs);
+      check = isPbmpInclude(sel_portArr, tmp_vlan_portArr);
+      if (true == check.include) {
+        res = true;
+        break;
+      }
+    }
+    if (true == res) {
+      matrixChange = 0; /* no change */
+    }
+    else {
+      matrixChange = 1; /* add */
+    }
+    return location.href = "pvlanSet.cgi?action=add"+ "&vid=" + $id("t_vid").value + "&vidx="+ idx + "&vidPbmp=" + sel_portbmp
+     + "&matrixChange=" + matrixChange + + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+  }
+}
+
+function pvlanDel() {
+  var i, check;
+  var include = false, isolate = true;
+  var change_vlan = isModifyVlan($id("t_vid").value, vlan_ds);
+  if (false == change_vlan.res) {
+    return alert(parent.window.vlan_portbased_info.alt_info0); /* Please input a VLAN ID. */
+  }
+  var sel_portbmp = vlan_ds.vlan_info[change_vlan.idx].mbrs;
+  var sel_portArr = portBmpToNumArr(sel_portbmp);
+  var tmp_vlan_portArr;
+
+  if (Number($id("t_vid").value) == ip_ds.mgmt_vlan)
+  {
+     return alert(parent.window.vlan_8021q_info.alt_info23); /* "The management VLAN cannot be deleted." */
+  }
+
+  if (vlan_ds.vlan_info[change_vlan.idx].mbrs == 0) {
+    alert(parent.window.str_info.alt_nochange); /* "Configuration no change." */
+    return false;
+  }
+  for (i = 0; i < portMaxNum; i++) {
+    if ((vlan_ds.vlan_info[i].vid == $id("t_vid").value) || (vlan_ds.vlan_info[i].mbrs == 0)) {
+      continue;
+    }
+    tmp_vlan_portArr = portBmpToNumArr(vlan_ds.vlan_info[i].mbrs);
+    check = isPbmpInclude(sel_portArr, tmp_vlan_portArr);
+    if (true == check.include) {
+      include = true;
+      break;
+    }
+  }
+  if (true == include) {
+    matrixChange = 0; /* no change */
+  }
+  else if (false == include) {
+    for (i = 0; i < portMaxNum; i++) {
+      if ((vlan_ds.vlan_info[i].vid == $id("t_vid").value) || (vlan_ds.vlan_info[i].mbrs == 0)) {
+        continue;
+      }
+      tmp_vlan_portArr = portBmpToNumArr(vlan_ds.vlan_info[i].mbrs);
+      check = isPbmpInclude(sel_portArr, tmp_vlan_portArr);
+      if (false == check.isolate) {
+        isolate = false;
+        break;
+      }
+    }
+    if (true == isolate) {
+      matrixChange = 2; /* delete */
+    }
+    else if (false == isolate) {
+      matrixChange = 3; /* recalculate */
+    }
+  }
+  return location.href = "pvlanSet.cgi?action=del"+ "&vid=" + $id("t_vid").value + "&vidx="+ vlan_ds.vlan_info[change_vlan.idx].idx
+  + "&oldVidPbmp=" + sel_portbmp + "&matrixChange=" + matrixChange + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+}
+function chkVlanRange(val, min, max) {
+  var input_vid = (typeof val == 'string')? Number(val) : val;
+  if (min <= input_vid && input_vid <= max) {
+    return true;
+  }
+  return false;
+}
+/*
+ * addPbmp = [1, 2];    comparePbmp = [1, 2, 3, 4] =>{include: T, isolate: F}
+ * addPbmp = [1, 2, 5]; comparePbmp = [1, 2, 3, 4] =>{include: F, isolate: F}
+ * addPbmp = [5];       comparePbmp = [1, 2, 3, 4] =>{include: F, isolate: true}
+ */
+function isPbmpInclude(addPbmp, comparePbmp) {
+  var res1 = addPbmp.every((item) => {
+    return comparePbmp.some((sub) => {
+      return sub === item;
+    });
+  }); /* T: comparePbmp includes addPbmp totally */
+  var res2 = addPbmp.every((item) => {
+    return comparePbmp.every((sub) => {
+      return sub !== item;
+    });
+  }); /* T: comparePbmp & addPbmp don't have any duplicate port */
+  return{include: res1, isolate: res2};
+}
+function isModifyVlan(val, vlan_ds) {
+  var input_vid = (typeof val == 'string')? Number(val) : val;
+
+  for (var i = 0; i < portMaxNum; i++) {
+    if (vlan_ds.vlan_info[i].vid == input_vid) {
+      return{res: true, idx: i};
+    }
+  }
+  return {res: false, idx: undefined};
+}
+function selPortsByFlag(id_Name, flag) {
+  for (var port = 1; port <= portMaxNum; port++) {
+    $id(id_Name + port).checked = flag;
+  }
+}
+function selTrunkByFlag(id_Name, flag) {
+  for (var port = 1; port <= trunk_conf.maxTrunkNum; port++) {
+    if ($id(id_Name + port) != null && typeof($id(id_Name + port)) != 'undefined') {
+      $id(id_Name + port).checked = flag;
+    }
+  }
+}
+function disablePortsByPortArr(id_Name_arr, arr) {
+  if (typeof arr == 'undefined') {
+    return;
+  }
+  for (var i = 1; i <= arr.length; i++) {
+    if (1 == arr[i-1]) {
+      for (var j = 0; j < id_Name_arr.length; j++) {
+        $id(id_Name_arr[j] + i).disabled = true;
+      }
+    }
+  }
+}
+function getSelPortCntIdxPbmById(id_Name, maxLimit) {
+  var i, count = 0, idxbmp = 0, portBmp = 0;
+
+  if (portMaxNum == maxLimit) { /* physical */
+    for (i = 1; i <= maxLimit; i++) {
+      if ($id(id_Name + i).checked == true) {
+        idxbmp |= (1 << (i - 1));
+        portBmp |= (1 << (i));
+        count++;
+      }
+    }
+  }
+  else if (trunk_conf.maxTrunkNum == maxLimit) { /* trunk */
+    for (i = 1; i <= maxLimit; i++) {
+      if ($id(id_Name + i) != null && typeof($id(id_Name + i)) != 'undefined') {
+        if ($id(id_Name + i).checked == true) {
+          idxbmp |= (1 << (i - 1));
+          portBmp |= portArrToBmp(trunk_conf.info[i-1].mbrs);
+          count++;
+        }
+      }
+    }
+  }
+  return{count, idxbmp, portBmp};
+}
+/* arr = [1, 0, 0, 1, 0] => pbm = 12 */
+function portArrToBmp(arr) {
+  var pbm = 0;
+  for (var port = 1; port <= portMaxNum; port++) {
+    if (1 == arr[port-1]) {
+      pbm |= (1 << port);
+    }
+  }
+  return pbm;
+}
+/* bmp = 12 => arr = [1, 4] */
+function portBmpToNumArr(bmp) {
+  var arr = [];
+  for (var port = 1; port <= portMaxNum; port++) {
+    if (bmp & (1 << (port))) {
+      arr.push(port);
+    }
+  }
+  return arr;
+}
+function pbmToStrHandleTrunk(portHex) {
+  var str = "", trunk_str = "";
+  var i, bit, len, trunkpbm;
+  for (len = 0; len < trunk_conf.maxTrunkNum; len++) {
+    if (1 == trunk_conf.info[len].valid) {
+      trunkpbm = portArrToBmp(trunk_conf.info[len].mbrs);
+      if ((portHex & trunkpbm) == trunkpbm) {
+        portHex -= trunkpbm;
+        trunk_str += parent.window.trunk_info.opt_trunk + (len + 1) + ",";
+      }
+    }
+  }
+  var portDec = parseInt(portHex);
+  for (i = 0, bit = 1; i <= portMaxNum; ++i) {
+    if (portDec & bit) {
+      str += i;
+      b = i;
+      do {
+        bit <<= 1;
+      } while ((portDec & bit) && (++i < portMaxNum));
+
+      if (b != i) {
+        str += "-" + i;
+      }
+      str += ",";
+      ++i;
+    }
+    bit <<= 1;
+  }
+  str += trunk_str;
+  if (str.charAt(str.length - 1) == ",") {
+    str = str.substr(0, str.length - 1);
+  }
+  return (str === "")? "-" : str;
+}
+function findVlanTblFirstEmptyIdx(vlan_info_arr)
+{
+    var j, count = 0;
+    for (j = 0; j < portMaxNum; j++)
+    {
+        if(0 == vlan_info_arr[j].mbrs)
+        {
+          break;
+        }
+        count++;
+    }
+    if (count == portMaxNum)
+    {
+        return 0;
+    }
+    return j+1;
+}
+var XML_SEND_COMPLETE = 4;
+var HTML_STATUS_OK = 200;
+var xmlReq;
+function state_change() {
+  var i = 0;
+  var vlan_entry;
+  var vlan_entry_val;
+  if ((XML_SEND_COMPLETE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status)) {
+    vlan_entry = xmlReq.responseText.split(";");
+    var display_count = portMaxNum;
+    for (i = 0; i < vlan_ds.count; i++) {
+      /*{idx:1, vid:1, name:'', mbrs:268435455, tagMbrs:0, untagMbrs:268435455}, */
+      vlan_entry_val = vlan_entry[i].split(",");
+      var vlan_obj = new Object();
+      vlan_obj.idx = Number(vlan_entry_val[0]);
+      vlan_obj.vid = Number(vlan_entry_val[1]);
+      vlan_obj.name = vlan_entry_val[2];
+      vlan_obj.mbrs = Number(vlan_entry_val[3]);
+      vlan_obj.tagMbrs = Number(vlan_entry_val[4]);
+      vlan_obj.untagMbrs = Number(vlan_entry_val[5]);
+      vlan_ds.vlan_info.push(vlan_obj);
+      if (display_count > 0) {
+        $id("port_vid_" + i).innerHTML = vlan_ds.vlan_info[i].vid;
+        $id("port_mbrs_" + i).innerHTML = pbmToStrHandleTrunk(vlan_ds.vlan_info[i].mbrs);
+        if(0 == vlan_obj.mbrs) {
+          $id("tr_port_" + i).style.display = "none";
+        }
+        else {
+          display_count--;
+        }
+      }
+    }
+  }
+}
+function get_xml() {
+  xmlReq = parent.getXMLObject();
+  if (null != xmlReq) {
+    xmlReq.onreadystatechange = state_change;
+    xmlReq.open("GET", "/vlanEntry.xml", true);
+    xmlReq.send(null);
+  }
+}
+function onlyNum(e) {
+    e.target.value = e.target.value.replace(/\D/g,'');
+}
+window.onload = () => {
+  $id("btn_mode").value = parent.window.str_info.btn_apply;
+  $id("btn_mode").onclick = () => do_mode_submit();
+  $id("t_vid").onkeyup = () => selMbrPorts_p();
+  $id("t_vid").oninput = (e) => onlyNum(e);
+  if (0 != trunk_conf.count) {
+    for (let i = 1; i <= trunk_conf.maxTrunkNum; i ++) {
+      if (0 == trunk_conf.info[i-1].valid) {
+        continue;
+      }
+      $id("trunk_" + i).onclick = (e) => selTrunkMbrsByFlag(e.target.id);
+    }
+  }
+  $id("pvlan_add").value = parent.window.str_info.btn_apply;
+  $id("pvlan_add").onclick = () => pvlanAdd();
+  $id("pvlan_del").value = parent.window.vlan_common_info.btn_del;
+  $id("pvlan_del").onclick = () => pvlanDel();
+  $id("port_vlan_div").style.display = "none";
+  initvlan();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<div>
+  <fieldset>
+    <legend><span class="NORMAL"><script>docW(parent.window.vlan_portbased_info.lgd_vlanset);</script></span></legend>
+    <div id="div_sec_title">
+    <form action="pvlanModeSet.cgi">
+      <table>
+        <tbody>
+            <tr>
+                <td>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td align="left" class="FRAMEWORK_LEFT">
+                                    <script>docW(parent.window.vlan_portbased_info.spn_pvlanen + ':');</script>
+                                </td>
+                                <td class="RADIO_WIDTH" align="left">
+                                    <input name="pvlan_mode" id="pvlan_en" type="radio" value="1" class="RADIO_NORMAL">
+                                    <span class="NORMAL"><script>docW(parent.window.str_info.opt_enable);</script></span>
+                                </td>
+                                <td align="left">
+                                    <input name="pvlan_mode" id="pvlan_dis" type="radio" value="0" class="RADIO_NORMAL" checked="">
+                                    <span class="NORMAL"><script>docW(parent.window.str_info.opt_disable);</script></span>
+                                </td>
+                                <td class="RADIO_WIDTH"></td>
+                                <td><a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_mode" name="vlan_mode"></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+    <div id="port_vlan_div">
+    <form action="pvlanSet.cgi">
+        <table class="BORDER">
+            <thead>
+                <tr>
+                    <td class="TD_FIRST_COL">
+                        <script>docW(parent.window.vlan_common_info.td_vlan);</script>
+                    </td>
+                    <td class="TD_SECOND_COL" colspan="12">
+                        <div class="ALIGN_LEFT">
+                            <input id="t_vid" maxlength="4" size="4" name="vid" class="TEXT_ENABLE">
+                            <span class="NORMAL">
+                                <script>docW("(1-" + vlanMaxNum + ", " + parent.window.vlan_portbased_info.alt_info7 + portMaxNum + ")");</script>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+            </thead>
+            <tbody id="pvlan_psel_tbl">
+            <script type="text/javascript">
+              var colspan = 12, add = 1;
+              var i, newPortRow, newMemberRow, newCell;
+              for (i = 1; i <= portMaxNum; i ++) {
+                if (1 == add) {
+                  newPortRow = $id("pvlan_psel_tbl").insertRow();
+                  newCell = newPortRow.insertCell();
+                  newCell.className = "TD_FIRST_COL";
+                  newCell.innerHTML = parent.window.str_info.td_port;
+                  newMemberRow = $id("pvlan_psel_tbl").insertRow();
+                  newCell = newMemberRow.insertCell();
+                  newCell.className = "TD_FIRST_COL";
+                  newCell.innerHTML = parent.window.vlan_common_info.td_member;
+                }
+                newCell = newPortRow.insertCell();
+                newCell.innerHTML = "<span class='NORMAL'>" + i + "</span>";
+                newCell = newMemberRow.insertCell();
+                newCell.innerHTML = "<input class='CHKBOX_NORMAL' type=checkbox name=port_" + i +" id=port_" + i + " value=" + i + ">";
+                add = (0 != (i % colspan))? 0 : 1;
+              }
+              if (0 != trunk_conf.count) {
+                newPortRow = $id("pvlan_psel_tbl").insertRow();
+                newCell = newPortRow.insertCell();
+                newCell.className = "TD_FIRST_COL";
+                newCell.innerHTML = parent.window.trunk_info.opt_trunk;
+                newMemberRow = $id("pvlan_psel_tbl").insertRow();
+                newCell = newMemberRow.insertCell();
+                newCell.className = "TD_FIRST_COL";
+                newCell.innerHTML = parent.window.vlan_common_info.td_member;
+                for (i = 1; i <= trunk_conf.maxTrunkNum; i ++) {
+                  if (0 == trunk_conf.info[i-1].valid) {
+                    continue;
+                  }
+                  newCell = newPortRow.insertCell();
+                  newCell.innerHTML = "<span class='NORMAL'>" + i + "</span>";
+                  newCell = newMemberRow.insertCell();
+                  newCell.innerHTML = "<input class='CHKBOX_NORMAL' type=checkbox name=trunk_" + i +" id=trunk_" + i + " value=" + i + '>';
+                  disablePortsByPortArr(["port_"], trunk_conf.info[i-1].mbrs);
+                }
+              }
+            </script>
+          </tbody>
+        </table>
+        <div>
+          <table align="center">
+            <tbody><tr>
+              <td><a class="BTN"><input type="button" id="pvlan_add" name="pvlan_add" class="BTN_NORMAL_BTN"></a></td>
+              <td class="SBLANK"></td>
+              <td><a class="BTN"><input type="button" id="pvlan_del" name="pvlan_del" class="BTN_NORMAL_BTN"></a></td>
+            </tr></tbody>
+          </table>
+        </div>
+      </form>
+      <form action="pvlanSet.cgi">
+        <table class="BORDER"><tbody><tr class="TABLE_HEAD">
+              <td class="TD_FIRST_COL"><script>docW(parent.window.vlan_common_info.td_vlan);</script></td>
+              <td class="TD_SECOND_COL"><span class="NORMAL"><script>docW(parent.window.vlan_common_info.td_memeberport);</script></span></td>
+            </tr>
+            <script type="text/javascript">
+              for (var i = 0; i < vlan_ds.count; i++) {
+                docW("<tr id=tr_port_" + i +"><td><span class='NORMAL'><div id=port_vid_" + i + "></div></span></td><td><span class='NORMAL'><div id=port_mbrs_" + i + "></div></span></td></tr>");
+              }
+            </script>
+        </tbody></table>
+      </form>
+    </div>
+  </fieldset>
+</div>
+</body>
+</html>

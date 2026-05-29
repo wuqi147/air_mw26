@@ -1,0 +1,89 @@
+/*
+ *  Note    : note_storm_control_application
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.8.1
+ *  Update  : 2023-02-24
+ */
+
+(1) Overview
+
+    The storm control module provide 3 ingress rate limit configurations for
+    unknown unicast(UUC), unknown multicast(UMC) and broadcast(BC) frames.
+    Each rate limit mode could be configured as PPS(packet per second) or
+    KBPS (kilo bit per second).
+    The storm control module could be selected to include or exclude
+    management frames.
+
+(2) Storm Control API Usage
+
+(2.1) Enable Storm Control Functionality
+
+    Enable storm control function is port basis.
+    User could enable storm control by air_sec_setPortStormCtrl() on each port.
+    The argument 'enable' is described as below:
+    - TRUE: Enable storm control for specific port & type.
+    - FALSE: Disable storm control for specific port & type.
+
+(2.2) Storm Control Rate Limit Configuration
+
+    User could configure the rate limit by air_sec_setPortStormCtrlRate().
+    The frame will be dropped if the rate of specific frame(UUC/UMC/BC) over
+    rate limit.
+
+    The unit of rate limit depends on rate limit mode:
+    - The unit on mode AIR_SEC_STORM_RATE_MODE_PPS is packet per second.
+    - The unit on mode AIR_SEC_STORM_RATE_MODE_KBPS is k-bit per second.
+
+    The actully rate limit depends on configured rate limit, please refer to
+    the following table.
+
+    +--------------------------------------------------------------+
+    | Configured Rate Limit | Actully Rate Limit | Rate Limit Unit |
+    |--------------------------------------------------------------|
+    |           0           |             0      |        ---      |
+    |--------------------------------------------------------------|
+    |         1 - 64        |            64      |         64      |
+    |--------------------------------------------------------------|
+    |        65 - 128       |           128      |         64      |
+    |--------------------------------------------------------------|
+    |          ...          |           ...      |         64      |
+    |--------------------------------------------------------------|
+    |     16256 - 16320     |         16320      |         64      |
+    |--------------------------------------------------------------|
+    |     16321 - 16384     |         16384      |        256      |
+    |--------------------------------------------------------------|
+    |          ...          |           ...      |        256      |
+    |--------------------------------------------------------------|
+    |     65024 - 65280     |         65280      |        256      |
+    |--------------------------------------------------------------|
+    |     65281 - 65536     |         65536      |       1024      |
+    |--------------------------------------------------------------|
+    |          ...          |           ...      |       1024      |
+    |--------------------------------------------------------------|
+    |    260096 - 261120    |        261120      |       1024      |
+    |--------------------------------------------------------------|
+    |    261121 - 262144    |        262144      |       4096      |
+    |--------------------------------------------------------------|
+    |          ...          |           ...      |       4096      |
+    |--------------------------------------------------------------|
+    |   1040384 - 1044480   |       1044480      |       4096      |
+    |--------------------------------------------------------------|
+    |   1044481 - 1048576   |       1048576      |      16384      |
+    |--------------------------------------------------------------|
+    |          ...          |           ...      |      16384      |
+    |--------------------------------------------------------------|
+    |   2473984 - 2490368   |       2490368      |      16384      |
+    |--------------------------------------------------------------|
+    |   2490368 - 2500000   |       2500000      |      16384      |
+    +--------------------------------------------------------------+
+
+(2.3) Storm Control for Management Frame Configuration
+
+    User could configure the storm control module by air_sec_setStormCtrlMgmtMode()
+    to include/exclude management frame.
+
+    - AIR_SEC_STORM_CTRL_MODE_MGMT_FRAME_INCLUDE:
+        Include management frame into storm control module.
+    - AIR_SEC_STORM_CTRL_MODE_MGMT_FRAME_EXCLUDE:
+        Exclude management frame from storm control module.
+

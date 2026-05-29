@@ -1,0 +1,1 @@
+subdir-$(CONFIG_ARCH_ANDES) += NDS32/

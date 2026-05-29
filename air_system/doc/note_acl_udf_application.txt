@@ -1,0 +1,149 @@
+/*
+ *  Note    : note_acl_udf_application
+ *  Chip    : EN8851/AN8855/AN8858
+ *  SDK     : AIR_SDK_v3.1.0
+ *  Update  : 2025-04-15
+ */
+
+(1) Overview
+
+    Switch provides ACL-UDF (user-defined fields) mechanism that enables the
+    device to filter traffic at the ingress interface and to apply the matching
+    packets to ACL. Switch supports 16 ACL-UDF for the not defined filtering
+    options in ACL normal or ARP rules. User can choose range checking or
+    pattern comparison to match the specified fields. Each UDF rule can be used
+    to filter 16-bit content of the incoming packets.
+
+(2) ACL-UDF Field Type
+
+    Switch supports several fields to match the incoming packets, and provides a
+    2-byte word offset to determine the relative position from the specified
+    field. The following table indicates the position and comparison region of
+    each field.
+
+    +----------------------------------------------------------------------+
+    | Field Type          | Position Description                           |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_MAC_HEADER  | Start from MAC header, end at ether type field |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_L2_PAYLOAD  | After ether type field                         |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_IPV4_HEADER | Match the content in IPv4 header only          |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_IPV6_HEADER | Match the content in IPv6 header only          |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_L3_PAYLOAD  | After the IPv4 or IPv6 header                  |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_TCP_HEADER  | Match the content in TCP header only           |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_UDP_HEADER  | Match the content in UDP header only           |
+    |----------------------------------------------------------------------|
+    | AIR_ACL_L4_PAYLOAD  | After the TCP or UDP header                    |
+    +----------------------------------------------------------------------+
+
+(2.1) SNAP PPPoE Header Move to MAC Header Field
+
+    AN8858 resolved the issue that user needs to use L2 payload field to match
+    LLC, SNAP, and PPPoE header in EN8851-series and AN8855. AN8858 ASIC move
+    the SNAP and PPPoE header to MAC header field.
+
+    For example:
+    (a) Match the PPPoE version and type of SNAP PPPoE packets in EN8851-series
+        and AN8855
+
+        UI32_T udf_id = 0;
+        AIR_ACL_UDF_RULE_T udf_rule;
+        osal_memset(&udf_rule, 0, sizeof(AIR_ACL_UDF_RULE_T));
+
+        udf_rule.udf_rule_en = 1;
+        udf_rule.udf_pkt_type = AIR_ACL_L2_PAYLOAD;
+        udf_rule.word_ofst = 4;
+        udf_rule.cmp_sel = 0;
+        udf_rule.cmp_pat = 0x0101;
+        udf_rule.cmp_mask = 0xffff;
+        udf_rule.portmap[0] = 0x3ff;
+
+        air_acl_setUdfRule(unit, udf_id, &udf_rule);
+
+    (b) Match the PPPoE version and type of SNAP PPPoE packets in AN8858
+
+        UI32_T udf_id = 0;
+        AIR_ACL_UDF_RULE_T udf_rule;
+        osal_memset(&udf_rule, 0, sizeof(AIR_ACL_UDF_RULE_T));
+
+        udf_rule.udf_rule_en = 1;
+        udf_rule.udf_pkt_type = AIR_ACL_MAC_HEADER;
+        udf_rule.word_ofst = 11;
+        udf_rule.cmp_sel = 0;
+        udf_rule.cmp_pat = 0x0101;
+        udf_rule.cmp_mask = 0xffff;
+        udf_rule.portmap[0] = 0x3ff;
+
+        air_acl_setUdfRule(unit, udf_id, &udf_rule);
+
+
+(2.2) Payload Field Matching
+
+    The payload type fields contain the upper layer header, which means user
+    can use L2 payload to match the IP header or TCP header content. Here are
+    two examples that can both match the first raw data in L4 payload.
+
+    For example:
+    (a) Use pattern to match the raw data 0x0908 in L4 payload from L2_PAYLOAD
+
+        UI32_T udf_id = 0;
+        AIR_ACL_UDF_RULE_T udf_rule;
+        osal_memset(&udf_rule, 0, sizeof(AIR_ACL_UDF_RULE_T));
+
+        udf_rule.udf_rule_en = 1;
+        udf_rule.udf_pkt_type = AIR_ACL_L2_PAYLOAD;
+        udf_rule.word_ofst = 20;
+        udf_rule.cmp_sel = 0;
+        udf_rule.cmp_pat = 0x0908;
+        udf_rule.cmp_mask = 0xffff;
+        udf_rule.portmap[0] = 0x3ff;
+
+        air_acl_setUdfRule(unit, udf_id, &udf_rule);
+
+    (b) Use threshold to check the raw data 0x0908 in L4 payload from
+        L4_PAYLOAD. Here the cmp_pat and cmp_mask variables would be translated
+        to low-threshold and high-threshold.
+
+        UI32_T udf_id = 0;
+        AIR_ACL_UDF_RULE_T udf_rule;
+        osal_memset(&udf_rule, 0, sizeof(AIR_ACL_UDF_RULE_T));
+
+        udf_rule.udf_rule_en = 1;
+        udf_rule.udf_pkt_type = AIR_ACL_L4_PAYLOAD;
+        udf_rule.word_ofst = 0;
+        udf_rule.cmp_sel = 1;
+        udf_rule.cmp_pat = 0x0907;
+        udf_rule.cmp_mask = 0x0909;
+        udf_rule.portmap[0] = 0x3ff;
+
+        air_acl_setUdfRule(unit, udf_id, &udf_rule);
+
+(2.3) Header Field Matching
+
+    UDF is not supported to match the packet content that is out of the
+    specified HEADER type field region. If the word offset that user configured
+    is out of range, then the matching will always be failed.
+
+    For example:
+    (a) IPv4 Header type is not supported to match the content in
+        TCP Header. The following sample would not hit.
+
+        UI32_T udf_id = 0;
+        AIR_ACL_UDF_RULE_T udf_rule;
+        osal_memset(&udf_rule, 0, sizeof(AIR_ACL_UDF_RULE_T));
+
+        udf_rule.udf_rule_en = 1;
+        udf_rule.udf_pkt_type = AIR_ACL_IPV4_HEADER;
+        udf_rule.word_ofst = 10;
+        udf_rule.cmp_sel = 1;
+        udf_rule.cmp_pat = 0x0000;
+        udf_rule.cmp_mask = 0xffff;
+        udf_rule.portmap[0] = 0x3ff;
+
+        air_acl_setUdfRule(unit, udf_id, &udf_rule);
+

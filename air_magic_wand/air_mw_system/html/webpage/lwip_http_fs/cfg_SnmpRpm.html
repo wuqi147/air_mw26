@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--#snmp_info-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+TABLE.FRAMEWORK {
+    line-height: 25px;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+TD.SBLANK {
+    width: 60px;
+}
+TD.FRAMEWORK_LEFT {
+    FONT-SIZE: 150%;
+    font-family: Arial;
+    text-align: left;
+    width: 300px;
+    padding: 0;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 200px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+td.RADIO_WIDE {
+    width: 150px;
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.BTN_WRAPPER {
+    transform: translate(300%, -10%);
+}
+</style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript">
+        var urlString = '';
+        var urlString1 = '';
+        var urlString2 = '';
+
+        function docW(a) {
+            document.write(a)
+        }
+
+        function $id(a) {
+            return document.getElementById(a)
+        }
+
+        function ipVerify(r) {
+            if (0 == r.length) return alert(js_ipVerify1 = parent.window.str_info.alt_ipverify1), !1;
+            if (!/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/.test(r)) return alert(js_ipVerify2 = parent.window
+                .str_info.alt_ipverify2), !1;
+            var a, e, t = [0, 0, 0, 0];
+            for (e = 0; e < 3; e++) {
+                var i = r.indexOf(".");
+                if (-1 == i)
+                    return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+                t[e] = r.substring(0, i), r = a = r.substring(i + 1)
+            }
+            for (t[3] = a, e = 0; e < 4; e++) {
+                if (t[e] < 0 || 255 < t[e])
+                    return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+            }
+            if (t[0] == 0)
+                return alert(js_ipVerify3 = parent.window.str_info.alt_ipverify2), !1;
+            if (127 == t[0])
+                return alert(js_ipVerify4 = parent.window.str_info.alt_ipverify4), !1;
+        }
+
+        function checkTrapName(input) {
+            if (input.match(/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i)) {
+                /* website address */
+                return 1;
+            } else if (input.match(/^([a-z0-9]+([-_][a-z0-9]+)*)+(\/[a-z0-9]+([-_][a-z0-9]+)*)*\/*$/i)) {
+                /* host name */
+                return 2;
+            } else {
+                /* invalid input */
+                alert(parent.window.snmp_info.alt_info0);
+                return 0;
+            }
+        }
+
+        function checkCommunity() {
+            if($id("readCm").value == ""){
+                alert(parent.window.snmp_info.alt_info2);
+                return $id("readCm").focus(), !1;
+            } else if (!$id("readCm").value.match(/^[a-z0-9\-_+=]+$/i)){
+                alert(parent.window.snmp_info.alt_info1);
+                return $id("readCm").focus(), !1;
+            }
+            if($id("writeCm").value == ""){
+                alert(parent.window.snmp_info.alt_info2);
+                return $id("writeCm").focus(), !1;
+            } else if (!$id("writeCm").value.match(/^[a-z0-9\-_+=]+$/i)){
+                alert(parent.window.snmp_info.alt_info1);
+                return $id("writeCm").focus(), !1;
+            }
+            if($id("trapCm").value == ""){
+                alert(parent.window.snmp_info.alt_info2);
+                return $id("trapCm").focus(), !1;
+            } else if (!$id("trapCm").value.match(/^[a-z0-9\-_+=]+$/i)){
+                alert(parent.window.snmp_info.alt_info1);
+                return $id("trapCm").focus(), !1;
+            }
+            return 1;
+        }
+
+        function snmpVersionSubmit() {
+            if (1 == $id("snmpv1En").checked) {
+                urlString += "snmpv1=1";
+            } else {
+                urlString += "snmpv1=0";
+            }
+            if (1 == $id("snmpv2En").checked) {
+                urlString += "&snmpv2=1";
+            } else {
+                urlString += "&snmpv2=0";
+            }
+            return location.href = "snmp.cgi?" + urlString;
+        }
+
+        function snmpCommunitySubmit() {
+            if (0 != checkCommunity()) {
+                urlString1 += "readCm=" + $id("readCm").value;
+                urlString1 += "&writeCm=" + $id("writeCm").value;
+                urlString1 += "&trapCm=" + $id("trapCm").value;
+                return location.href = "snmp.cgi?" + urlString1;
+            }
+            else {
+                return 0;
+            }
+        }
+
+        function snmpTrapSubmit() {
+            if (1 == $id("trapV1En").checked && 1 == $id("snmpv1En").checked) {
+                urlString2 += "trapV1En=1";
+            } else {
+                urlString2 += "trapV1En=0";
+            }
+            if (1 == $id("trapV2En").checked && 1 == $id("snmpv2En").checked) {
+                urlString2 += "&trapV2En=1";
+            } else {
+                urlString2 += "&trapV2En=0";
+            }
+            if (1 == $id("trapName").checked) {
+                if (0 != checkTrapName($id("trapIpName").value)) {
+                    urlString2 += "&trapName=" + $id("trapIpName").value;
+                } else {
+                    return $id("trapIpName").focus(), !1;
+                }
+            } else if (1 == $id("trapIp").checked) {
+                if (0 == ipVerify($id("trapIpName").value)) {
+                    return $id("trapIpName").focus(), !1;
+                } else {
+                    urlString2 += "&trapIp=" + $id("trapIpName").value;
+                }
+            }
+            if (1 == $id("coldwarmstartEn").checked) {
+                urlString2 += "&coldwarmstartEn=1";
+            } else {
+                urlString2 += "&coldwarmstartEn=0";
+            }
+            if (1 == $id("linkupdownEn").checked) {
+                urlString2 += "&linkupdownEn=1";
+            } else {
+                urlString2 += "&linkupdownEn=0";
+            }
+            if (1 == $id("AuthfailEn").checked) {
+                urlString2 += "&AuthfailEn=1";
+            } else {
+                urlString2 += "&AuthfailEn=0";
+            }
+            return location.href = "snmp.cgi?" + urlString2;
+        }
+
+        function snmpChange() {
+            if (0 == $id("snmpv1En").checked) {
+                $id("trapV1En").disabled = true;
+                $id("trapV1Dis").disabled = true;
+            } else {
+                $id("trapV1En").disabled = false;
+                $id("trapV1Dis").disabled = false;
+            }
+            if (0 == $id("snmpv2En").checked) {
+                $id("trapV2En").disabled = true;
+                $id("trapV2Dis").disabled = true;
+            } else {
+                $id("trapV2En").disabled = false;
+                $id("trapV2Dis").disabled = false;
+            }
+        }
+
+        function snmploadValue() {
+            $id("snmpv1En").checked = !!snmp_info.snmpv1, $id("snmpv1Dis").checked = !snmp_info.snmpv1;
+            $id("snmpv2En").checked = !!snmp_info.snmpv2, $id("snmpv2Dis").checked = !snmp_info.snmpv2;
+            $id("snmpv1En").onclick = () => { return snmpChange(); };
+            $id("snmpv1Dis").onclick = () => { return snmpChange(); };
+            $id("snmpv2En").onclick = () => { return snmpChange(); };
+            $id("snmpv2Dis").onclick = () => { return snmpChange(); };
+            $id("snmpVer").onclick = () => { return snmpVersionSubmit(); };
+            $id("snmpVer").value = parent.window.str_info.btn_apply;
+            $id("snmpCm").onclick = () => { return snmpCommunitySubmit(); };
+            $id("snmpCm").value = parent.window.str_info.btn_apply;
+            $id("snmpTrap").onclick = () => { return snmpTrapSubmit(); };
+            $id("snmpTrap").value = parent.window.str_info.btn_apply;
+            $id("readCm").value = snmp_info.readCm;
+            $id("writeCm").value = snmp_info.writeCm;
+            $id("trapCm").value = snmp_info.trapCm;
+            if ("" == snmp_info.trapName) {
+                $id("trapIpName").value = snmp_info.trapIp;
+                $id("trapName").checked = 0;
+                $id("trapIp").checked = 1;
+            } else {
+                $id("trapIpName").value = snmp_info.trapName;
+                $id("trapName").checked = 1;
+                $id("trapIp").checked = 0;
+            }
+            $id("trapV1En").checked = !!snmp_info.trapv1, $id("trapV1Dis").checked = !snmp_info.trapv1;
+            $id("trapV2En").checked = !!snmp_info.trapv2, $id("trapV2Dis").checked = !snmp_info.trapv2;
+            $id("coldwarmstartEn").checked = snmp_info.coldwarm;
+            $id("linkupdownEn").checked = snmp_info.linkupdown;
+            $id("AuthfailEn").checked = snmp_info.authfail;
+            snmpChange();
+        }
+    </script>
+</head>
+
+<body marginwidth="0" marginheight="0">
+<fieldset>
+    <legend>
+    <span class="NORMAL">
+        <script>docW(parent.window.snmp_info.lgd_version)</script>
+    </span>
+    </legend>
+    <div id="div_sec_title">
+        <form action="snmp.cgi" enctype="multipart/form-data">
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_snmpv1)</script>
+                        </td>
+                        <td align="left" class="RADIO_WIDE">
+                        <input name="snmpV1" id="snmpv1En" type="radio" value="1" class="RADIO_NORMAL">
+                        <span class="NORMAL">
+                            <script>
+                                docW(parent.window.str_info.opt_enable)
+                            </script>
+                        </span>
+                        </td>
+                        <td align="left">
+                        <input name="snmpV1" id="snmpv1Dis" type="radio" value="0" class="RADIO_NORMAL">
+                        <span class="NORMAL">
+                            <script>
+                                docW(parent.window.str_info.opt_disable)
+                            </script>
+                        </span>
+                        </td>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_snmpv2)</script>
+                        </td>
+                        <td align="left" class="RADIO_WIDE">
+                        <input name="snmpV2" id="snmpv2En" type="radio" value="1" class="RADIO_NORMAL">
+                        <span class="NORMAL">
+                            <script>
+                                docW(parent.window.str_info.opt_enable)
+                            </script>
+                        </span>
+                        </td>
+                        <td align="left">
+                        <input name="snmpV2" id="snmpv2Dis" type="radio" value="0" class="RADIO_NORMAL">
+                        <span class="NORMAL">
+                            <script>
+                                docW(parent.window.str_info.opt_disable)
+                            </script>
+                        </span>
+                        </td>
+                        <table class="BTN_WRAPPER" align="center">
+                            <tbody>
+                                <tr>
+                                    <td class="BTN_WRAPPER">
+                                    <a class="BTN"><input id="snmpVer" class="BTN_NORMAL_BTN" type="button" name="Apply"></script></a>
+                                </td>
+                            </tbody>
+                        </table>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</fieldset>
+<fieldset>
+    <legend>
+    <span class="NORMAL">
+        <script>docW(parent.window.snmp_info.lgd_comm)</script>
+    </span>
+    </legend>
+    <div id="div_sec_title">
+        <form action="snmp.cgi" enctype="multipart/form-data">
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_rc)</script>
+                        </td>
+                        <td><input class="TEXT_ENABLE" type="text" id="readCm" name="community" maxlength="20"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_wc)</script>
+                        </td>
+                        <td><input class="TEXT_ENABLE" type="text" id="writeCm" name="community" maxlength="20"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_tc)</script>
+                        </td>
+                        <td><input class="TEXT_ENABLE" type="text" id="trapCm" name="community" maxlength="20"></td>
+                        <table class="BTN_WRAPPER" align="center">
+                            <tbody>
+                                <tr>
+                                    <td class="BTN_WRAPPER">
+                                    <a class="BTN">
+                                    <input id="snmpCm" class="BTN_NORMAL_BTN" type="button" name="Apply"></script>
+                                    </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</fieldset>
+<fieldset>
+    <legend>
+    <span class="NORMAL">
+        <script>docW(parent.window.snmp_info.lgd_trap)</script>
+    </span>
+    </legend>
+    <div id="div_sec_title">
+        <form action="snmp.cgi" enctype="multipart/form-data">
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_trapv1)</script>
+                        </td>
+                        <td align="left" class="RADIO_WIDE">
+                            <input name="trapV1" id="trapV1En" type="radio" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.str_info.opt_enable)</script>
+                            </span>
+                        </td>
+                        <td align="left">
+                            <input name="trapV1" id="trapV1Dis" type="radio" value="0" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.str_info.opt_disable)</script>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_trapv2)</script>
+                        </td>
+                        <td align="left" class="RADIO_WIDE">
+                            <input name="trapV2" id="trapV2En" type="radio" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.str_info.opt_enable)</script>
+                            </span>
+                        </td>
+                        <td align="left">
+                            <input name="trapV2" id="trapV2Dis" type="radio" value="0" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.str_info.opt_disable)</script>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_trapServer)</script>
+                        </td>
+                        <td align="left" class="RADIO_WIDE">
+                            <input name="trapServer" id="trapName" type="radio" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.snmp_info.opt_trapServerName)</script>
+                            </span>
+                        </td>
+                        <td align="left">
+                            <input name="trapServer" id="trapIp" type="radio" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.snmp_info.opt_trapServerIp)</script>
+                            </span>
+                        </td>
+                        <td class="SBLANK"></td>
+                        <td>
+                            <input class="TEXT_ENABLE" type="text" id="trapIpName" name="trapIpName" maxlength="32">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="FRAMEWORK">
+                <tbody>
+                    <tr>
+                        <td class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.snmp_info.spn_trapty)</script>
+                        </td>
+                        <td>
+                            <input name="trapType" id="coldwarmstartEn" type="checkbox" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.snmp_info.opt_coldwarmstart)</script>
+                            </span>
+                        </td>
+                        <td class="SBLANK"></td>
+                        <td>
+                            <input name="trapType" id="linkupdownEn" type="checkbox" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.snmp_info.opt_linkupdown)</script>
+                            </span>
+                        </td>
+                        <td class="SBLANK"></td>
+                        <td>
+                            <input name="trapType" id="AuthfailEn" type="checkbox" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL">
+                                <script>docW(parent.window.snmp_info.opt_authfail)</script>
+                            </span>
+                        </td>
+                        <table class="BTN_WRAPPER" align="center">
+                            <tbody>
+                                <tr>
+                                    <td class="BTN_WRAPPER">
+                                    <a class="BTN">
+                                    <input id="snmpTrap" class="BTN_NORMAL_BTN" type="button" name="Apply"></script>
+                                    </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</fieldset>
+<script type="text/javascript">
+    snmploadValue()
+</script>
+</body>
+
+</html>

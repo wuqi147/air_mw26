@@ -1,0 +1,109 @@
+/*
+ *  Note    : note_flash_layout
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.8.6
+ *  Update  : 2024-01-30
+ */
+
+(1) Overview
+    SDK utilizes flash-layout-definition in platform.h to partition flash into
+    multiple sections for use. The purpose of this document is to describe how
+    to adjust it.
+
+(2) Flash Layout Design Mechanism
+    SDK partitions flash into multiple sections which is determined by
+    flash-layout-definition in platform.h.
+
+    The format of flash-layout-definition in platform.h is as follows:
+    #define A_BASE ****
+    #define A_SIZE ****
+    #define B_BASE (A_BASE+A_SIZE)
+    #define B_SIZE ****
+    #define C_BASE (B_BASE+B_SIZE)
+    #define C_SIZE ****
+    #define D_BASE (C_BASE+C_SIZE)
+    #define D_SIZE ****
+    ...
+    **** is constant value
+    In this example, the starting positions and sizes of the A/B/C/D partitions
+    in flash are described.
+
+
+(3) Default Flash Layout
+    #define DEFAULT_SYSTEMSIZE  (S_1M + S_512K)
+    #define SystemSize          (DEFAULT_SYSTEMSIZE)
+    #define BootLoaderBase      (0x20000000)
+    #define BootLoaderSize      (S_112K)
+    #define BootConfigBase      (BootLoaderBase + BootLoaderSize)
+    #define TempBootConfigBase  (BootConfigBase + S_4K)
+    #define BootConfigSize      (12*1024)
+    #define ManufactureBase     (BootConfigBase + BootConfigSize)
+    #define ManufactureSize     (S_4K)
+    #define MainSystemBase      (ManufactureBase + ManufactureSize)
+    #define MainSystemSize      (SystemSize)
+    #define BackupSystemBase    (MainSystemBase + MainSystemSize)
+    #define BackupSystemSize    (SystemSize)
+    #define SystemConfigBase    (BackupSystemBase + BackupSystemSize)
+    #define SystemConfigSize    (S_64K)
+    #define TempSystemBase      (SystemConfigBase + SystemConfigSize)
+    #define TempSystemSize      (SystemSize)
+    #define FwSignatureBase     (TempSystemBase + TempSystemSize)
+    #define FwSignatureSize     (S_64K)
+
+
+    BootLoaderBase :    |--------------------| 0x20000000
+                        |                    |
+                        |               112K |
+                        |                    |
+    BootConfigBase :    |--------------------| 0x2001C000
+                        |                    |
+                        |                12K |
+                        |                    |
+    ManufactureBase :   |--------------------| 0x2001F000
+                        |                    |
+                        |                 4K |
+                        |                    |
+    MainSystemBase :    |--------------------| 0x20020000
+                        |                    |
+                        |               1.5M |
+    BackupSystemBase :  |--------------------| 0x201A0000
+                        |                    |
+                        |               1.5M |
+                        |                    |
+    SystemConfigBase :  |--------------------| 0x20320000
+                        |                    |
+                        |                64K |
+                        |                    |
+    TempSystemBase :    |--------------------| 0x20330000
+                        |                    |
+                        |               1.5M |
+                        |                    |
+    FwSignatureBase :   |--------------------| 0x204B0000
+                        |                    |
+                        |                64K |
+                        |                    |
+                        |--------------------| 0x204C0000
+
+    Customers can directly modify "#define SystemSize" in platform.h to fit
+    the size of SDK image (airRTOSSystem.img). The default value is
+    1.5MB or 2.5MB.
+
+(4) Notes
+    When flash-layout-definition is modified, you need to recompile
+    bootloader & SDK, then update bootloader through bootloader shell
+    command "upgrade fw-type=bootloader". After updating bootloader,
+    User can see the changes of bootmenu title(system size **** MB).
+    In final step, update SDK with bootloader shell command
+    "upgrade fw-type=rtos".
+
+    It is recommended that after changing flash-layout-definition and updating
+    bootloader, use bootloader shell command "flash-erase-partition" to
+    clear old information. Then update SDK with "upgrade fw-type=rtos".
+
+    Summarize steps for changing flash-layout-definition
+    1: recompile bootloader & SDK
+    2: bootloader shell command "upgrade fw-type=bootloader"
+    3: bootloader shell command "flash-erase-partition"
+    4: bootloader shell command "upgrade fw-type=rtos"
+
+

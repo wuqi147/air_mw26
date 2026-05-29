@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<script>
+<!--#dhcpsnpinfo-->
+</script>
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+  font-size: 12px;
+  width: 1300px;
+  margin: 1em auto;
+  padding: 1em;
+  border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+  font-weight: bold;
+  font-size: 150%;
+  color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+  font-family: Arial;
+}
+span.NORMAL {
+  font-size: 150%;
+  font-family: "Arial";
+}
+table {
+  margin: 1em auto;
+  border-collapse: collapse;
+  text-align: center;
+}
+table td {
+  height: 32px;
+  line-height: 21px;
+}
+tr.TABLE_HEAD {
+  height: 32px;
+}
+table.BORDER td, th {
+  border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+  background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+  padding: 0 5px;
+  font-size: 150%;
+  font-family: "Arial";
+}
+table.BTN_WRAPPER {
+  margin-top: 12px;
+}
+TD.BTN_WRAPPER {
+  width: 70px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 250px;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+.SELECT_WIDTH {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 140px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 100px;
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.RADIO_WIDTH {
+    width: 120px;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+input {
+  border-width: 1px;
+  border-style: solid;
+}
+tbody#tb_portSet tr:not(.TABLE_HEAD) td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 20ch;
+  white-space: nowrap;
+}
+</style>
+<meta name="referrer" content="no-referrer">
+<script>
+var docW = (a) => document.write(a), $ = (a) => document.getElementById(a),
+  incMeta = () => docW('<meta http-equiv="Content-Type" content="text/html; charset=' + ((0 == top.g_Lan) ? "gb2312" : "utf-8") + '">');
+var s_info = parent.window.dhcp_snoop_info, selState = new Array(dhcp_ds.portNum), ps_cnt = 0,
+  g_plist = _port_list, g_pbmp = Array.from(g_plist.values());
+
+function initPs() {
+  let ps = $("dhcp_snoop_portset");
+  ps.trustPort.value = -1;
+  ps.option82.value = -1;
+  ps.opt82Mode.value = -1;
+  ps.cirType.value = -1;
+  ps.circuitId.value = "";
+  ps.remType.value = -1;
+  ps.remoteId.value = "";
+  ps.circuitId.disabled = !!1;
+  ps.remoteId.disabled = !!1;
+}
+
+function initPage() {
+  for (let i = 0; i < selState.length; ++i) selState[i] = !1;
+  $("dhcpsnpEn").checked = !!dhcp_ds.state;
+  $("dhcpsnpDis").checked = !dhcp_ds.state;
+  initPs();
+}
+
+function initPageLang() {
+  let setT = (e,t) => e.innerText = t;
+  setT($("lgd_dhcpsnooping"), s_info.lgd_dhcpsnooping);
+  setT($("lgd_port_set"), s_info.lgd_port_set);
+  setT($("spn_dhcpsnooping"), s_info.spn_dhcpsnooping);
+  setT($("spn_enable"), s_info.enable);
+  setT($("spn_disable"), s_info.disable);
+  setT($("tb1_port"), s_info.port);
+  setT($("tb1_trust"), s_info.trust);
+  setT($("tb1_option82"), s_info.option82);
+  setT($("tb1_opt82_mode"), s_info.opt82_mode);
+  setT($("tb1_circuit_custom"), s_info.circuit_custom);
+  setT($("tb1_circuit_custom_id"), s_info.circuit_custom_id);
+  setT($("tb1_remote_custom"), s_info.remote_custom);
+  setT($("tb1_remote_custom_id"), s_info.remote_custom_id);
+  setT($("tb2_port"), s_info.port);
+  setT($("tb2_trust"), s_info.trust);
+  setT($("tb2_option82"), s_info.option82);
+  setT($("tb2_opt82_mode"), s_info.opt82_mode);
+  setT($("tb2_circuit_custom"), s_info.circuit_custom);
+  setT($("tb2_circuit_custom_id"), s_info.circuit_custom_id);
+  setT($("tb2_remote_custom"), s_info.remote_custom);
+  setT($("tb2_remote_custom_id"), s_info.remote_custom_id);
+  $("submitBtn1").value = s_info.btn_apply;
+  $("submitBtn2").value = s_info.btn_apply;
+
+  let ps = $("dhcp_snoop_portset");
+  setT(ps.trustPort.children[0], s_info.disable);
+  setT(ps.trustPort.children[1], s_info.enable);
+  setT(ps.option82.children[0], s_info.disable);
+  setT(ps.option82.children[1], s_info.enable);
+  setT(ps.opt82Mode.children[0], s_info.opt82_mode1);
+  setT(ps.opt82Mode.children[1], s_info.opt82_mode2);
+  setT(ps.opt82Mode.children[2], s_info.opt82_mode3);
+  setT(ps.cirType.children[0], s_info.default);
+  setT(ps.cirType.children[1], s_info.usr_cfg);
+  setT(ps.remType.children[0], s_info.mac);
+  setT(ps.remType.children[1], s_info.ip);
+  setT(ps.remType.children[2], s_info.usr_cfg);
+  ps.cirType.onchange = () => {
+    let ps = $("dhcp_snoop_portset"), v = ps.cirType.value;
+    ps.circuitId.disabled = (v != 1);
+    ps.circuitId.value = "";
+  };
+  ps.remType.onchange = () => {
+    let ps = $("dhcp_snoop_portset"), v = ps.remType.value;
+    ps.remoteId.disabled = (v != 2);
+    ps.remoteId.value = "";
+  };
+  $("submitBtn1").onclick = () => { return do_submit1(); };
+  $("portSel").onclick = (e) => { return chkSel(e); };
+  $("submitBtn2").onclick = () => { return do_submit2(); };
+}
+
+function initPsTbl() {
+  g_plist.forEach((e, k) => {
+    var ps = $("tb_portSet");
+    var op82op = [s_info.opt82_mode1, s_info.opt82_mode2, s_info.opt82_mode3],
+      cir_en = [s_info.default, s_info.usr_cfg],
+      rem_en = [s_info.mac, s_info.ip, s_info.usr_cfg];
+    i = parent.window.g_getPort(e);
+    ps.innerHTML += "<tr><td width='7%'><span class='NORMAL'>" +
+      ((k.indexOf("Trunk") < 0) ? (s_info.port + k): (k.replace("Trunk", parent.window.trunk_info.opt_trunk))) +
+      "</span></td><td width='7%'><span class='NORMAL'>" + ((dhcp_ds.trust[i] == 1)? s_info.enable: s_info.disable) +
+      "</span></td><td width='7%'><span class='NORMAL'>" + ((dhcp_ds.option82[i] == 1)? s_info.enable: s_info.disable) +
+      "</span></td><td width='7%'><span class='NORMAL'>" + op82op[(dhcp_ds.opt82Mode[i])] +
+      "</span></td><td width='10%'><span class='NORMAL'>" + cir_en[dhcp_ds.circuitCustom[i]] +
+      "</span></td><td title='" + dhcp_ds.circuitCustomId[i] + "' width='23%'><span class='NORMAL'>" + dhcp_ds.circuitCustomId[i] +
+      "</span></td><td width='10%'><span class='NORMAL'>" + rem_en[dhcp_ds.remoteCustom[i]] +
+      "</span></td><td title='" + dhcp_ds.remoteCustomId[i] + "' width='23%'><span class='NORMAL'>" + dhcp_ds.remoteCustomId[i] +
+      "</span></td></tr>";
+  });
+}
+
+function getSelNum() {
+  var t = 0;
+  selState.forEach((e) => { if (e) ++t; });
+  return t;
+}
+
+function chkSel(event) {
+  let portSel_options = $("portSel").options;
+  let portSel_length = portSel_options.length;
+  let portSel_index = 0;
+  let ps = $("dhcp_snoop_portset");
+
+  for (portSel_index = 0; portSel_index < portSel_length; ++portSel_index) {
+    selState[portSel_index] = portSel_options[portSel_index].selected;
+  }
+  if (1 == getSelNum()) {
+    let i = selState.indexOf(!0);
+    portSel_index = parent.window.g_getPort(g_pbmp[i]);
+    if (portSel_index >= 0) {
+      ps.trustPort.value = dhcp_ds.trust[portSel_index];
+      ps.option82.value = dhcp_ds.option82[portSel_index];
+      ps.opt82Mode.value = dhcp_ds.opt82Mode[portSel_index];
+      ps.cirType.value = dhcp_ds.circuitCustom[portSel_index];
+      ps.circuitId.value = dhcp_ds.circuitCustomId[portSel_index];
+      ps.remType.value = dhcp_ds.remoteCustom[portSel_index];
+      ps.remoteId.value = dhcp_ds.remoteCustomId[portSel_index];
+      ps.circuitId.disabled = (ps.cirType.value != 1);
+      ps.remoteId.disabled = (ps.remType.value != 2);
+    }
+  } else {
+    initPs();
+  }
+}
+
+function activeAllInput(en) {
+  let ps = $("dhcp_snoop_portset"), setEn = (el) => el.disabled = !en;
+  setEn($("dhcpsnpEn")), setEn($("dhcpsnpDis")), setEn($("submitBtn1")), setEn($("submitBtn2")), setEn($("portSel"));
+  setEn(ps.trustPort), setEn(ps.option82), setEn(ps.opt82Mode), setEn(ps.cirType), setEn(ps.circuitId), setEn(ps.remType), setEn(ps.remoteId);
+}
+
+function do_submit1() {
+  let m = ($("dhcpsnpEn").checked)? 1: 0;
+  if (m === dhcp_ds.state) { alert(parent.window.str_info.alt_nochange); return !1; }
+  return (activeAllInput(!1), location.href = "dhcpSnoopEnable.cgi?state=" + m);
+}
+
+function getPortBmp() {
+  var p = 0;
+  selState.forEach((e, i) => { if (e) p |= g_pbmp[i]; });
+  return p;
+}
+
+function do_submit2() {
+  let ps = $("dhcp_snoop_portset"), isValid = (t, s, e) => (!t) || RegExp("^([a-zA-Z 0-9%_-]){1," + e + "}$").test(s);
+  if (getSelNum() == 0) { alert(s_info.alt_info1); return !1; }
+  if (!isValid(ps.cirType.value == 1, ps.circuitId.value, 64)) { alert(s_info.alt_info2); return !1; }
+  if (!isValid(ps.remType.value == 2, ps.remoteId.value, 64)) { alert(s_info.alt_info3); return !1; }
+  let req = "dhcpSnoopPortSet.cgi?pbmp=" + getPortBmp(), valid = !1, addParam = (c, p) => { if (c.value != '') { req += p; valid = !0; } };
+  addParam(ps.trustPort, "&trust=" + ps.trustPort.value);
+  addParam(ps.option82, "&option82=" + ps.option82.value);
+  addParam(ps.opt82Mode, "&opt82Mode=" + ps.opt82Mode.value);
+  addParam(ps.cirType, "&circuitCustom=" + ps.cirType.value + "&circuitCustomId=" + ps.circuitId.value);
+  addParam(ps.remType, "&remoteCustom=" + ps.remType.value + "&remoteCustomId=" + ps.remoteId.value);
+  return (valid)? (activeAllInput(!1), location.href = req + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info)): (alert(parent.window.str_info.alt_nochange), !1);
+}
+
+function getPsData() {
+  if (ps_cnt >= dhcp_ds.portNum) { return; }
+  var xhr = parent.getXMLObject();
+  if (!!xhr) {
+    xhr.onreadystatechange = function() {
+      if ((this.readyState == 4) && (this.status == 200)) {
+        let ids = this.responseText.split(";"), cids = ids[0].split(","), rids = ids[1].split(","), cnt = cids.length;
+        if (!!cnt && (cnt == rids.length)) {
+          dhcp_ds.circuitCustomId.push(...cids);
+          dhcp_ds.remoteCustomId.push(...rids);
+          ps_cnt += cnt;
+        }
+        if (ps_cnt == dhcp_ds.portNum) {
+          initPsTbl();
+        } else {
+          getPsData();
+        }
+      }
+    };
+    xhr.open("GET", "/opt82info.xml", true);
+    xhr.send();
+  }
+}
+incMeta();
+
+window.onload = () => {
+  let psl = $("portSel"), opts = "";
+  g_plist.forEach((e, i) => {
+    opts += ('<option id="dhcpport_' + i + '" value=' + e + '>' +
+      ((i.indexOf("Trunk") < 0) ? (s_info.port + i): (i.replace("Trunk", parent.window.trunk_info.opt_trunk))) + "</option>");
+  });
+  psl.innerHTML = opts;
+  initPageLang();
+  initPage();
+  getPsData();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<fieldset>
+<legend><span class="NORMAL" id="lgd_dhcpsnooping"></span></legend>
+<form name="dhcpSnoopEnable">
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="20%" align="left">
+            <span class="NORMAL" id="spn_dhcpsnooping"></span>
+        </td>
+        <td class="RADIO_WIDTH" align="left">
+          <input name="dhcpsnp_mode" id="dhcpsnpEn" type="radio" value="1" class="RADIO_NORMAL"/>
+          <span id="spn_enable" class="NORMAL"></span>
+        </td>
+        <td align="left">
+          <input name="dhcpsnp_mode" id="dhcpsnpDis" type="radio" value="0" class="RADIO_NORMAL" checked="" />
+          <span id="spn_disable" class="NORMAL"></span>
+        </td>
+        <td class="RADIO_WIDTH" valign="middle">
+          <table>
+            <tbody>
+              <tr>
+                <td class="BTN_WRAPPER">
+                  <a class="BTN"><input id="submitBtn1" class="BTN_NORMAL_BTN" type="button" /></a></td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+</fieldset>
+<fieldset>
+<legend><span class="NORMAL" id="lgd_port_set"></span></legend>
+<form id="dhcp_snoop_portset">
+  <table class="BORDER" width="100%">
+    <tbody>
+      <tr class="TABLE_HEAD">
+        <td id="tb1_port" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb1_trust" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb1_option82" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb1_opt82_mode" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb1_circuit_custom" class="TD_FIRST_COL" width="10%"></td>
+        <td id="tb1_circuit_custom_id" class="TD_FIRST_COL" width="23%"></td>
+        <td id="tb1_remote_custom" class="TD_FIRST_COL" width="10%"></td>
+        <td id="tb1_remote_custom_id" class="TD_FIRST_COL"></td>
+      </tr>
+      <tr>
+        <td>
+          <select class="SELECT_PORTLIST" id="portSel" name="dhcpport" multiple size="5" overflow="scroll">
+          </select></td>
+        <td>
+          <select class="SELECT_NORMAL" name="trustPort">
+            <option value="0"></option>
+            <option value="1"></option>
+          </select></td>
+        <td>
+          <select class="SELECT_NORMAL" name="option82">
+            <option value="0"></option>
+            <option value="1"></option>
+          </select></td>
+        <td>
+          <select class="SELECT_NORMAL" name="opt82Mode">
+            <option value="0"></option>
+            <option value="1"></option>
+            <option value="2"></option>
+          </select></td>
+        <td>
+          <select class="SELECT_WIDTH" name="cirType">
+            <option value="0"></option>
+            <option value="1"></option>
+          </select></td>
+        <td>
+            <input class="TEXT_ENABLE" maxlength="64" id="circuitId" name="circuitId" /></td>
+        <td>
+          <select class="SELECT_WIDTH" name="remType">
+            <option value="0"></option>
+            <option value="1"></option>
+            <option value="2"></option>
+          </select></td>
+        <td>
+          <input class="TEXT_ENABLE" size="15" maxlength="64" id="remoteId" name="remoteId" /></td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="BTN_WRAPPER" align="center">
+    <tbody>
+      <tr>
+        <td class="BTN_WRAPPER">
+          <a class="BTN"><input id="submitBtn2" class="BTN_NORMAL_BTN" type="button" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+    <table class="BOTTOM_LINE">
+      <tbody>
+         <tr>
+            <td class="BOTTOM_LINE"></td>
+         </tr>
+      </tbody>
+    </table>
+  <table class="BORDER" width="100%">
+    <tbody id="tb_portSet">
+      <tr class="TABLE_HEAD">
+        <td id="tb2_port" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb2_trust" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb2_option82" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb2_opt82_mode" class="TD_FIRST_COL" width="7%"></td>
+        <td id="tb2_circuit_custom" class="TD_FIRST_COL" width="10%"></td>
+        <td id="tb2_circuit_custom_id" class="TD_FIRST_COL" width="23%"></td>
+        <td id="tb2_remote_custom" class="TD_FIRST_COL" width="10%"></td>
+        <td id="tb2_remote_custom_id" class="TD_FIRST_COL" width="23%"></td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+</fieldset>
+</body>
+</html>

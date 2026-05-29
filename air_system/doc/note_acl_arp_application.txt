@@ -1,0 +1,160 @@
+/*
+ *  Note    : note_acl_arp_application
+ *  Chip    : AN8858
+ *  SDK     : AIR_SDK_v3.1.0
+ *  Update  : 2025-04-15
+ */
+
+(1) Overview
+
+    AN8858 ACL enhanced the matching ARP packet mechanism. In EN8851-series,
+    user needs to use additional UDF rules to filter the DMAC or SMAC, while
+    AN8858 creates a new format called ARP-rule for filtering ARP packets
+    exclusively. Original ACL rules cannot be applied to ARP packets in AN8858.
+    AN8858 ACL supports up to 128 entries, including both normal and ARP-rules.
+    User can configure the action and bind to the ARP-rule at the ingress
+    interfaces. SDK v3.1.0 creates new APIs to support the ACL ARP-rules.
+
+(2) ARP Rule
+
+    Configuring the ARP-rule for filtering ARP packets is similar to original
+    ACL rule. SDK v3.1.0 creates a new structure AIR_ACL_ARP_RULE_T and ARP
+    rule relative APIs. The following table presents the supported filtering
+    options. The examples below introduce how to configure, retrieve, or remove
+    an ARP-rule.
+
+    +------------------------------------------------+
+    |  Field  |  Key Size  |      Description        |
+    |------------------------------------------------|
+    |   DMAC  |   48 bits  | Destination MAC Address |
+    |------------------------------------------------|
+    |   SMAC  |   48 bits  | Source MAC Address      |
+    |------------------------------------------------|
+    |   STAG  |   16 bits  | Service Tag TCI         |
+    |------------------------------------------------|
+    |   CTAG  |   16 bits  | Customer Tag TCI        |
+    |------------------------------------------------|
+    |   THA   |   48 bits  | Target Hardware Address |
+    |------------------------------------------------|
+    |   SHA   |   16 bits  | Sender Hardware Address |
+    |------------------------------------------------|
+    |   DIP   |   16 bits  | Target Protocol Address |
+    |------------------------------------------------|
+    |   SIP   |   16 bits  | Sender Protocol Address |
+    |------------------------------------------------|
+    |   UDF   |   16 bits  | User-Defined Fields     |
+    +------------------------------------------------+
+
+    For example:
+    (a) Permit specific DMAC in ARP packets and forward to CPU only
+
+        UI32_T entry_id = 0;
+        AIR_ACL_ARP_RULE_T rule;
+        AIR_ACL_ACTION_T action;
+        osal_memset(&rule, 0, sizeof(AIR_ACL_ARP_RULE_T));
+        osal_memset(&action, 0, sizeof(AIR_ACL_ACTION_T));
+
+        rule.rule_en = 1;
+        rule.end = 1;
+        rule.key.dmac = {0x00, 0x10, 0x94, 0x00, 0x01, 0x02};
+        rule.mask.dmac = 0x3f;
+        rule.field_valid |= BIT(AIR_ACL_ARP_DMAC_KEY);
+        rule.portmap[0] = 0x3ff;
+
+        air_acl_setArpRule(unit, entry_id, &rule);
+
+        action.port_fw = 6;
+        action.field_valid |= BIT(AIR_ACL_FW_PORT);
+
+        air_acl_setAction(unit, entry_id, &action);
+
+    (b) Deny specific DMAC and SHA in ARP packets and others forward to CPU only
+
+        UI32_T entry_id = 0;
+        AIR_ACL_ARP_RULE_T rule;
+        AIR_ACL_ACTION_T action;
+        osal_memset(&rule, 0, sizeof(AIR_ACL_ARP_RULE_T));
+        osal_memset(&action, 0, sizeof(AIR_ACL_ACTION_T));
+
+        rule.rule_en = 1;
+        rule.reverse = 1;
+        rule.end = 1;
+        rule.portmap[0] = 0x3ff;
+
+        rule.key.dmac = {0x00, 0x10, 0x94, 0x00, 0x01, 0x02};
+        rule.mask.dmac = 0x3f;
+        rule.field_valid |= BIT(AIR_ACL_ARP_DMAC_KEY);
+        rule.key.sha = {0x00, 0x10, 0x94, 0x00, 0x01, 0x00};
+        rule.mask.sha = 0x3f;
+        rule.field_valid |= BIT(AIR_ACL_ARP_SHA_KEY);
+
+        air_acl_setArpRule(unit, entry_id, &rule);
+
+        action.port_fw = 6;
+        action.field_valid |= BIT(AIR_ACL_FW_PORT);
+
+        air_acl_setAction(unit, entry_id, &action);
+
+    (c) Get an ARP-rule of specified entry index 0
+
+        UI32_T entry_id = 0;
+        AIR_ACL_ARP_RULE_T rule;
+        osal_memset(&rule, 0, sizeof(AIR_ACL_ARP_RULE_T));
+
+        air_acl_getArpRule(unit, entry_id, &rule);
+
+    (d) Delete an ARP-rule of specified entry index
+
+        air_acl_delArpRule(unit, entry_id);
+
+(3) Limitation
+
+    Current ARP-rule could not detect whether the TCI value is STAG or CTAG
+    of single VLAN tag packets. For example, if user wants to filter CTAG with
+    VID 100 and PCP 7 value from single tag ARP packets, but the incoming
+    traffic contain single STAG with the same VID 100 and PCP 7 value would
+    also be permitted. QinQ packets that contained 2 VLAN tags do not have this
+    restriction. In this case, SDK introduces how to use an additional ACL-UDF
+    to detect the TPID value is CTAG (0x8100) or STAG (0x88a8 or 0x9100) from
+    incoming network traffic.
+
+    For example:
+    (a) Permit specific DMAC and CTAG ARP packets
+
+        UI32_T entry_id = 0;
+        UI32_T udf_id = 0;
+        AIR_ACL_ARP_RULE_T rule;
+        AIR_ACL_UDF_RULE_T udf_rule;
+        osal_memset(&rule, 0, sizeof(AIR_ACL_ARP_RULE_T));
+        osal_memset(&udf_rule, 0, sizeof(AIR_ACL_UDF_RULE_T));
+
+        /* Add the udf rule to match TPID */
+        udf_rule.udf_rule_en = 1;
+        udf_rule.udf_pkt_type = AIR_ACL_MAC_HEADER;
+        udf_rule.word_ofst = 6;
+        udf_rule.cmp_sel = 0;
+        udf_rule.cmp_pat = 0x8100;
+        udf_rule.cmp_mask = 0xffff;
+        udf_rule.portmap[0] = 0x3ff;
+
+        air_acl_setUdfRule(unit, udf_id, &udf_rule);
+
+        /* configur the ARP-rule */
+        rule.rule_en = 1;
+        rule.end = 1;
+        rule.portmap[0] = 0x3ff;
+
+        rule.key.dmac = {0x00, 0x10, 0x94, 0x00, 0x01, 0x02};
+        rule.mask.dmac = 0x3f;
+        rule.field_valid |= BIT(AIR_ACL_ARP_DMAC_KEY);
+
+        /* ctag vid=100, pcp=7 */
+        rule.key.ctag = 0xe064;
+        rule.mask.ctag = 0x3;
+        rule.field_valid |= BIT(AIR_ACL_ARP_CTAG_KEY);
+        rule.mask.udf = (1U << udf_id);
+        rule.key.udf = rule.mask.udf;
+        rule.field_valid |= BIT(AIR_ACL_ARP_UDF_KEY);
+
+        air_acl_setArpRule(unit, entry_id, &rule);
+

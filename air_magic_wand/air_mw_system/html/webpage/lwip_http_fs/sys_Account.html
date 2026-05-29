@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<!--#sysAccount-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+    width: 400px;
+}
+td.NORMAL_TAIL {
+    padding: 0;
+    width: 400px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(200%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    font-size: 12px;
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 32px;
+    width: 400px;
+}
+</style>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var nchange = false;
+var pchange = false;
+var urlString = '';
+function isValid(s, e)
+{
+    return RegExp("^([a-zA-Z0-9_]){1," + e + "}$").test(s)
+}
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function appendString(nchange, pchange)
+{
+    if (nchange)
+    {
+        urlString += "&username=" + $id("txt_username").value;
+    }
+    if (pchange)
+    {
+        urlString += "&password=" + $id("txt_confirmpwd").value;
+    }
+}
+function doSubmit()
+{
+    var name = $id("txt_username").value,
+    opwd = $id("txt_oldpwd").value,
+    npwd = $id("txt_userpwd").value,
+    cpwd = $id("txt_confirmpwd").value;
+    if ("" == name)
+    {
+        return (alert(js_username_new = parent.window.str_info.alt_enterusername), $id("txt_username").focus(), !1);
+    }
+    else if (0 == isValid(name, 16))
+    {
+        return (alert(js_username_new = parent.window.str_info.alt_username), $id("txt_username").focus(), !1);
+    }
+    else if ( $id("txt_username").value != user_ds.userNameStr)
+    {
+        nchange = true;
+    }
+    if ("" == opwd)
+    {
+        return (alert(js_userpwd_old = parent.window.str_info.alt_enteroldpassword), $id("txt_oldpwd").focus(), !1);
+    }
+    else if (0 == isValid(opwd, 16))
+    {
+        return (alert(js_useroldpwd_length = parent.window.str_info.alt_userpwdold), $id("txt_oldpwd").focus(), !1);
+    }
+    if ("" == npwd)
+    {
+        return (alert(js_userpwd_new = parent.window.str_info.alt_enternewpassword), $id("txt_userpwd").focus(), !1);
+    }
+    else if (0 == isValid(npwd, 16))
+    {
+        return (alert(js_usernewpwd_length = parent.window.str_info.alt_userpwdnew), $id("txt_userpwd").focus(), !1);
+    }
+    if ("" == cpwd)
+    {
+        return (alert(js_userpwd_confirm = parent.window.str_info.alt_entercfmpassword), $id("txt_confirmpwd").focus(), !1);
+    }
+    else if (cpwd != npwd)
+    {
+        return (alert(js_userpwd_nequal = parent.window.str_info.alt_nequal), $id("txt_userpwd").focus(), !1);
+    }
+    else if (cpwd != opwd)
+    {
+        pchange = true;
+    }
+    if (false == pchange)
+    {
+        return alert(parent.window.str_info.alt_same);
+    }
+    appendString(nchange, pchange);
+    return !!confirm(js_userpwd_modify = parent.window.str_info.cfm_userpwdmodify) && (location.href = "usr_account_set.cgi?old_password=" + opwd + urlString, !0)
+}
+function returnError(tip)
+{
+    switch(tip)
+    {
+       case -1:
+          alert(parent.window.str_info.tip_oldpasswordcfmfail);
+          break;
+       case 1:
+          alert(parent.window.str_info.tip_oldpasswordcfmsuccess);
+          break;
+       default:
+          return "";
+    }
+}
+function loadValue()
+{
+    $id("txt_username").value = user_ds.userNameStr
+    $id("btn_submit").value = parent.window.str_info.btn_apply;
+    $id("btn_submit").onclick = () => { return doSubmit(); };
+    returnError(tip);
+}
+window.onload = () => {
+    loadValue();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <fieldset>
+      <legend><span id="userAccountSetting" class="NORMAL"><script>docW(parent.window.str_info.spn_usersetting)</script></span></legend>
+      <div id="div_sec_title">
+         <form action="usr_account_set.cgi" enctype="multipart/form-data">
+            <table class="BORDER">
+               <tbody>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_username)</script></span></td>
+                     <td class="NORMAL_TAIL"><input class="TEXT_ENABLE" id="txt_username" size="17" maxlength="16"></td>
+                  </tr>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_oldpasswd)</script></span></td>
+                     <td class="NORMAL_TAIL"><input class="TEXT_ENABLE" id="txt_oldpwd" type="password" size="17" maxlength="16"></td>
+                  </tr>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_newpasswd)</script></span></td>
+                     <td class="NORMAL_TAIL"><input class="TEXT_ENABLE" id="txt_userpwd" type="password" size="17" maxlength="16"></td>
+                  </tr>
+                  <tr>
+                     <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.cfm_newpasswd)</script></span></td>
+                     <td class="NORMAL_TAIL"><input class="TEXT_ENABLE" id="txt_confirmpwd" type="password" size="17" maxlength="16"></td>
+                  </tr>
+               </tbody>
+            </table>
+         </form>
+         <table class="BTN_WRAPPER" align="center">
+            <tbody>
+               <tr>
+                  <td class="BTN_WRAPPER"><a class="BTN">
+                    <input class="BTN_NORMAL_BTN" type="button" id="btn_submit"></a></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div>
+         <table width="100%">
+            <tbody>
+               <tr>
+                  <td class="BOTTOM_LINE"></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div>
+         <table width="100%">
+            <tbody>
+               <tr>
+                  <td align="left"><span id="t_note_title" class="BOLDER"><script>docW(parent.window.str_info.spn_attention)</script></span></td>
+               </tr>
+               <tr>
+                  <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.str_info.spn_namepwdnote)</script></span>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </fieldset>
+</body>
+</html>

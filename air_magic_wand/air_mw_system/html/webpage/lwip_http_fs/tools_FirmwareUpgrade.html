@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<!--#chunksize-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+a.BTN1 {
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(20%, 0%);
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 300px;
+}
+input.TEXT_HIDE{
+    display:none;
+}
+</style>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+const MAX_FILE_SIZE = 2.5*1024*1024;
+const XML_SEND_COMPLETE = 4;
+const HTML_STATUS_OK = 200;
+const TIME_STOP = 200;
+const IS_UPLOAD = 2;
+const IS_ERASE = 3;
+var curmsg = parent.window.fwupdate_info.cur_upload;
+var msg_time = 0;
+var isReady = 0;
+const S_E_UPLOAD = 1;
+const S_E_WRITE = 2;
+const S_E_CRCERROR = 3;
+const S_E_ERRORUPLOAD = 4;
+const S_E_WAIT_FINISH = 5;
+const LARGEST_DENOMINATOR = <!--#eraseTime-->;
+var _start = 0;
+var _end = SLICE_SIZE;
+var img;
+var xmlreq;
+var chunkNum = 0;
+var interval;
+
+function param_init()
+{
+    _start = 0;
+    _end = SLICE_SIZE;
+    isReady = 0;
+    chunkNum = 0;
+}
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function background_timer()
+{
+    countDown();
+    if(TIME_STOP != msg_time)
+    {
+        interval.postMessage(1000);
+    }
+}
+function normal_timer()
+{
+    countDown();
+    if(TIME_STOP != msg_time)
+    {
+        setTimeout(normal_timer, 1000);
+    }
+}
+function countDown()
+{
+    if(isReady == IS_ERASE)
+    {
+        msg_time = Math.round((chunkNum * 100) / LARGEST_DENOMINATOR);
+        if(chunkNum < LARGEST_DENOMINATOR)
+        {
+            chunkNum++;
+        }
+    }
+    else
+    {
+        msg_time = Math.round(((chunkNum * SLICE_SIZE * 100) / img.size) * 100 / LARGEST_DENOMINATOR);
+    }
+    parent.window.document.getElementById("blockmsg").innerHTML = curmsg + msg_time + "%";
+    if(100 <= msg_time )
+    {
+        top.location.href = "index.html";
+    }
+}
+function uploadCbk()
+{
+    var upStatus = 0;
+    if(XML_SEND_COMPLETE == xmlreq.readyState)
+    {
+        if (HTML_STATUS_OK == xmlreq.status)
+        {
+            upStatus = Number(xmlreq.responseText);
+            if(S_E_UPLOAD == upStatus)
+            {
+                curmsg = parent.window.fwupdate_info.cur_upload;
+                isReady = IS_UPLOAD;
+            }
+            else if(S_E_WRITE == upStatus)
+            {
+                curmsg = parent.window.fwupdate_info.cur_erase;
+                isReady = IS_ERASE;
+                chunkNum = 100;
+            }
+            else
+            {
+                if(S_E_CRCERROR == upStatus)
+                {
+                    alert(parent.window.fwupdate_info.cur_errCRC);
+                    msg_time = TIME_STOP;
+                }
+                else if(S_E_ERRORUPLOAD == upStatus)
+                {
+                    alert(parent.window.fwupdate_info.cur_errSend);
+                    msg_time = TIME_STOP;
+                }
+                else
+                {
+                    return;
+                }
+                parent.window.document.getElementById("blockbg").style.display = "none";
+                parent.window.document.getElementById("blockmsg").style.display = "none";
+                parent.window.doUpgarde = false;
+            }
+
+            chunkNum++;
+            _start = _end;
+            _end = _start + SLICE_SIZE;
+            if(TIME_STOP != msg_time)
+            {
+                if((chunkNum % 10) || (isReady == IS_ERASE))
+                {
+                    sendChunk();
+                }
+                else
+                {
+                    setTimeout(sendChunk, 200);
+                }
+            }
+            else
+            {
+                param_init();
+            }
+        }
+    }
+}
+function sendChunk()
+{
+    var chunk = 0;
+    var suri;
+
+    if(_start < img.size)
+    {
+        if(img.mozSlice)
+        {
+            chunk = img.mozSlice(_start, _end);
+        }
+        else if(img.webkitSlice)
+        {
+            chunk = img.webkitSlice(_start, _end);
+        }
+        else
+        {
+            chunk = img.slice(_start, _end);
+        }
+        if(_end < img.size)
+        {
+            suri = "/fupgrade.cgi?id=" + chunkNum;
+        }
+        else
+        {
+            suri = "/fupgrade.cgi?id=End";
+        }
+
+        var formdata = new FormData();
+        formdata.append("file-data", chunk);
+        xmlreq = parent.getXMLObject();
+        xmlreq.open("POST", suri, true);
+        if(0 == chunkNum)
+        {
+            xmlreq.setRequestHeader("file-size", img.size);
+        }
+        xmlreq.onreadystatechange = uploadCbk;
+        xmlreq.send(formdata);
+    }
+    else if(isReady == IS_ERASE)
+    {
+        xmlreq = parent.getXMLObject();
+        if(null != xmlreq)
+        {
+            xmlreq.open("GET", "/fuState.xml", true);
+            xmlreq.send(null);
+        }
+    }
+}
+function fwupgrade_confirm()
+{
+    var KEY_ENTER_EVENT = 13;
+    var form = document.ConfigForm;
+    if("" == form.uploadfile.value)
+    {
+        alert(parent.window.fwupdate_info.err_file);
+        return false;
+    }
+    else if(event.keyCode == KEY_ENTER_EVENT)
+    {
+        return false;
+    }
+    else
+    {
+        img = document.getElementById("uploadfile").files[0];
+        if(MAX_FILE_SIZE < img.size)
+        {
+            alert(parent.window.fwupdate_info.err_size + (MAX_FILE_SIZE / (1024*1024)) + "M");
+            return false;
+        }
+        msg_time = 0;
+        isReady = IS_UPLOAD;
+        parent.window.document.getElementById("blockbg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").innerHTML = curmsg + msg_time + "%";
+
+        try{
+            sendChunk();
+        }
+        catch(e)
+        {
+            document.ConfigForm.submit();
+        }
+        parent.window.doUpgarde = true;
+        if(window.Worker)
+        {
+            interval = new Worker("upgradeworker.js");
+            interval.postMessage(1000);
+            interval.onmessage = background_timer;
+        }
+        else
+        {
+            normal_timer();
+        }
+        return true;
+    }
+}
+function getFile(file)
+{
+    document.getElementById("fname").innerHTML = '<input name="path" size="25" value="'+ file[0].name +'" readonly>';
+}
+function showfilename()
+{
+    $id("path").value = $id("uploadfile").value.replace(/[^\\\/]*[\\\/]+/g, "");
+}
+window.onload = function () {
+    $id("ConfigForm").onkeydown = () => { if(event.keyCode == 116)return false; };
+    $id("uploadfile").onchange = () => { showfilename(); };
+    $id("path").value = parent.window.syscfg_info.path_info;
+    $id("selectfile").onclick = () => { $id("uploadfile").click(); };
+    $id("selectfile").value = parent.window.syscfg_info.path_info1;
+    $id("btn_apply").onclick = () => { fwupgrade_confirm(); };
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <div>
+      <fieldset>
+         <legend><span class="NORMAL"><script>docW(parent.window.fwupdate_info.lgd_sysupdate)</script></span></legend>
+         <div>
+            <table width="100%">
+                <tbody>
+                  <tr>
+                     <td> <span class="NORMAL"><script>docW(parent.window.fwupdate_info.spn_info0)</script></span> </td>
+                  </tr>
+                  <tr height="10">
+                     <td></td>
+                  </tr>
+                </tbody>
+            </table>
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td>
+                            <table align="center">
+                                 <tbody>
+                                    <tr>
+                                        <form name="ConfigForm" id="ConfigForm" method="post" action="fupgrade.cgi" enctype="multipart/form-data">
+                                            <input class="TEXT_ENABLE TEXT_HIDE" name="uploadfile" size="20" type="file" id="uploadfile">
+                                        </form>
+                                        <td align="center">
+                                            <input class="TEXT_ENABLE" name="path" id="path" size="25" readonly>
+                                        </td>
+                                        <td align="left">
+                                            <a class="BTN1"><input type="button" id="selectfile"></a>
+                                        </td>
+                                    </tr>
+                                 </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+         </div>
+        <div>
+            <table align="center">
+                <tbody>
+                    <tr>
+                        <td> <a class="BTN"> <input type="button" id="btn_apply" class="BTN_NORMAL_BTN"> </a> </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width="100%">
+               <tbody>
+                  <tr>
+                     <td class="BOTTOM_LINE"></td>
+                  </tr>
+               </tbody>
+            </table>
+        </div>
+         <div>
+            <table width="100%">
+               <tbody>
+                  <tr>
+                     <td align="left"><span class="BOLDER"><script>docW(parent.window.fwupdate_info.spn_attention)</script></span></td>
+                  </tr>
+                  <tr>
+                     <td align="left"><span class="NORMAL"><script>docW(parent.window.fwupdate_info.spn_note0)</script></span></td>
+                  </tr>
+                  <tr>
+                     <td align="left"><span class="NORMAL"><script>docW(parent.window.fwupdate_info.spn_note1)</script></span></td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </fieldset>
+   </div>
+</body>
+</html>

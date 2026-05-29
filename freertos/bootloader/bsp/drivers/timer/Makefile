@@ -1,0 +1,1 @@
+obj-$(CONFIG_TIMER_COMMON) += timer.o

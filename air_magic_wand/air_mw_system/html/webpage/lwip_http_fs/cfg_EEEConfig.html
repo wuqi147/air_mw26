@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#eeeconfig-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+    font-size: 150%;
+    font-family: "Arial";
+}
+table .TD_SECOND_COL {
+    padding: 0 5px;
+    width: 400px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 200px;
+}
+.CHECK_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var selectPortbit = 0;
+
+function docW(a)
+{
+    document.write(a)
+}
+
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+function chkeeeselected(e)
+{
+    let check_name = e.target.id;
+    let idx = +check_name.split("_")[1];
+    if(e.target.checked == true)
+        selectPortbit |= 1<<idx;
+    else
+        selectPortbit &= ~(1<<idx);
+}
+
+function modifyState()
+{
+    var changeBit = 0,
+    eeestate = $id("eeestate").value;
+    if(selectPortbit == 0)
+    {
+        alert(parent.window.eeecfg_info.alt_info0);
+        return false;
+    }
+    changeBit = ((eeestate==0)?eeeinfo_ds.enable_bit:(~eeeinfo_ds.enable_bit))&selectPortbit;
+    if(changeBit == 0)
+    {
+        alert(parent.window.str_info.alt_nochange);
+        return false;
+    }
+    $id("eeeBit").value = selectPortbit;
+    var urlString = "eeeSet.cgi?state=" + eeestate + "&portBit=" + changeBit;
+    return location.href = urlString;
+}
+
+window.onload = () => {
+    for (var i = 0; i < eeeinfo_ds.portNum; i++) {
+        $id("port_" + i).onclick = (e) => chkeeeselected(e);
+    }
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+    $id("btn_apply").onclick = () => modifyState();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<div>
+    <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.eeecfg_info.lgd_eeecfg)</script></span></legend>
+        <form action="eeeSet.cgi">
+            <table class="BORDER">
+                <tbody>
+                <tr>
+                    <td class="TD_FIRST_COL"><script>docW(parent.window.eeecfg_info.td_state)</script></td>
+                    <td class="TD_SECOND_COL">
+                    <select class="SELECT_NORMAL" id="eeestate">
+                        <option value="0"><script>docW(parent.window.str_info.opt_disable)</script></option>
+                        <option value="1"><script>docW(parent.window.str_info.opt_enable)</script></option>
+                    </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="BTN_WRAPPER" align="center">
+                <tbody>
+                <tr>
+                    <td class="BTN_WRAPPER"><a class="BTN"><input type="button" id="btn_apply" class="BTN_NORMAL_BTN"></a></td>
+                </tr>
+                </tbody>
+            </table>
+            <input type="hidden" id="eeeBit">
+            <table class="BORDER">
+                <tbody>
+                <tr class="TABLE_HEAD">
+                    <td class="TD_FIRST_COL"><script>docW(parent.window.str_info.td_port)</script></td>
+                    <td class="TD_FIRST_COL"><script>docW(parent.window.eeecfg_info.td_state)</script></td>
+                    <td class="TD_FIRST_COL"><script>docW(parent.window.eeecfg_info.td_selected)</script></td>
+                </tr>
+                <script type="text/javascript">
+                function writeEEEState(i)
+                {
+                    return (eeeinfo_ds.enable_bit & (1 << i)) ? parent.window.str_info.opt_enable: parent.window.eeecfg_info.alt_disable;
+                }
+                for (var i = 0; i < eeeinfo_ds.portNum; i++) {
+                    docW("<tr><td><span class='NORMAL'>" + (i + 1) + "</span></td>"),
+                    docW("<td><span class='NORMAL'>" + writeEEEState(i) + "</span></td>"),
+                    docW("<td><input class='CHECK_NORMAL' type=checkbox id='port_" + i + "'></td></tr>");
+                }
+                </script>
+                </tbody>
+            </table>
+        </form>
+    </fieldset>
+</div>
+</body>
+</html>

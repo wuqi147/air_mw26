@@ -1,0 +1,1 @@
+obj-$(CONFIG_SPI_COMMON) += flash_util.o

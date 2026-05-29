@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#qvlanconfig-->
+<!--#qvlanconfigpvid-->
+<!--#qvlanconfigextra-->
+<!--#erpsCfg-->
+<!--#ipSetting-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+  font-size: 12px;
+  width: 1020px;
+  margin: 1em auto;
+  padding: 1em;
+  border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+  font-weight: bold;
+  font-size: 150%;
+  color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+  font-family: Arial;
+}
+table {
+  margin: 1em auto;
+  border-collapse: collapse;
+  text-align: center;
+}
+table td {
+  height: 32px;
+  line-height: 21px;
+}
+tr.TABLE_HEAD {
+  height: 32px;
+}
+table.BORDER td,th {
+  border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+  background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+  padding: 0 5px;
+  width: 400px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+a.BTN1 {
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.2, 1.2) translate(100%, 0%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+INPUT.BTN_LONG_BTN {
+    font-family: "Arial";
+    width: 80px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.RADIO_WIDTH {
+    width: 120px;
+}
+.CHKBOX_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+TD.FRAMEWORK_LEFT {
+    font-size: 150%;
+    text-align: left;
+    width: 300px;
+    padding: 0;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 25px;
+    width: 40px;
+}
+input.TEXT_DESCRIP {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 25px;
+    width: 80px;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 150px;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var state_info = new Array(parent.window.str_info.opt_disable, parent.window.str_info.opt_enable);
+var selState = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+var sel_portbit = 0;
+function docW(a)
+{
+  document.write(a);
+}
+function $id(a)
+{
+  return document.getElementById(a);
+}
+function initvlan()
+{
+    if ((vlanState == 1) || (vlanState == 3))
+    {
+        $id("qvlan_en").checked = false;
+        $id("qvlan_dis").checked = true;
+        $id("802_vlan_div").style.display = "none";
+        $id("802_port_field").style.display = "none";
+    }
+    else if (vlanState == 2)
+    {
+        $id("qvlan_en").checked = true;
+        $id("qvlan_dis").checked = false;
+        $id("802_vlan_div").style.display = "";
+        $id("802_port_field").style.display = "";
+    }
+    get_xml();
+}
+function do_mode_submit()
+{
+    var click_state = (1 == $id("qvlan_en").checked)? 2 : 1;
+    if (((vlanState == 1) && (click_state == 1)) || ((vlanState == 2) && (click_state == 2)))
+    {
+        alert(parent.window.str_info.alt_nochange);
+        return;
+    }
+    var confirm_val
+    if (click_state == 1)
+    {
+        if ((voiceinfo.state == 1) || (surveilinfo.state == 1))
+        {
+            alert(parent.window.vlan_common_info.alt_info2); /* "Cannot change mode due to voice VLAN or surveilinfo VLAN enable." */
+            return;
+        }
+        /* "802.1Q VLAN will be disabled ... */
+        confirm_val = confirm(parent.window.vlan_8021q_info.alt_info17);
+    }
+    else if (click_state == 2)
+    {
+        /* "802.1Q VLAN will be enabled ... */
+        confirm_val = confirm(parent.window.vlan_8021q_info.alt_info18);
+    }
+    if(0 == confirm_val)
+        return;
+    var i, defIdx = 0, changeVbmp = 0;
+    for (i = 0; i < vlan_ds.count; i++)
+    {
+        if (vlan_ds.vlan_info[i].vid == 1)
+        {
+            defIdx = vlan_ds.vlan_info[i].idx;
+        }
+        else
+        {
+            changeVbmp |= (1 << (vlan_ds.vlan_info[i].idx - 1));
+        }
+    }
+    return location.href = "qvlanModeSet.cgi?vlan_mode=" + click_state + "&changeVbmp=" + changeVbmp + "&defVidx=" + defIdx;
+}
+function sel1QMbrs(port, val)
+{
+    let p = port.split("_");
+    let name = p[0], pid = p[1];
+    var selAll_name_arr = ["selAllUntag", "selAllTag", "selAllNon"];
+    var id_name_arr = ["untag_", "tag_", "non_"];
+    var i, j, flag, count;
+    for (i = 0; i < id_name_arr.length; i++)
+    {
+        if (i == val) continue;
+        $id(id_name_arr[i] + name + "_" + pid).checked = false;
+    }
+    if ('trunk' == name)
+    {
+        for (i = 0; i < portMaxNum; i++)
+        {
+            if (1 == trunk_conf.info[pid-1].mbrs[i])
+            {
+                for (j = 0; j < id_name_arr.length; j++)
+                {
+                    flag = (j == val)? true : false;
+                    $id(id_name_arr[j] + "port_" + (i+1)).checked = flag;
+                }
+            }
+        }
+    }
+    for (j = 0; j < id_name_arr.length; j++)
+    {
+        count = 0;
+        for (i = 0; i < portMaxNum; i++)
+        {
+            if ($id(id_name_arr[j] + "port_" + (i+1)).checked == true)
+            {
+                count++;
+            }
+        }
+        flag = (count == portMaxNum)? true : false;
+        $id(selAll_name_arr[j]).checked = flag;
+    }
+}
+function sel1QAllByType(type_name, val)
+{
+ var selAll_name_arr = ["selAllUntag", "selAllTag", "selAllNon"];
+ var pid_name_arr = ["untag_", "tag_", "non_"];
+ var i, j, flag;
+ var sel_val = $id(selAll_name_arr[val]).checked;
+ for (i = 0; i < selAll_name_arr.length; i++)
+ {
+  if (i == val) continue;
+  $id(selAll_name_arr[i]).checked = false;
+ }
+ for (i = 0; i < portMaxNum; i++)
+ {
+  for (j = 0; j < pid_name_arr.length; j++)
+  {
+   flag = ((sel_val == true) && ((j == val)))? true : false;
+   $id(pid_name_arr[j] + "port_" + (i+1)).checked = flag;
+  }
+ }
+ for (i = 0; i < trunk_conf.maxTrunkNum; i++)
+ {
+  if (1 == trunk_conf.info[i].valid)
+  {
+   for (j = 0; j < pid_name_arr.length; j++)
+   {
+    flag = ((sel_val == true) && ((j == val)))? true : false;
+    $id(pid_name_arr[j] + "trunk_" + (i+1)).checked = flag;
+   }
+  }
+ }
+}
+function selMbrPortsByPbmHandleTrunk(tagMbrs, untagMbrs)
+{
+ var i, pbit, trunkpbm = 0, untagCnt = 0, tagCnt = 0, nonCnt = 0;
+ for (i = 0; i < trunk_conf.maxTrunkNum; i++)
+ {
+  if (1 == trunk_conf.info[i].valid)
+  {
+   trunkpbm = portArrToBmp(trunk_conf.info[i].mbrs);
+   if ((tagMbrs & trunkpbm) == trunkpbm)
+   {
+    $id("tag_trunk_" + (i+1)).checked = true;
+   }
+   else if ((untagMbrs & trunkpbm) == trunkpbm)
+   {
+    $id("untag_trunk_" + (i+1)).checked = true;
+   }
+   else
+   {
+    $id("non_trunk_" + (i+1)).checked = true;
+   }
+  }
+ }
+ for (i = 0, pbit = 1; i <= portMaxNum; i++)
+ {
+  if (i != 0)
+  {
+   if (tagMbrs & pbit)
+   {
+    $id("tag_port_" + i).checked = true;
+    tagCnt++;
+   }
+   else if (untagMbrs & pbit)
+   {
+    $id("untag_port_" + i).checked = true;
+    untagCnt++;
+   }
+   else
+   {
+    $id("non_port_" + i).checked = true;
+    nonCnt++;
+   }
+  }
+  pbit <<= 1;
+ }
+ if (untagCnt == portMaxNum)
+ {
+     $id("selAllUntag").checked = true;
+ }
+ else if (tagCnt == portMaxNum)
+ {
+  $id("selAllTag").checked = true;
+ }
+ else if (nonCnt == portMaxNum)
+ {
+  $id("selAllNon").checked = true;
+ }
+}
+function selMbrPorts()
+{
+ var input_vlan = Number($id("t_vid_q").value);
+ $id("selAllUntag").checked = false;
+ $id("selAllTag").checked = false;
+ $id("selAllNon").checked = false;
+ sel1QAllByType('untag', 0);
+ sel1QAllByType('tag', 1);
+ sel1QAllByType('non', 2);
+ $id("t_vname").value = "";
+ if (false == chkVlanRange(input_vlan, 1, vlanMaxNum))
+ {
+  return;
+ }
+ for (var i = 0; i < vlan_ds.count; i++)
+ {
+  if (input_vlan == vlan_ds.vlan_info[i].vid)
+  {
+   selMbrPortsByPbmHandleTrunk(vlan_ds.vlan_info[i].tagMbrs, vlan_ds.vlan_info[i].untagMbrs);
+   $id("t_vname").value = vlan_ds.vlan_info[i].name;
+  }
+ }
+}
+function chkVname(b)
+{
+ var a = /[^A-Za-z0-9_\-]/;
+ if (a.test(b) || b.length > 10)
+ {
+  alert(parent.window.vlan_8021q_info.alt_info1);
+  return false;
+ }
+ return true;
+}
+function fmtSubStr(a)
+{
+ var b = $id(a).value;
+ b = b.replace(/(^\s*)|(\s*$)/g, "");
+ $id(a).value = b;
+ return b
+}
+function addModQvlan()
+{
+    var vid = Number($id("t_vid_q").value);
+    var vlan_name = fmtSubStr("t_vname");
+    var untagBmp = 0, tagBmp = 0, nonBmp = 0, idx = 0;
+    var action = "", req = "";
+    var change_vlan;
+    var flag = false;
+    if ("undefined" != typeof(erpsInfo))
+    {
+        for (var i=0 ; i<erpsInfo.length ; i++)
+        {
+            if (Number($id("t_vid_q").value) == erpsInfo[i][1] && 0 != erpsInfo[i][1])
+            {
+                return alert(parent.window.vlan_8021q_info.alt_info22); /* "The ERPS control VLAN cannot be edited." */
+            }
+        }
+    }
+    if (vlanState == 2)
+    {
+        if (false == chkVlanRange(vid, 1, vlanMaxNum))
+        {
+            alert(parent.window.vlan_8021q_info.alt_info2); /* VLAN ID value range is 1-4094! */
+            return false;
+        }
+        change_vlan = isModifyVlan(vid, vlan_ds);
+        if (vlan1qMaxNum == vlan_ds.count)
+        {
+            if (false == change_vlan.res)
+            {
+                alert(parent.window.vlan_8021q_info.alt_info3); /* The number of VLANs is full! */
+                return false;
+            }
+        }
+        if(false == chkVname(vlan_name))
+            return false
+        for (var i = 0; i < portMaxNum; i++)
+        {
+            if ($id("untag_port_" + (i+1)).checked == true)
+            {
+                untagBmp |= 1 << (i+1);
+            }
+            if ($id("tag_port_" + (i+1)).checked == true)
+            {
+                tagBmp |= 1 << (i+1);
+            }
+            if ($id("non_port_" + (i+1)).checked == true)
+            {
+                nonBmp |= 1 << (i+1);
+            }
+        }
+        if (true == change_vlan.res)
+        {
+            action = "mod";
+            idx = vlan_ds.vlan_info[change_vlan.idx].idx;
+            if ((vlan_ds.vlan_info[change_vlan.idx].name == $id("t_vname").value)
+                && (vlan_ds.vlan_info[change_vlan.idx].tagMbrs == tagBmp)
+                && (vlan_ds.vlan_info[change_vlan.idx].untagMbrs == untagBmp))
+            {
+                alert(parent.window.str_info.alt_nochange) /* "Configuration no change." */
+                return false;
+            }
+            var oldTagMbrs = portBmpToNumArr(vlan_ds.vlan_info[change_vlan.idx].tagMbrs);
+            var oldUntagMbrs = portBmpToNumArr(vlan_ds.vlan_info[change_vlan.idx].untagMbrs);
+            var oldUnionMbrs = oldTagMbrs.concat(oldUntagMbrs.filter((e) => { return oldTagMbrs.indexOf(e) === -1 }))
+            var newTagMbrs = portBmpToNumArr(tagBmp);
+            var newUntagMbrs = portBmpToNumArr(untagBmp);
+            var newUnionMbrs = newTagMbrs.concat(newUntagMbrs.filter((e) => { return newTagMbrs.indexOf(e) === -1 }))
+            var delMbrs = oldUnionMbrs.filter((e) => { return newUnionMbrs.indexOf(e) === -1 })
+            var addMbrs = newUnionMbrs.filter((e) => { return oldUnionMbrs.indexOf(e) === -1 })
+            var changePcnt = delMbrs.length + addMbrs.length;
+
+            req = "qvlanSet.cgi?action="+ action + "&vid="+ $id("t_vid_q").value + "&vidx="+ idx + "&untagMbrs=" + untagBmp + "&tagMbrs=" + tagBmp + "&addPbmp=" + portNumArrToBmp(addMbrs) + "&delPbmp=" + portNumArrToBmp(delMbrs) + "&changePcnt=" + changePcnt;
+            if (vlan_ds.vlan_info[change_vlan.idx].name !== $id("t_vname").value)
+            {
+                req += "&name="+ $id("t_vname").value;
+            }
+            req += ("&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info));
+        }
+        else
+        {
+            var i = 0, j = 0, k = 0;
+            var fid = 0;
+            if ("undefined" != typeof(erpsInfo))
+            {
+                for (k = 0; k< erpsInfo.length; k++)
+                {
+                    var str = erpsInfo[k][2];
+                    var vlan_id_array = str.split(",");
+                    let all_data_vlan_id = [];
+                    var temp_id_array = [];
+
+                    if (0 != erpsInfo[k][1])
+                    {
+                        for (i = 0 ; vlan_id_array[i]!= undefined; i++)
+                        {
+                            if (true == vlan_id_array[i].includes("-"))
+                            {
+                                temp_id_array = vlan_id_array[i].split("-");
+                                for(j = parseInt(temp_id_array[0]) ; j <= parseInt(temp_id_array[1]) ; j++)
+                                {
+                                    all_data_vlan_id.push(parseInt(j));
+                                }
+                            }
+                            else
+                            {
+                                all_data_vlan_id.push(parseInt(vlan_id_array[i]));
+                            }
+                        }
+                    }
+
+                    if (all_data_vlan_id.includes(parseInt($id("t_vid_q").value)))
+                    {
+                        fid = 1;
+                    }
+                }
+            }
+            action = "add";
+            idx = findVlanTblFirstEmptyIdx(vlan_ds.vlan_info);
+            req = "qvlanSet.cgi?action="+ action + "&vid="+ $id("t_vid_q").value + "&vidx="+ idx + "&fid="+ fid + "&untagMbrs=" + untagBmp + "&tagMbrs=" + tagBmp;
+            if (vlan_name.length !== 0)
+            {
+                req += "&name="+ $id("t_vname").value;
+            }
+            req += ("&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info));
+        }
+        return location.href = req;
+    }
+    else
+    {
+        alert(parent.window.vlan_8021q_info.alt_info5);
+        return false;
+    }
+}
+
+function dodelVlan()
+{
+    var change_vlan = isModifyVlan($id("t_vid_q").value, vlan_ds);
+
+    if (false == change_vlan.res)
+    {
+        return alert(parent.window.vlan_8021q_info.alt_info0); /* Cannot delete non-existent VLAN. */
+    }
+    if (Number($id("t_vid_q").value) == 1)
+    {
+        return alert(parent.window.vlan_8021q_info.alt_info15); /* "The default vlan 1 cannot be deleted." */
+    }
+    if (pvids.includes(Number($id("t_vid_q").value)))
+    {
+        return alert(parent.window.vlan_8021q_info.alt_info20); /* "The vlan is assigned as PVID." */
+    }
+    if ("undefined" != typeof(erpsInfo))
+    {
+        for (var i=0 ; i<erpsInfo.length ; i++)
+        {
+            if (Number($id("t_vid_q").value) == erpsInfo[i][1])
+            {
+                return alert(parent.window.vlan_8021q_info.alt_info21); /* "The ERPS control VLAN cannot be deleted." */
+            }
+        }
+    }
+    if (Number($id("t_vid_q").value) == ip_ds.mgmt_vlan)
+    {
+        return alert(parent.window.vlan_8021q_info.alt_info23); /* "The management VLAN cannot be deleted." */
+    }
+
+    return location.href = "qvlanSet.cgi?action=del&vid=" + $id("t_vid_q").value + "&vidx="
+    + vlan_ds.vlan_info[change_vlan.idx].idx + "&untagMbrs=" + vlan_ds.vlan_info[change_vlan.idx].untagMbrs + "&tagMbrs=" + vlan_ds.vlan_info[change_vlan.idx].tagMbrs
+    + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+}
+
+function checkIsPortExistInAny(vlan_ds_tmp)
+{
+  var allPortArr = []
+  for(var port = 1; port <= portMaxNum; port++)
+  {
+    allPortArr.push(port)
+  }
+
+  for(var i = 0; i < vlan_ds_tmp.count; i++)
+  {
+    var tmp_tagMbrs = portBmpToNumArr(vlan_ds_tmp.vlan_info[i].tagMbrs);
+    var tmp_untagMbrs = portBmpToNumArr(vlan_ds_tmp.vlan_info[i].untagMbrs);
+    allPortArr = allPortArr.filter((e) => { return tmp_tagMbrs.indexOf(e) === -1 })
+    allPortArr = allPortArr.filter((e) => { return tmp_untagMbrs.indexOf(e) === -1 })
+  }
+
+  var allPortBmp = portNumArrToBmp(allPortArr);
+  if(allPortBmp > 0) {
+    return false
+  } else {
+    return true
+  }
+}
+
+function portSelectedNum() {
+    var idx = 0;
+    var c = 0;
+    var a = 0;
+
+    for(let value of _port_list.values())
+    {
+        if(selState[idx])
+        {
+            sel_portbit |= value;
+        }
+        idx++;
+    }
+    for(idx = 0; idx < portMaxNum; idx++)
+    {
+        if(0 != (sel_portbit & (0x01 << idx)))
+        {
+            c += 1;
+        }
+    }
+    for(let [key, value] of _port_list.entries())
+    {
+        if(-1 != key.indexOf("Trunk"))
+        {
+            if(sel_portbit == value)
+            {
+                c = 1;
+            }
+        }
+    }
+    return c
+}
+function chkSel(f)
+{
+    var h = $id("portSel");
+    var e = h.options;
+    var d = 1;
+    var c, b;
+    var g;
+    var num;
+    var idx = 0, cp = 0;
+    sel_portbit = 0;
+
+    for(c = 0; c < _port_list.size; ++c)
+    {
+        selState[c] = e[c].selected;
+    }
+    num = portSelectedNum();
+    if(1 == num)
+    {
+        for(let [key, value] of _port_list.entries())
+        {
+            if(selState[idx])
+            {
+                cp = parent.window.g_getPort(value);
+                $id("pvid").value = pvids[cp];
+                $id("ingresscheck").value = ingressChecks[cp];
+                break
+            }
+            idx++;
+        }
+    }
+    else
+    {
+        $id("pvid").value = '';
+        $id("ingresscheck").value = 7;
+    }
+}
+function setPvidandIncheck()
+{
+    var r = /^\s*$/;
+    var input_pvid = 0;
+    var ingress_check = $id("ingresscheck").value;
+    var changePbmp = 0, changePcnt = 0;
+
+    if(0 === sel_portbit)
+    {
+        return alert(parent.window.vlan_common_info.alt_info1); /* "Please select at least one port." */
+    }
+    if((true === (r.test($id("pvid").value))) && (7 == ingress_check))
+    {
+        alert(parent.window.vlan_8021q_info.alt_info13); /* "Please input a PVID."; */
+        return false;
+    }
+    if(false === (r.test($id("pvid").value)))
+    {
+        input_pvid = Number($id("pvid").value);
+        if (false === chkVlanRange(input_pvid, 1, vlanMaxNum))
+        {
+            alert(parent.window.vlan_8021q_info.alt_info11); /* PVID is out of range. */
+            return false;
+        }
+        var change_vlan = isModifyVlan(input_pvid, vlan_ds);
+        if(false == change_vlan.res)
+        {
+            alert(parent.window.vlan_8021q_info.alt_info16); /* VLAN ID doesn't exist. */
+            return false;
+        }
+    }
+    for (var i = 0; i < portMaxNum; i++)
+    {
+        if (0 != (sel_portbit&(1<<i)))
+        {
+            if (((0 != input_pvid)&&(pvids[i] != input_pvid)) || ((7 != ingress_check)&&(ingressChecks[i] != ingress_check)))
+            {
+                changePbmp |= (1 << (i+1));
+                changePcnt++;
+            }
+        }
+    }
+    if(0 === changePcnt)
+    {
+        return alert(parent.window.str_info.alt_nochange); /* "Configuration no change." */
+    }
+
+    return location.href = "qvlanPvidSet.cgi?vid=" + input_pvid
+    + "&ingressCheck=" + ingress_check + "&changePbmp=" + changePbmp + "&changePcnt=" + changePcnt
+    + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+}
+function chkVlanRange(val, min, max)
+{
+    var input_vid = (typeof val == 'string')? Number(val) : val;
+    if(min <= input_vid && input_vid <= max)
+        return true
+    return false;
+}
+function isModifyVlan(val, vlan_ds)
+{
+    var input_vid = (typeof val == 'string')? Number(val) : val;
+    for (var i = 0; i < vlan_ds.vlan_info.length; i++)
+    {
+        if(vlan_ds.vlan_info[i].vid == input_vid)
+        return {res: true, idx: i}
+    }
+    return {res: false, idx: undefined};
+}
+
+function disablePortsByPortArr(id_Name_arr, arr)
+{
+    if(typeof arr == 'undefined')
+        return
+    for (var i = 1; i <= arr.length; i++)
+    {
+        if (1 == arr[i-1])
+        {
+            for (var j = 0; j < id_Name_arr.length; j++)
+            {
+                $id(id_Name_arr[j] + i).disabled = true;
+            }
+        }
+    }
+}
+/* arr = [1, 0, 0, 1, 0] => pbm = 12 */
+function portArrToBmp(arr)
+{
+    var pbm = 0;
+    for (var port = 1; port <= portMaxNum; port++)
+    {
+        if (1 == arr[port-1])
+        {
+            pbm |= (1 << port);
+        }
+    }
+    return pbm;
+}
+/* bmp = 12 => arr = [1, 4] */
+function portBmpToNumArr(bmp)
+{
+    var arr = [];
+    for (var port = 1; port <= portMaxNum; port++)
+    {
+        if (bmp & (1 << (port)))
+        {
+            arr.push(port);
+        }
+    }
+    return arr;
+}
+/* arr = [1, 4] => pbm = 12 */
+function portNumArrToBmp(arr)
+{
+    var pbm = 0;
+    for (var i = 0; i < arr.length; i++)
+    {
+        pbm |= (1 << (arr[i]));
+    }
+    return pbm;
+}
+function pbmToStrHandleTrunk(portHex)
+{
+    var str = "", trunk_str = "";
+    var i, bit, len, trunkpbm;
+    for (len = 0; len < trunk_conf.maxTrunkNum; len++)
+    {
+        if (1 == trunk_conf.info[len].valid)
+        {
+            trunkpbm = portArrToBmp(trunk_conf.info[len].mbrs);
+            if ((portHex & trunkpbm) == trunkpbm)
+            {
+                portHex -= trunkpbm;
+                trunk_str += parent.window.trunk_info.opt_trunk + (len + 1) + ",";
+            }
+        }
+    }
+    var portDec = parseInt(portHex);
+    for (i = 0, bit = 1; i <= portMaxNum; ++i)
+    {
+        if (portDec & bit)
+        {
+            str += i;
+            b = i;
+            do {
+                bit <<= 1;
+            } while ((portDec & bit) && ++i);
+            if (b != i)
+            {
+                str += "-" + i;
+            }
+            str += ",";
+            ++i;
+        }
+        bit <<= 1;
+    }
+    str += trunk_str;
+    if(str.charAt(str.length - 1) == ",")
+        str = str.substr(0, str.length - 1)
+    return (str === "")? "-" : str;
+}
+function findVlanTblFirstEmptyIdx(vlan_info_arr)
+{
+    var i, j, count = 0;
+    for (i = 1; i <= vlanMaxNum; i++)
+    {
+        for (j = 0; j < vlan_info_arr.length; j++)
+        {
+            (vlan_info_arr[j].idx != i) && count++
+        }
+        if (count == vlan_info_arr.length)
+        {
+            return i;
+        }
+        else
+        {
+            count = 0;
+        }
+    }
+}
+var XML_SEND_COMPLETE = 4;
+var HTML_STATUS_OK = 200;
+var xmlReq;
+function state_change()
+{
+    var i = 0;
+    var vlan_entry;
+    var vlan_entry_val;
+    if ((XML_SEND_COMPLETE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status))
+    {
+        vlan_entry = xmlReq.responseText.split(";");
+        for (i = 0; i < vlan_ds.count; i++)
+        {
+            /*{idx:1, vid:1, name:'', mbrs:268435455, tagMbrs:0, untagMbrs:268435455}, */
+            vlan_entry_val = vlan_entry[i].split(",");
+            var vlan_obj = new Object();
+            vlan_obj.idx = Number(vlan_entry_val[0]);
+            vlan_obj.vid = Number(vlan_entry_val[1]);
+            vlan_obj.name = vlan_entry_val[2];
+            vlan_obj.mbrs = Number(vlan_entry_val[3]);
+            vlan_obj.tagMbrs = Number(vlan_entry_val[4]);
+            vlan_obj.untagMbrs = Number(vlan_entry_val[5]);
+            vlan_ds.vlan_info.push(vlan_obj);
+            $id("1q_vid_" + i).innerHTML = vlan_ds.vlan_info[i].vid;
+            $id("1q_name_" + i).innerHTML = vlan_ds.vlan_info[i].name;
+            $id("1q_allMbrs_" + i).innerHTML = pbmToStrHandleTrunk(vlan_ds.vlan_info[i].tagMbrs | vlan_ds.vlan_info[i].untagMbrs);
+            $id("1q_tagMbrs_" + i).innerHTML = pbmToStrHandleTrunk(vlan_ds.vlan_info[i].tagMbrs);
+            $id("1q_untagMbrs_" + i).innerHTML = pbmToStrHandleTrunk(vlan_ds.vlan_info[i].untagMbrs);
+        }
+    }
+}
+function get_xml()
+{
+    xmlReq = parent.getXMLObject();
+    if (null != xmlReq)
+    {
+        xmlReq.onreadystatechange = state_change;
+        xmlReq.open("GET", "/vlanEntry.xml", true);
+        xmlReq.send(null);
+    }
+}
+function onlyNum(e) {
+    e.target.value = e.target.value.replace(/\D/g,'');
+}
+window.onload = () => {
+    $id("btn_mode").value = parent.window.str_info.btn_apply;
+    $id("btn_mode").onclick = () => do_mode_submit();
+    $id("t_vid_q").onkeyup = () => selMbrPorts();
+    $id("t_vid_q").oninput = (e) => onlyNum(e);
+    $id("btn_add_v").value = parent.window.vlan_8021q_info.btn_addmodify;
+    $id("btn_add_v").onclick = () => addModQvlan();
+    $id("btn_del_v").value = parent.window.vlan_common_info.btn_del;
+    $id("btn_del_v").onclick = () => dodelVlan();
+    $id("selAllUntag").onclick = () => sel1QAllByType('untag', 0);
+    $id("selAllTag").onclick = () => sel1QAllByType('tag', 1);
+    $id("selAllNon").onclick = () => sel1QAllByType('non', 2);
+    for (let i = 1; i <= portMaxNum; i++) {
+        $id("untag_port_" + i).onclick = () => sel1QMbrs("port_" + i, 0);
+        $id("tag_port_" + i).onclick = () => sel1QMbrs("port_" + i, 1);
+        $id("non_port_" + i).onclick = () => sel1QMbrs("port_" + i, 2);
+    }
+    if (0 != trunk_conf.count) {
+        for (let i = 1; i <= trunk_conf.maxTrunkNum; i ++) {
+            if (0 == trunk_conf.info[i-1].valid) {
+                continue;
+            }
+            $id("untag_trunk_" + i).onclick = () => sel1QMbrs("trunk_" + i, 0);
+            $id("tag_trunk_" + i).onclick = () => sel1QMbrs("trunk_" + i, 1);
+            $id("non_trunk_" + i).onclick = () => sel1QMbrs("trunk_" + i, 2);
+        }
+    }
+    $id("portSel").onclick = (e) => chkSel(e);
+    $id("pvid").oninput = (e) => onlyNum(e);
+    $id("btn_pvid").value = parent.window.str_info.btn_apply;
+    $id("btn_pvid").onclick = () => setPvidandIncheck();
+    $id("802_vlan_div").style.display = "none";
+    $id("802_port_field").style.display = "none";
+    initvlan();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<div>
+  <fieldset>
+    <legend><span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.lgd_vlanset)</script></span></legend>
+    <div id="div_sec_title">
+    <form action="qvlanModeSet.cgi">
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <table class="FRAMEWORK">
+                        <tbody>
+                            <tr>
+                                <td align="left">
+                                    <span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.spn_qvlanen + ':')</script></span>
+                                </td>
+                                <td class="RADIO_WIDTH">
+                                    <input name="qvlan_mode" id="qvlan_en" type="radio" value="1" class="RADIO_NORMAL">
+                                    <span class="NORMAL">
+                                        <script>docW(parent.window.str_info.opt_enable)</script>
+                                    </span>
+                                </td>
+                                <td align="left">
+                                    <input name="qvlan_mode" id="qvlan_dis" type="radio" value="0" class="RADIO_NORMAL" checked="">
+                                    <span class="NORMAL">
+                                        <script>docW(parent.window.str_info.opt_disable)</script>
+                                    </span>
+                                </td>
+                                <td class="RADIO_WIDTH">
+                                <td><a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_mode"></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+    </div>
+    <div id=802_vlan_div>
+      <form id="eight02_vlan_f" action="qvlanSet.cgi">
+        <table class="BORDER">
+          <tbody>
+            <tr class="TABLE_HEAD">
+            <td class="TD_FIRST_COL">
+                <span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.td_qvlan)</script></span>
+                <input id="t_vid_q" size="1" maxlength="4" autocomplete="off" class="TEXT_ENABLE">
+                <span class="NORMAL"><script>docW("(1-" + vlanMaxNum + ")")</script></span>
+            </td>
+             <td class="TD_FIRST_COL">
+                <span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.td_qvlandes)</script></span>
+                <input size="8" maxlength="10" id="t_vname" name="vname" class="TEXT_DESCRIP">
+            </td>
+            <td class="TD_FIRST_COL">
+                <a class="BTN1">
+                    <span class="NORMAL"><input type="button" id="btn_add_v" class="BTN_LONG_BTN"></span>
+                </a>
+            </td>
+            <td class="TD_FIRST_COL">
+                <a class="BTN1">
+                    <span class="NORMAL"><input type="button" id="btn_del_v" class="BTN_LONG_BTN"></span>
+                </a>
+            </td>
+            </tr>
+            <tr class="TABLE_HEAD">
+              <script>
+                docW(
+                   '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.str_info.td_port +'</span></td>' +
+                   '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_8021q_info.td_untaggedport +'</span></td>' +
+                   '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_8021q_info.td_taggedport +'</span></td>' +
+                   '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_8021q_info.td_unmemeberport +'</span></td>')
+                </script>
+            </tr>
+            <tr class="TABLE_HEAD">
+                <td class="TD_FIRST_COL">
+                    <span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.td_selectall)</script></span>
+                </td>
+                <td class="TD_FIRST_COL"><input class="CHKBOX_NORMAL" type="checkbox" id="selAllUntag" name="selAllType"></td>
+                <td class="TD_FIRST_COL"><input class="CHKBOX_NORMAL" type="checkbox" id="selAllTag" name="selAllType"></td>
+                <td class="TD_FIRST_COL"><input class="CHKBOX_NORMAL" type="checkbox" id="selAllNon" name="selAllType"></td>
+            </tr>
+            <script type="text/javascript">
+              for (var i = 1; i <= portMaxNum; i++) {
+                docW("<tr>"),
+                docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port +" " + i + "</span></td>"),
+                docW("<td><input class=CHKBOX_NORMAL type=radio value=0 id=untag_port_" + i + "></td>"),
+                docW("<td><input class=CHKBOX_NORMAL type=radio value=1 id=tag_port_" + i + "></td>"),
+                docW("<td><input class=CHKBOX_NORMAL type=radio value=2 id=non_port_" + i + "></td>"),
+                docW("</tr>")
+              }
+              if (0 != trunk_conf.count) {
+                for (i = 1; i <= trunk_conf.maxTrunkNum; i ++) {
+                  if (0 == trunk_conf.info[i-1].valid) {
+                    continue;
+                  }
+                  docW("<tr>"),
+                  docW("<td><span class='NORMAL'>" + parent.window.trunk_info.opt_trunk +" " + i + "</span></td>"),
+                  docW("<td><input class=CHKBOX_NORMAL type=radio value=0 id=untag_trunk_" + i + "></td>"),
+                  docW("<td><input class=CHKBOX_NORMAL type=radio value=1 id=tag_trunk_" + i + "></td>"),
+                  docW("<td><input class=CHKBOX_NORMAL type=radio value=2 id=non_trunk_" + i + "></td>"),
+                  docW("</tr>")
+                  disablePortsByPortArr(["untag_port_", "tag_port_", "non_port_"], trunk_conf.info[i-1].mbrs);
+                }
+              }
+            </script>
+          </tbody>
+        </table>
+      </form>
+      <form action="qvlanSet.cgi">
+        <table class="BORDER"><tbody><tr class="TABLE_HEAD">
+          <script>
+          docW(
+             '<td class="TD_FIRST_COL"><span class="NORMAL">VLAN</span></td>'+
+             '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_8021q_info.td_vlandes +'</span></td>'+
+             '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_common_info.td_memeberport +'</span></td>'+
+             '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_8021q_info.td_taggedport +'</span></td>'+
+             '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_8021q_info.td_untaggedport +'</span></td>')
+          </script></tr>
+          <script type="text/javascript">
+            for (var i = 0; i < vlan_ds.count; i++) {
+              docW("<tr>"),
+              docW("<td><span class='NORMAL'>" + "<div id=1q_vid_" + i + "></div>" + "</span></td>"),
+              docW("<td><span class='NORMAL'>" + "<div id=1q_name_" + i + "></div>" + "</span></td>"),
+              docW("<td><span class='NORMAL'>" + "<div id=1q_allMbrs_" + i + "></div>" + "</span></td>"),
+              docW("<td><span class='NORMAL'>" + "<div id=1q_tagMbrs_" + i + "></div>" + "</span></td>"),
+              docW("<td><span class='NORMAL'>" + "<div id=1q_untagMbrs_" + i + "></div>" + "</span></td>"),
+              docW("</tr>")
+            }
+          </script>
+        </tbody></table>
+      </form>
+</div>
+</fieldset>
+  <fieldset id=802_port_field>
+    <legend><span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.lgd_vlanportset)</script></span></legend>
+      <table class="BORDER">
+        <tbody>
+            <tr class="TABLE_HEAD">
+                <td class="TD_FIRST_COL"><span class='NORMAL'><script>docW(parent.window.str_info.td_port)</script></span></td>
+                <td class="TD_FIRST_COL"><span class='NORMAL'><script>docW(parent.window.vlan_8021q_info.td_pvid)</script></span></td>
+                <td class="TD_FIRST_COL"><span class='NORMAL'><script>docW(parent.window.vlan_8021q_info.td_incheck)</script></span></td>
+            </tr>
+            <tr>
+                <td>
+                    <select class="SELECT_PORTLIST" id="portSel" multiple="" size="4" overflow="scroll">
+                        <script type="text/javascript">
+                            for (let [key, value] of _port_list.entries())
+                            {
+                                if (-1 == key.indexOf("Trunk"))
+                                {
+                                    docW("<option value=" + value + ">" + parent.window.str_info.td_port + " " + key + "</option>")
+                                }
+                                else
+                                {
+                                    newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                                    docW("<option value=" + value + ">" + newKey + "</option>")
+                                }
+                            }
+                        </script>
+                    </select>
+                </td>
+                <td>
+                    <input class="TEXT_DESCRIP" type="text" id="pvid" maxlength="4">
+                </td>
+                <td>
+                    <select id="ingresscheck" class="SELECT_NORMAL">
+                        <option value="7"> </option>
+                        <option value="0"><script>docW(parent.window.str_info.opt_disable)</script> </option>
+                        <option value="1"><script>docW(parent.window.str_info.opt_enable)</script> </option>
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+      </table>
+      <table class="BTN_WRAPPER" align="center">
+        <tbody>
+            <tr>
+              <td class="BTN_WRAPPER"> <a class="BTN"><input type="button" id="btn_pvid" class="BTN_NORMAL_BTN"></a></td>
+            </tr>
+        </tbody>
+      </table>
+        <div><table width="100%">
+            <tbody>
+                <tr>
+                    <td class="BOTTOM_LINE"></td>
+                </tr>
+            </tbody>
+        </table></div>
+        <table class="BORDER">
+          <tr class="TABLE_HEAD">
+            <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.str_info.td_port)</script></span></td>
+            <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.td_pvid)</script></span></td>
+            <td class="TD_FIRST_COL"><span class="NORMAL"><script>docW(parent.window.vlan_8021q_info.td_incheck)</script></span></td>
+          </tr>
+          <script type="text/javascript">
+            var lowerport = 0;
+            for(let [key, value] of _port_list.entries())
+            {
+                docW("<tr>");
+                if(-1 == key.indexOf("Trunk"))
+                {
+                    docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port + " " + key +"</span></td>");
+                }
+                else
+                {
+                    newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                    docW("<td><span class='NORMAL'>" + newKey  +"</span></td>");
+                }
+                lowerport = parent.window.g_getPort(value);
+                docW("<td id=pvid_val_" + i + "><span class='NORMAL'>" + pvids[lowerport] + "</span></td>"),
+                docW("<td id=incheck_val_" + i + "><span class='NORMAL'>" + state_info[ingressChecks[lowerport]] + "</span></td>"),
+                docW("</tr>")
+            }
+          </script>
+        </table>
+  </fieldset>
+</div>
+</body>
+</html>

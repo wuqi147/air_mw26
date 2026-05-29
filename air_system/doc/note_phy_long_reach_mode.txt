@@ -1,0 +1,122 @@
+/*
+ *  Note    : note_phy_long_reach_mode
+ *  Chip    : EN8851(E3)
+ *  SDK     : AIR_SDK_v3.1.1
+ *  Update  : 2025-05-08
+ */
+(1) Overview
+
+    The operation of phy could be on normal mode or long-reach mode. The normal
+    mode focus on power-saving. The long-reach mode focus on cable length. SDK
+    provides APIs for these two modes. The purpose of this document is to
+    describe how to change phy operation between normal mode and long-reach
+    mode.
+
+(2) PHY Operation Mode Configuration
+
+    SDK provide two operation modes could be configured by user:
+    - AIR_PORT_OP_MODE_NORMAL is the mode to focus on power-saving.
+    - AIR_PORT_OP_MODE_LONG_REACH is the mode to focus on cable length.
+
+    SDK default phy operation mode is normal mode.
+
+(2.1) PHY Operation Mode Change Flow
+
+    In generally, configure port setting should follow this flow, disable port
+    first, configure port setting, then enable port to apply new setting.
+
+    But configure PHY operation mode do not need to follow this flow, just
+    configure phy mode directly. In addition, EN8851 should configure phy mode
+    based on each phy-group. In chapter 3, it will use an example to illustrate
+    how to determine the phy-group which a port belongs to.
+
+(2.2) PHY Long-Reach mode Limitation
+
+    PHY long-reach mode do not support EEE. There are two situations will return
+    error, such as
+
+    (a) Configure EEE ability from disable to enable when PHY operation mode is
+        long-reach mode.
+
+    (b) Configute phy operation mode from normal mode to long-reach mode when
+        EEE ability is enable.
+
+(3) Example of PHY Operation Mode Change
+
+(3.1) Per-Group Setting Method
+    Take EN8851C for example, if user wants to configure port 2 from normal mode
+    to long-reach mode:
+
+    Check port 2 is belong to which phy-group.
+    (a) Use command: [diag show info port] to check port 2 is belong to which
+        phy-group. The command result as shown below.
+
+    air port bitmap total  : 000007FF
+    air port bitmap gphy   : 000001FE
+    air port bitmap xsgmii : 00000600
+    air port bitmap combo  : 00000000
+    air port map info      :
+     unit/port    type    max-speed    xsgmii-id    gphy-id    mac-pid
+       0/ 0        cpu       1000         ---         ---        28
+       0/ 1      baset       1000         ---           7         7
+       0/ 2      baset       1000         ---           6         6
+       0/ 3      baset       1000         ---           5         5
+       0/ 4      baset       1000         ---           4         4
+       0/ 5      baset       1000         ---           0         0
+       0/ 6      baset       1000         ---           1         1
+       0/ 7      baset       1000         ---           2         2
+       0/ 8      baset       1000         ---           3         3
+       0/ 9     xsgmii       1000           0           0        23
+       0/10     xsgmii       1000           1           0        24
+
+    A phy-group consist of four ports on EN8851. One of phy-group's gphy-id is
+    0-3, and another phy-group's gphy-id is 4-7. From this information, user
+    could understand port 1-4 belongs to one phy-group, and port 5-8 belongs to
+    another phy-group. PHY mode setting within a phy-group must be the same on
+    EN8851. If user would like to change port 2 to be long-reach mode, based on
+    this phy-group information, user should configure port 1-4 to be long-reach
+    mode at the same time.
+
+    (b) Use below APIs to change all ports that belong to the same phy-group of
+        port 2 to be long-reach mode:
+        air_port_setPhyOpMode(unit, 1, AIR_PORT_OP_MODE_LONG_REACH);
+        air_port_setPhyOpMode(unit, 2, AIR_PORT_OP_MODE_LONG_REACH);
+        air_port_setPhyOpMode(unit, 3, AIR_PORT_OP_MODE_LONG_REACH);
+        air_port_setPhyOpMode(unit, 4, AIR_PORT_OP_MODE_LONG_REACH);
+
+    If user want to configure phy operation mode to normal mode, the configured
+    flow is also like this, just change the parameter of step (b) from
+    AIR_PORT_OP_MODE_LONG_REACH to AIR_PORT_OP_MODE_NORMAL.
+
+(3.2) Per-Port Setting Method
+    Take AN8858 for example, if user wants to configure port 2 from normal mode
+    to long-reach mode, use below APIs to configure port 2 directly.
+
+    air_port_setPhyOpMode(unit, 2, AIR_PORT_OP_MODE_LONG_REACH);
+
+    If user want to configure phy operation mode to normal mode, use below APIs
+    to configure port 2 directly.
+
+    air_port_setPhyOpMode(unit, 2, AIR_PORT_OP_MODE_NORMAL);
+
+(4) Notices
+
+(4.1) Differences in Chip Configuration Method
+    Below table shows the differences in configuration method.
+
+    +----------------------------------+
+    |    Chip           |    Method    |
+    |----------------------------------|
+    |   EN8851/EN8853   |   per-group  |
+    |----------------------------------|
+    |   EN8808/EN8804   |   per-group  |
+    |----------------------------------|
+    |   AN8855          |   per-group  |
+    |----------------------------------|
+    |   AN8858          |   per-port   |
+    |----------------------------------|
+    |   AN8808          |   per-port   |
+    +----------------------------------+
+
+    A phy-group consist of four ports on EN8851/EN8853/EN8808/EN8804.
+    A phy-group consist of five ports on AN8855.

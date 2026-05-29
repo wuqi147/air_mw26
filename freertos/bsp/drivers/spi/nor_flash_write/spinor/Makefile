@@ -1,0 +1,1 @@
+obj-$(CONFIG_SPI_COMMON) += spi_controller.o

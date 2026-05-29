@@ -1,0 +1,165 @@
+/*
+ *  Note    : note_sdk_default_application
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.8.4
+ *  Update  : 2023-08-10
+ */
+
+(1) Overview
+
+    The SDK will configure Switch and PHY to be specific settings during SDK
+    initialization. After that, user might use those APIs SDK provided to
+    re-configure setting to be what user wanted. The purpose of this
+    application note is to describe what are those default settings will be
+    after SDK initialization.
+
+(2) SDK Default Configuration
+
+(2.1) VLAN Configuration
+    VLAN 1 has be created and attributes will be:
+    - Members           : all ports joins VLAN 1
+    - Egress tag        : untag
+    - IVL               : enabled
+
+    All AIR ports' VLAN attributes will be:
+    - Ingress filter    : disabled
+
+(2.2) Port Configuration
+    All AIR ports' attributes will be:
+    - Admin state       : enabled, it will be determined by the setting value
+                          of AIR_CFG_TYPE_PORT_ADMIN_STATE, default is enabled.
+    - Auto-Nego         : enabled
+    - Flow control      : the result of Auto-Nego
+    - Speed             : the result of Auto-Nego
+    - Duplex            : the result of Auto-Nego
+
+(2.3) L2 Configuration
+    L2 attributes will be:
+    - MAC aging         : enabled
+    - Aging time        : 300 seconds
+    - BC traffic        : flooding
+    - MC traffic        : flooding
+    - UUC traffic       : flooding
+
+(2.4) QoS Configuration
+    System priority to queue mapping will be:
+    - Priority 7        : queue 7
+    - Priority 6        : queue 6
+    - Priority 5        : queue 5
+    - Priority 4        : queue 4
+    - Priority 3        : queue 3
+    - Priority 2        : queue 2
+    - Priority 1        : queue 0
+    - Priority 0        : queue 1
+
+    System QoS attributes will be:
+    - Trust mode        : 1P > Port
+
+    All front port QoS attributes will be:
+    - Port priority     : 0
+    - Rate limit        : disabled
+
+    CPU port QoS attributes will be:
+    - Port priority     : 0
+    - Rate limit        : egress 1 Mbps
+
+    All queues QoS attributes will be:
+    - Schedule mode     : SP
+    - Shapper           : disabled
+
+(2.5) Switch Control Configuration
+    Management frame attributes will be:
+    - IGMP              : enabled
+    - PPPoE             : enabled
+    - ARP               : enabled
+    - PAE               : enabled
+    - DHCP              : disabled
+    - BPDU              : enabled
+    - MLD               : enabled
+    - TTL 01            : disabled
+    - REV 02            : enabled
+    - REV 03            : enabled
+    - REV 0E            : enabled
+    - REV 10            : enabled
+    - REV 20            : enabled
+    - REV 21            : enabled
+    - REV Unknown       : enabled
+
+    Forwarding mode of management frame attributes will be:
+    - IGMP              : default
+    - PPPoE             : default
+    - ARP               : cpu included
+    - PAE               : default
+    - DHCP              : default
+    - BPDU              : default
+    - MLD               : default
+    - TTL 01            : default
+    - REV 02            : default
+    - REV 03            : default
+    - REV 0E            : default
+    - REV 10            : default
+    - REV 20            : default
+    - REV 21            : default
+    - REV Unknown       : default
+
+    Jumbo size attributes will be:
+    - frame size        : 1518 bytes
+
+    Properties attributes will be:
+    - MAC auto flush    : enabled
+    - Rate control on L1: disabled
+
+    System MAC address attributes will be:
+    - Source MAC        : 00-00-00-17-A5-01
+
+(2.6) Security Configuration
+
+    Forwarding policy of 802.1X attributes will be:
+    - Authenticated     : default
+    - Unauthenticated   : drop
+
+    802.1X authentication attributes will be:
+    - Mode              : port-based
+
+    MAC-based 802.1x attributes will be:
+    - Auth. port move   : denied
+    - Unauth. port move : allowed
+
+    Port-based 802.1x attributes will be:
+    - Port move         : allowed
+
+    802.1X of all front port attributes will be:
+    - Auth. state       : auth.
+
+    Management of security attributes will be:
+    - Management frame  : included
+
+    SA full limit attributes will be:
+    - Drop error frame  : disabled
+    - Trap to CPU       : disabled
+
+    Port move limit attributes will be:
+    - Drop error frame  : disabled
+    - Trap to CPU       : disabled
+
+    All front port security attributes will be:
+    - MAC learning      : enabled
+    - SA limit          : disabled
+
+    All front port storm control attributes will be:
+    - UUC storm control : disabled
+    - MC storm control  : disabled
+    - BC storm control  : disabled
+
+    Management frame of storm control attributes will be:
+    - Management frame  : excluded
+
+(2.7) Spanning Tree Configuration
+
+    All STP group attributes will be:
+    - State             : enabled
+    - Disabled port     : none
+    - Listened port     : none
+    - Learned port      : none
+    - Forward port      : all front port
+

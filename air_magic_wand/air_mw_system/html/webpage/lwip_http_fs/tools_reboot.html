@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+var count_time = 15;
+function countDown()
+{
+    count_time--;
+    parent.window.document.getElementById("blockmsg").innerHTML = parent.window.sysreboot_info.waitSystem + count_time + parent.window.fwupdate_info.cur_sec;
+    if(count_time == 0)
+    {
+        top.location.href = "index.html";
+    }
+    else
+    {
+        setTimeout(countDown, 1000);
+    }
+}
+function doReboot() {
+    var ret = confirm(js_confirm_reboot = parent.window.sysreboot_info.cfm_info0);
+    if(ret)
+    {
+        parent.window.document.getElementById("blockbg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").style.display = "block";
+        parent.window.document.getElementById("blockmsg").innerHTML = parent.window.sysreboot_info.waitSystem + count_time + parent.window.fwupdate_info.cur_sec;
+
+        var rstreq = parent.getXMLObject();
+        rstreq.open("GET", "/reboot.cgi?reboot_op=reboot");
+        rstreq.send(null);
+
+        setTimeout(countDown, 1000);
+    }
+}
+window.onload = function () {
+    $id("btn_apply").onclick = () => { doReboot(); };
+    $id("btn_apply").value = parent.window.sysreboot_info.btn_reboot;
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+  <div id="autoHeight" class="AUTOHEIGHT_MAIN">
+     <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.sysreboot_info.lgd_sysreboot)</script></span></legend>
+        <div>
+           <table width="100%">
+              <tbody>
+                 <tr height="8">
+                    <td>
+                       <table class="BTN_WRAPPER" align="center">
+                          <tbody>
+                            <tr>
+                                <td> <span id="t_reboot_switch" class="NORMAL"><script>docW(parent.window.sysreboot_info.td_reboot)</script></span></td>
+                            </tr>
+                            <tr height='8'>
+                            <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                       <table class="BTN_WRAPPER" align="center">
+                          <tbody>
+                            <tr>
+                                <td> <a class="BTN"> <input type="button" id="btn_apply" name="apply" class="BTN_NORMAL_BTN"> </a> </td>
+                            </tr>
+                          </tbody>
+                       </table>
+                    </td>
+                 </tr>
+              </tbody>
+           </table>
+        </div>
+        <div>
+           <table width="100%">
+              <tbody>
+                 <tr>
+                    <td class="BOTTOM_LINE"></td>
+                 </tr>
+              </tbody>
+           </table>
+        </div>
+        <div>
+           <table width="100%">
+              <tbody>
+                 <tr>
+                    <td align="left"><span id="t_note_title" class="BOLDER"><script>docW(parent.window.sysreboot_info.spn_attention)</script></span></td>
+                 </tr>
+                 <tr>
+                    <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.sysreboot_info.spn_note0)</script></span></td>
+                 </tr>
+              </tbody>
+           </table>
+        </div>
+     </fieldset>
+  </div>
+</body>
+</html>

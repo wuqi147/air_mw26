@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html>
+<!--#portTrunkInfo-->
+<!--#port_setting-->
+<!--#portMode-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1200px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 16px;
+}
+td.NORMAL_TAIL {
+    padding: 0;
+}
+tr.TABLE_HEAD {
+    font-size: 150%;
+    font-family: "Arial";
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    height: 22px;
+}
+td.HINT {
+    font-size: 100%;
+    font-family: "Arial";
+    height: 10px;
+    border:none !important;
+}
+table .TD_FIRST_ROW {
+    padding: 0 5px;
+    width: 150px;
+}
+table.BORDER td,th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+td.TABLE_HEAD_BOTTOM {
+    font-size: 150%;
+    font-family: "Arial";
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 150px;
+}
+option.HIDE_OPT {
+    display:none;
+}
+</style>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+const PORT_ERRTYPE_NO_ERR = 0;
+const PORT_ERRTYPE_STATE_CHANGED = 1;
+const PORT_STATE_NORMAL = 0;
+const PORT_STATE_BLOCK  = 1;
+const PORT_STATE_LOOP   = 2;
+const PORT_TYPE_COPPER       = 0;
+const PORT_TYPE_SFP          = 1;
+const PORT_TYPE_COMBO_COPPER = 2;
+const PORT_TYPE_COMBO_SFP    = 3;
+const SERDES_MODE_SGMII      = 0;
+const SERDES_MODE_1000BASE_X = 1;
+const SERDES_MODE_HSGMII     = 2;
+const SERDES_MODE_100BASE_FX = 3;
+const SERDES_MODE_UNSUPPORT  = 7;
+var trunk_info = new Array("", " (Trunk1)", " (Trunk2)", " (Trunk3)", " (Trunk4)"),
+state_info = new Array(parent.window.str_info.opt_disable, parent.window.str_info.opt_enable),
+speed_info = new Array(parent.window.str_info.ary_spdinfo0, parent.window.str_info.ary_spdinfo1, parent.window.str_info.ary_spdinfo2, parent.window.str_info.ary_spdinfo3, parent.window.str_info.ary_spdinfo4),
+mode_info = new Array(parent.window.str_info.ary_modeinfo0, parent.window.str_info.ary_modeinfo1, parent.window.str_info.ary_spdinfo0),
+flow_info = new Array(parent.window.str_info.ary_flowinfo0, parent.window.str_info.ary_flowinfo1, parent.window.str_info.ary_spdinfo0),
+selState = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+portStatus = Array.from({length:max_port_num},() => ({port_type:0, serdes_mode:0, i2c_flag:0})),
+porttype_info = new Array(parent.window.str_info.ary_porttype0,
+                          parent.window.str_info.ary_porttype1,
+                          parent.window.str_info.ary_porttype2 + "," + parent.window.str_info.ary_porttype0,
+                          parent.window.str_info.ary_porttype2 + "," + parent.window.str_info.ary_porttype1),
+serdesmode_info = new Array(parent.window.str_info.ary_serdesmode0, parent.window.str_info.ary_serdesmode1, parent.window.str_info.ary_serdesmode2,
+                            parent.window.str_info.ary_serdesmode3, parent.window.str_info.ary_serdesmode4)
+var xmlReq;
+var XML_SEND_COMPLETE = 4;
+var HTML_STATUS_OK = 200;
+var sel_portbit = 0;
+var sel_speedbit = 0;
+
+function docW(a)
+{
+    document.write(a)
+}
+
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+function curState()
+{
+    var pst;
+    var sp, dp, fc, pt;
+    var i;
+    if(XML_SEND_COMPLETE == xmlReq.readyState)
+    {
+        if(HTML_STATUS_OK == xmlReq.status)
+        {
+            pst = xmlReq.responseText.split("&");
+            st = pst[0].split(",");
+            sp = pst[1].split(",");
+            dp = pst[2].split(",");
+            fc = pst[3].split(",");
+            pt = pst[4].split(",");
+            for (i = 0; i < max_port_num; i ++)
+            {
+                $id("st_"+i).innerHTML = state_info[st[i]];
+                /* if port disable, other status show "N/A" */
+                if(0 == st[i])
+                {
+                    $id("sp_"+i).innerHTML = "N/A";
+                    $id("dp_"+i).innerHTML = "N/A";
+                    $id("fc_"+i).innerHTML = "N/A";
+                }
+                else
+                {
+                    $id("sp_"+i).innerHTML = speed_info[sp[i]];
+                    $id("dp_"+i).innerHTML = mode_info[dp[i]];
+                    $id("fc_"+i).innerHTML = flow_info[fc[i]];
+                }
+                $id("pt_"+i).innerHTML = parent.window.str_info.td_port + " " + (i + 1) + trunk_info[all_info.trunk_info[i]].replace("Trunk", parent.window.trunk_info.opt_trunk);
+
+                /*  expected port status xml string, it appears in following format [port type]-[serdes mode]-[i2c_flag]
+                 *  &0-0-0,0-0-0,0-0-0,0-0-0,0-0-0,0-0-0,0-0-0,0-0-0,1-1-0,1-2-0,&
+                 */
+                if(pt.length >= max_port_num)
+                {
+                    /* Parse port type */
+                    portStatus[i].port_type = parseInt(pt[i].split("-")[0]);
+                    if((PORT_TYPE_COPPER != portStatus[i].port_type))
+                    {
+                        if(porttype_info.length <= portStatus[i].port_type)
+                        {
+                            continue;
+                        }
+                        if((PORT_TYPE_SFP == portStatus[i].port_type) || (PORT_TYPE_COMBO_SFP == portStatus[i].port_type))
+                        {
+                            portStatus[i].i2c_flag = parseInt(pt[i].split("-")[2]);
+                            /* Parse SERDES mode */
+                            portStatus[i].serdes_mode = parseInt(pt[i].split("-")[1]);
+                            if(SERDES_MODE_UNSUPPORT != portStatus[i].serdes_mode)
+                            {
+                                if(serdesmode_info.length <= portStatus[i].serdes_mode)
+                                {
+                                    continue;
+                                }
+                                $id("pt_"+i).innerHTML += "<br>(" + porttype_info[(portStatus[i].port_type)];
+                                if(0 != portStatus[i].i2c_flag)
+                                {
+                                    $id("pt_"+i).innerHTML += "," + serdesmode_info[(portStatus[i].serdes_mode)];
+                                }
+                                else if(SERDES_MODE_SGMII == portStatus[i].serdes_mode)
+                                {
+                                    /* Fc config display follows current fc state */
+                                    $id("fc_config_"+i).innerHTML = flow_info[fc[i]];
+                                    all_info.fc_cfg[i] = fc[i];
+                                }
+                            }
+                            else
+                            {
+                                $id("pt_"+i).innerHTML += "<br>(" + serdesmode_info[serdesmode_info.length - 1];
+                                $id("sp_"+i).innerHTML = "N/A";
+                                $id("dp_"+i).innerHTML = "N/A";
+                                $id("fc_"+i).innerHTML = "N/A";
+                            }
+                        }
+                        else
+                        {
+                            $id("pt_"+i).innerHTML += "<br>(" + porttype_info[(portStatus[i].port_type)];
+                        }
+                        $id("pt_"+i).innerHTML +=")";
+                    }
+                    else
+                    {
+                        portStatus[i].serdes_mode = parseInt(pt[i].split("-")[1]);
+                        if (SERDES_MODE_HSGMII != portStatus[i].serdes_mode)
+                        {
+                            portStatus[i].serdes_mode = null;
+                        }
+                    }
+                }
+            }
+        }
+        setTimeout(getCurrent, 1500);
+    }
+}
+
+function getCurrent()
+{
+    xmlReq = parent.getXMLObject();
+    if(null != xmlReq)
+    {
+        xmlReq.onreadystatechange = curState;
+        xmlReq.open("GET", "/portCur.xml", true);
+        xmlReq.send(null);
+    }
+}
+
+function portSelectedNum() {
+    var idx = 0;
+    var c = 0;
+    var a = 0;
+    for(let value of _port_list.values())
+    {
+        if(selState[idx])
+        {
+            sel_portbit |= value;
+        }
+        idx++;
+    }
+    for(idx = 0; idx < max_port_num; idx++)
+    {
+        if(0 != (sel_portbit & (0x01 << idx)))
+        {
+            c += 1;
+        }
+    }
+    for(let [key, value] of _port_list.entries())
+    {
+        if(-1 != key.indexOf("Trunk"))
+        {
+            if(sel_portbit == value)
+            {
+                c = 1;
+            }
+        }
+    }
+
+    return c
+}
+function disable_all_speed(t)
+{
+    t = t ? true : false;
+    $id("speed_10m_half").disabled = t;
+    $id("speed_10m_full").disabled = t;
+    $id("speed_100m_half").disabled = t;
+    $id("speed_100m_full").disabled = t;
+    $id("speed_1g").disabled = t;
+    $id("speed_2_5g").disabled = t;
+
+}
+function check_select_port(index)
+{
+    let selected_port = 0, check_port = 0;
+    let h = document.getElementById("portSel");
+    let e = h.options;
+    let s = e[index];
+    let i, num = 0;
+    num = portSelectedNum();
+
+    let selected_port_type, check_port_type;
+    selected_port = parent.window.g_getPort(s.value);
+    selected_port_type = portStatus[selected_port].port_type;
+    $id("auto_off").disabled = ((0 < num) && ((PORT_TYPE_SFP == selected_port_type) || (PORT_TYPE_COMBO_SFP == selected_port_type))&&
+                                ((SERDES_MODE_HSGMII == portStatus[selected_port].serdes_mode) || (SERDES_MODE_1000BASE_X == portStatus[selected_port].serdes_mode)));
+
+    if(true == selState[index])
+    {
+        for(i = 0; i < e.length; i++)
+        {
+            /* even though it is a trunk port only check first port member */
+            check_port = parent.window.g_getPort(e[i].value);
+            if(check_port == selected_port)
+            {
+                continue;
+            }
+            check_port_type = portStatus[check_port].port_type;
+            if(check_port_type != selected_port_type)
+            {
+                /* selected port is SERDES mode SGMII and other port is PHY mode*/
+                if((((PORT_TYPE_SFP == selected_port_type) || (PORT_TYPE_COMBO_SFP == selected_port_type)) && (SERDES_MODE_SGMII == portStatus[selected_port].serdes_mode))
+                && ((PORT_TYPE_COMBO_COPPER == check_port_type) ||(PORT_TYPE_COPPER == check_port_type)))
+                {
+                    continue;
+                }
+                /* selected port is PHY mode and other port is SERDES mode SGMII or PHY mode*/
+                if(((PORT_TYPE_COMBO_COPPER == selected_port_type) || (PORT_TYPE_COPPER == selected_port_type))&&
+                ((((PORT_TYPE_SFP == check_port_type) || (PORT_TYPE_COMBO_SFP == check_port_type)) && (SERDES_MODE_SGMII == portStatus[check_port].serdes_mode))||
+                ((PORT_TYPE_COMBO_COPPER == check_port_type) || (PORT_TYPE_COPPER == check_port_type))))
+                {
+                    continue;
+                }
+                e[i].disabled = true;
+            }
+            else
+            {
+                /* selected port and other port are SERDES mode but not at the same rate */
+                if(((PORT_TYPE_SFP == selected_port_type) || (PORT_TYPE_COMBO_SFP == selected_port_type)) &&
+                (portStatus[check_port].serdes_mode != portStatus[selected_port].serdes_mode))
+                {
+                    /* disable port */
+                    e[i].disabled = true;
+                }
+                /* selected port and other port are PHY mode but not at the same rate */
+                if ((PORT_TYPE_COPPER == selected_port_type) && (PORT_TYPE_COPPER == check_port_type))
+                {
+                    if (portStatus[check_port].serdes_mode != portStatus[selected_port].serdes_mode)
+                    {
+                        /* disable port */
+                        e[i].disabled = true;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        if(0 >= num)
+        {
+            /* resume disabled port except loop port and blocked port */
+            for(let [key, value] of _port_list.entries())
+            {
+                let op_id = "op_port_" + key;
+                port_state = checkPortState(value);
+                if(PORT_STATE_NORMAL != port_state)
+                {
+                    $id(op_id).disabled = true;
+                }
+                else
+                {
+                    $id(op_id).disabled = false;
+                }
+            }
+        }
+    }
+}
+function check_rate()
+{
+    let idx = 0;
+    var port_idx = 0;
+    for(let [key, value] of _port_list.entries())
+    {
+        if(1 == selState[idx])
+        {
+            for(port_idx = 0; port_idx < max_port_num; port_idx++)
+            {
+                if (0 != (value & (1 << port_idx)))
+                {
+                    break;
+                }
+            }
+            break;
+        }
+        idx++;
+    }
+    if(_port_list.size > idx)
+    {
+        if(((PORT_TYPE_SFP == portStatus[port_idx].port_type) || (PORT_TYPE_COMBO_SFP == portStatus[port_idx].port_type)))
+        {
+            /* Default configs */
+            $id("auto_on").disabled = false;
+            switch(portStatus[port_idx].serdes_mode)
+            {
+                case SERDES_MODE_SGMII:
+                    if(1 == $id("automatic").value)
+                    {
+                        $id("speed").multiple = "multiple";
+                        $id("speed").className = "SELECT_PORTLIST";
+                        disable_all_speed(false);
+                        $id("speed_2_5g").disabled = true;
+                    }
+                    else
+                    {
+                        $id("speed").multiple = "";
+                        $id("speed").className = "SELECT_NORMAL";
+                        disable_all_speed(false);
+                        $id("speed_1g").disabled = true;
+                        $id("speed_2_5g").disabled = true;
+                    }
+                    if(0 == portStatus[port_idx].i2c_flag)
+                    {
+                        $id("automatic").disabled = true;
+                        $id("speed").disabled = true;
+                        $id("flowcontrol").disabled = true;
+                    }
+                    break;
+                case SERDES_MODE_1000BASE_X:
+                    if(1 == $id("automatic").value)
+                    {
+                        $id("speed").multiple = "";
+                        $id("speed").className = "SELECT_NORMAL";
+                        disable_all_speed(true);
+                        $id("speed_1g").disabled = false;
+                        $id("speed").value = 4;
+                    }
+                    break;
+                case SERDES_MODE_HSGMII:
+                    $id("auto_on").disabled = true;
+                    $id("automatic").value = 0;
+                    $id("speed").multiple = "";
+                    $id("speed").className = "SELECT_NORMAL";
+                    disable_all_speed(true);
+                    $id("speed_2_5g").disabled = false;
+                    $id("speed").value = 5;
+                    break;
+                case SERDES_MODE_100BASE_FX:
+                    $id("auto_on").disabled = true;
+                    $id("automatic").value = 0;
+                    $id("speed").multiple = "";
+                    $id("speed").className = "SELECT_NORMAL";
+                    disable_all_speed(true);
+                    $id("speed_100m_full").disabled = false;
+                    $id("speed").value = 3;
+                    break;
+                default:
+                    $id("automatic").value = 1;
+                    $id("automatic").disabled = true;
+                    $id("speed").disabled = true;
+                    $id("speed").multiple = "";
+                    $id("speed").className = "SELECT_NORMAL";
+                    $id("speed").value = 7;
+                    $id("flowcontrol").disabled = true;
+                    $id("flowcontrol").value = 1;
+                    break;
+            }
+
+            if ((1 != $id("automatic").value) && (4 <= $id("speed").value))
+            {
+                $id("speed").value = 7;
+            }
+        }
+        else
+        {
+            if(1 == $id("automatic").value)
+            {
+                $id("speed").multiple = "multiple";
+                $id("speed").className = "SELECT_PORTLIST";
+                disable_all_speed(false);
+                if (SERDES_MODE_HSGMII != portStatus[port_idx].serdes_mode)
+                {
+                    $id("speed_2_5g").disabled = true;
+                }
+            }
+            else
+            {
+                $id("speed").multiple = "";
+                $id("speed").className = "SELECT_NORMAL";
+                disable_all_speed(false);
+                $id("speed_1g").disabled = true;
+                $id("speed_2_5g").disabled = true;
+                if (4 <= $id("speed").value)
+                {
+                    $id("speed").value = 7;
+                    sel_speedbit = 0;
+                }
+                else
+                {
+                    sel_speedbit = 1 << $id("speed").value;
+                }
+            }
+        }
+    }
+}
+function chk_an()
+{
+    if(0 == $id("state").value)
+    {
+        $id("automatic").value = 1;
+        $id("automatic").disabled = true;
+        $id("speed").disabled = true;
+        $id("speed").value = 4;
+        $id("flowcontrol").disabled = true;
+        $id("flowcontrol").value = 1;
+    }
+    else
+    {
+        $id("automatic").disabled = false;
+        $id("speed").disabled = false;
+        $id("flowcontrol").disabled = false;
+    }
+    check_rate();
+
+    if(0 == $id("state").value)
+    {
+        var h = document.getElementById("speed");
+        var e = h.options;
+        var i;
+        $id("speed").multiple = "multiple";
+        $id("speed").className = "SELECT_PORTLIST";
+        for(i = 1; i < e.length; i++)
+        {
+            e[i].selected = true;
+        }
+        do_check1();
+    }
+}
+function get_speedbit(port)
+{
+    let selspeedbit = 0;
+    let port_type = portStatus[port].port_type;
+    let serdes_mode = 0;
+    switch(port_type)
+    {
+        case PORT_TYPE_COPPER:
+        case PORT_TYPE_COMBO_COPPER:
+            selspeedbit = all_info.ability[port];
+            break;
+        case PORT_TYPE_SFP:
+        case PORT_TYPE_COMBO_SFP:
+            serdes_mode = portStatus[port].serdes_mode;
+            if(SERDES_MODE_SGMII == serdes_mode)
+            {
+                selspeedbit = all_info.ability[port];
+            }
+            else if(SERDES_MODE_1000BASE_X == serdes_mode)
+            {
+                selspeedbit = 1 << parseInt($id("speed_1g").value);
+            }
+            else if(SERDES_MODE_HSGMII == serdes_mode)
+            {
+                selspeedbit = 1 << parseInt($id("speed_2_5g").value);
+            }
+            else if(SERDES_MODE_100BASE_FX == serdes_mode)
+            {
+                selspeedbit = 1 << parseInt($id("speed_100m_full").value);
+            }
+            break;
+        default:
+            break;
+    }
+    return selspeedbit;
+}
+function do_check(f)
+{
+    var portSel = document.getElementById("portSel");
+    var portSel_options = portSel.options;
+    var num;
+    var idx = 0, cp = 0;
+    var i;
+    var set_flag = 0;
+    var speed_e = $id("speed").options;
+    let portSel_idx = portSel.selectedIndex;
+    sel_portbit = 0;
+
+    for(port_index = 0; port_index < _port_list.size; ++port_index)
+    {
+        if((selState[port_index] != portSel_options[port_index].selected) && (-1 == portSel_idx) && (false == portSel_options[port_index].selected))
+        {
+            portSel_idx = port_index;
+        }
+        selState[port_index] = portSel_options[port_index].selected;
+    }
+
+    $id("flowcontrol").disabled = 0;
+    check_select_port(portSel_idx);
+    num = portSelectedNum();
+    if(1 == num)
+    {
+        for(let [key, value] of _port_list.entries())
+        {
+            if(true == selState[idx])
+            {
+                cp = parent.window.g_getPort(value);
+                $id("state").value = all_info.state[cp];
+                sel_speedbit = get_speedbit(cp);
+                for (i = 0; i < (speed_e.length - 1); i++)
+                {
+                    if (0 != (sel_speedbit & (0x01 << i)))
+                    {
+                        if (0 == set_flag)
+                        {
+                            $id("speed").value = i;
+                            set_flag = 1;
+                        }
+                    }
+                }
+                $id("automatic").value = (0 == all_info.spd_cfg[cp]) ? 1 : 0;
+                $id("flowcontrol").value = (0 == all_info.fc_cfg[cp]) ? 0 : 1;
+                break
+            }
+            idx++;
+        }
+    }
+    else
+    {
+        $id("state").value = 7;
+        $id("speed").value = 7;
+        $id("automatic").value = 7;
+        $id("flowcontrol").value = 7;
+    }
+    chk_an();
+    if(1 == num)
+    {
+        for (i = 0; i < (speed_e.length - 1); i++)
+        {
+            if (0 != (sel_speedbit & (0x01 << i)))
+            {
+                speed_e[i + 1].selected = 1;
+            }
+        }
+    }
+}
+
+function do_check1()
+{
+    var h = document.getElementById("speed");
+    var e = h.options;
+    var i;
+    sel_speedbit = 0;
+    for(i = 0; i < (e.length - 1); i++)
+    {
+        if (1 == e[i + 1].selected)
+        {
+            sel_speedbit |= (0x01 << i);
+        }
+    }
+}
+
+function spd_dx_to_speed_duplex(speed, spd_dx)
+{
+    var h = document.getElementById("speed");
+    var e = h.options;
+    var speed_temp = 0;
+    var duplex_temp = 2;
+    if (0 != speed)
+    {
+        for (i = 0; i < (e.length - 1); i++)
+        {
+            if (0 != (spd_dx & (0x01 << i)))
+            {
+                switch (i)
+                {
+                    case 0:
+                        speed_temp = 1;
+                        duplex_temp = 0;
+                        break;
+                    case 1:
+                        speed_temp = 1;
+                        duplex_temp = 1;
+                        break;
+                    case 2:
+                        speed_temp = 2;
+                        duplex_temp = 0;
+                        break;
+                    case 3:
+                        speed_temp = 2;
+                        duplex_temp = 1;
+                        break;
+                    case 5:
+                        speed_temp = 4;
+                        duplex_temp = 1;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    return [speed_temp, duplex_temp]
+}
+
+function show_port_setting_all()
+{
+    var c;
+    var f;
+    var d;
+    var e;
+    var h;
+    var i;
+    var speed_temp = 0;
+    var duplex_temp = 2;
+    for (index = 0; index < max_port_num; index++) {
+        c = parent.window.str_info.td_port + " " + (index + 1) + trunk_info[all_info.trunk_info[index]].replace("Trunk", parent.window.trunk_info.opt_trunk);
+        f = state_info[all_info.state[index]];
+        var sd = spd_dx_to_speed_duplex(all_info.spd_cfg[index], all_info.ability[index]);
+        speed_temp = sd[0];
+        duplex_temp = sd[1];
+        d = speed_info[speed_temp];
+        h = mode_info[duplex_temp];
+        e = flow_info[(0 == all_info.fc_cfg[index]) ? 0 : 1];
+
+        docW("<tr>");
+        docW('<td class="TABLE_HEAD_BOTTOM" id="pt_' + index + '" align=center width="120px">' + c);
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" align=center width="78px">' + f);
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" id="st_' + index + '" align=center width="78px">');
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" align=center width="78px">' + d);
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" id="sp_' + index + '" align=center width="78px">');
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" align=center width="78px">' + h);
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" id="dp_' + index + '" align=center width="78px">');
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" id="fc_config_' + index + '" align=center width="78px">' + e);
+        docW("</td>");
+        docW('<td class="TABLE_HEAD_BOTTOM" id="fc_' + index + '" align=center width="78px">');
+        docW("</td>");
+        docW("</tr>")
+    }
+    if(PORT_ERRTYPE_STATE_CHANGED == errType)
+    {
+        /* The port state has changed, Please refresh the page. */
+        alert(parent.window.str_info.alt_statechanged);
+    }
+}
+
+function do_submit() {
+    var tmpStr = '', i = 0, speed_new, duplex_new;
+    var portbit = sel_portbit;
+
+    if ($id("state").value == 7 || $id("automatic").value == 7 || sel_speedbit == 0 || $id("flowcontrol").value == 7) {
+        alert(parent.window.str_info.alt_portsettingcheck1);
+        return false;
+    }
+
+    if (portbit == 0) {
+        alert(parent.window.str_info.alt_portsettingcheck0);
+        return false;
+    }
+
+    var sd = spd_dx_to_speed_duplex(((0 == $id("automatic").value) ? 1 : 0), sel_speedbit);
+    speed_new = sd[0];
+
+    for (i = 0; i < max_port_num; i++) {
+        if (portbit & (1 << i)) {
+            if (($id("state").value == all_info.state[i]) &&
+                (sel_speedbit == all_info.ability[i]) &&
+                ($id("automatic").value == ((0 == all_info.spd_cfg[i]) ? 1 : 0)) &&
+                ($id("flowcontrol").value == ((0 == all_info.fc_cfg[i]) ? 0 : 1))) {
+                portbit &= ~(1 << i);
+            }
+        }
+    }
+
+    if (portbit == 0) {
+        alert(parent.window.str_info.alt_nochange);
+        return false;
+    }
+
+    tmpStr = portbit;
+    tmpStr += "&state=" + $id("state").value;
+    tmpStr += "&speed=" + speed_new;
+    tmpStr += "&flowcontrol=" + $id("flowcontrol").value;
+    tmpStr += "&ability=" + sel_speedbit;
+
+    location.href = "port_setting.cgi?port_bit=" + tmpStr + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+	return true;
+}
+
+function getportList(value)
+{
+    let portlist = [];
+    let targetPort = 0;
+    while(value > 0)
+    {
+        if(value & 1)
+        {
+            portlist.push(targetPort);
+        }
+        value >>= 1;
+        targetPort++;
+    }
+    return portlist;
+}
+function checkPortState(value)
+{
+    let port = [];
+    let j = 0;
+    let port_state = PORT_STATE_NORMAL;
+    if(("undefined" == typeof(portState)))
+    {
+        return port_state;
+    }
+    port = getportList(value);
+    if(port.length != 0)
+    {
+        for(j; j < port.length; j++)
+        {
+            if(PORT_STATE_NORMAL != portState[port[j]])
+            {
+                port_state = portState[port[j]];
+                if(PORT_STATE_BLOCK == port_state)
+                {
+                    break;
+                }
+            }
+        }
+    }
+    return port_state;
+}
+window.onload = () => {
+    $id("portSel").onclick = (e) => { return do_check(e); };
+    $id("state").onclick = () => { return chk_an(); };
+    $id("automatic").onclick = () => { return chk_an(); };
+    $id("speed").onclick = () => { return do_check1(); };
+    $id("btn_submit").onclick = () => { return do_submit(); };
+    $id("btn_submit").value = parent.window.str_info.btn_apply;
+    getCurrent();
+};
+</script>
+</head>
+   <body marginwidth="0" marginheight="0">
+      <form name="port_setting" action="port_setting.cgi" enctype="multipart/form-data">
+      <input type="hidden" name="port_bit" id="port_bit">
+         <fieldset>
+           <legend><span class="NORMAL"><script>docW(parent.window.str_info.lgd_portsetting)</script></span></legend>
+            <div id="div_sec_title">
+               <table cellspacing="1" class="BORDER">
+                  <tbody>
+                     <tr class="TABLE_HEAD">
+                        <td class="TD_FIRST_ROW" align="center"><script>docW(parent.window.str_info.td_port)</script> </td>
+                        <td class="TD_FIRST_ROW" align="center"><script>docW(parent.window.str_info.td_portsettingstate)</script></td>
+                        <td class="TD_FIRST_ROW" align="center"><script>docW(parent.window.str_info.ary_spdinfo0)</script></td>
+                        <td class="TD_FIRST_ROW" align="center"><script>docW(parent.window.str_info.td_portsettingspd)</script></td>
+                        <td class="TD_FIRST_ROW" align="center"><script>docW(parent.window.str_info.td_portsettingflow)</script> </td>
+                     </tr>
+                     <tr align="center">
+                        <td><select class="SELECT_PORTLIST" id="portSel" multiple="" size="5" overflow="scroll">
+                            <script>
+                                let port_state = 0;
+                                let op_id = "";
+                                for(let [key, value] of _port_list.entries())
+                                {
+                                    op_id = "op_port_" + key;
+                                    if(-1 == key.indexOf("Trunk"))
+                                    {
+                                        docW("<option value=\'" + value + "\' id=\'" + op_id + "\'>" + parent.window.str_info.td_port + " " + key);
+                                    }
+                                    else
+                                    {
+                                        newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                                        docW("<option value=\'" + value + "\' id=\'" + op_id + "\'>" + newKey);
+                                    }
+                                    port_state = checkPortState(value);
+                                    if(PORT_STATE_NORMAL != port_state)
+                                    {
+                                        $id(op_id).disabled = true;
+                                    }
+                                }
+                            </script>
+                            </select> </td>
+                        <td><select class="SELECT_NORMAL" id="state">
+                              <option value="7" class="HIDE_OPT"></option>
+                              <option value="0"><script>docW(parent.window.str_info.opt_disable)</script> </option>
+                              <option value="1"><script>docW(parent.window.str_info.opt_enable)</script> </option>
+                           </select> </td>
+                        <td><select class="SELECT_NORMAL" id="automatic">
+                              <option value="7" class="HIDE_OPT"></option>
+                              <option value="0" id="auto_off"><script>docW(parent.window.str_info.ary_flowinfo0)</script> </option>
+                              <option value="1" id="auto_on"><script>docW(parent.window.str_info.ary_flowinfo1)</script> </option>
+                           </select> </td>
+                        <td><select class="SELECT_NORMAL" id="speed">
+                              <option value="7" class="HIDE_OPT"></option>
+                              <option id="speed_10m_half" value="0" ><script>docW(parent.window.str_info.ary_spdduplex0)</script></option>
+                              <option id="speed_10m_full" value="1" ><script>docW(parent.window.str_info.ary_spdduplex1)</script></option>
+                              <option id="speed_100m_half" value="2" ><script>docW(parent.window.str_info.ary_spdduplex2)</script></option>
+                              <option id="speed_100m_full" value="3" ><script>docW(parent.window.str_info.ary_spdduplex3)</script></option>
+                              <option disabled id="speed_1g" value="4"><script>docW(parent.window.str_info.ary_spdinfo3)</script></option>
+                              <option disabled id="speed_2_5g" value="5"><script>docW(parent.window.str_info.ary_spdinfo4)</script></option>
+                           </select> </td>
+                        <td><select class="SELECT_NORMAL" id="flowcontrol">
+                              <option value="7" class="HIDE_OPT"></option>
+                              <option value="0"><script>docW(parent.window.str_info.ary_flowinfo0)</script> </option>
+                              <option value="1"><script>docW(parent.window.str_info.ary_flowinfo1)</script> </option>
+                           </select> </td>
+                     </tr>
+                     <tr>
+                        <td align="left" colspan="5" class="HINT">
+                           <script>docW(parent.window.str_info.spn_hintportsetting)</script></span>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+               <table class="BTN_WRAPPER" align="center">
+                  <tbody>
+                     <tr>
+                        <td class="BTN_WRAPPER"> <a class="BTN">
+                            <input type="button" id="btn_submit" name="apply" class="BTN_NORMAL_BTN">
+                        </a> </td>
+                        <td> </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div>
+               <table class="BOTTOM_LINE">
+                  <tbody>
+                     <tr>
+                        <td class="BOTTOM_LINE"></td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div>
+               <table class="BORDER">
+                  <tbody>
+                     <tr class="TABLE_HEAD">
+                        <td align="center" rowspan="2" width="20%"><script>docW(parent.window.str_info.td_port)</script> </td>
+                        <td align="center" colspan="2" width="20%"><script>docW(parent.window.str_info.td_portsettingstate)</script></td>
+                        <td align="center" colspan="2" width="20%"><script>docW(parent.window.str_info.td_portsettingspd)</script></td>
+                        <td align="center" colspan="2" width="20%"><script>docW(parent.window.str_info.td_portsettingmode)</script></td>
+                        <td align="center" colspan="2" width="20%"><script>docW(parent.window.str_info.td_portsettingflow)</script></td>
+                     </tr>
+                     <tr class="TABLE_HEAD">
+                        <td align="center" width="10%"><script>docW(parent.window.str_info.td_portsettingcfg)</script></td>
+                        <td align="center"><script>docW(parent.window.str_info.td_portsettingact)</script></td>
+                        <td align="center" width="10%"><script>docW(parent.window.str_info.td_portsettingcfg)</script></td>
+                        <td align="center"><script>docW(parent.window.str_info.td_portsettingact)</script></td>
+                        <td align="center" width="10%"><script>docW(parent.window.str_info.td_portsettingcfg)</script></td>
+                        <td align="center"><script>docW(parent.window.str_info.td_portsettingact)</script></td>
+                        <td align="center" width="10%"><script>docW(parent.window.str_info.td_portsettingcfg)</script> </td>
+                        <td align="center"><script>docW(parent.window.str_info.td_portsettingact)</script> </td>
+                     </tr>
+                     <script type="text/javascript">
+                        show_port_setting_all()
+                     </script>
+                  </tbody>
+               </table>
+            </div>
+            <div>
+               <table width="100%">
+                  <tbody>
+                     <tr>
+                        <td class="BOTTOM_LINE"></td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div>
+               <table width="100%">
+                  <tbody>
+                     <tr>
+                        <td align="left"><span id="t_note_title" class="BOLDER"><script>docW(parent.window.str_info.spn_attention)</script></span></td>
+                     </tr>
+                     <tr>
+                        <td align="left"><span id="t_note_info"
+                              class="NORMAL"><script>docW(parent.window.str_info.spn_noteportsetting)</script></span>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </fieldset>
+      </form>
+      <script>
+    </script>
+</body>
+</html>

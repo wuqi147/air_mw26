@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#bandwidth-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+.TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    font-size: 150%;
+    font-family: "Arial";
+    width: 400px;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 32px;
+    width: 200px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var selState = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+var selMask = 0x0;
+var urlString ='';
+
+function docW(a)
+{
+    document.write(a)
+}
+
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+function chkSel(event) {
+    let portSel_options = $id("portSel").options;
+    let portSel_length = portSel_options.length;
+    let i = 1;
+    let portSel_index = 0;
+    selMask = 0;
+    let flag = 1;
+    let port_index = 0;
+
+    for(portSel_index = 0; portSel_index < portSel_length; ++portSel_index)
+    {
+        selState[portSel_index] = portSel_options[portSel_index].selected;
+    }
+    for (let [key, value] of _port_list.entries())
+    {
+        if (port_index < portSel_length && selState[port_index])
+        {
+            selMask |= value;
+            if (flag)
+            {
+                if (-1 == key.indexOf("Trunk"))
+                {
+                    $id("ingressSpeed").value = portspeed_info.ingress[key - 1];
+                    $id("egressSpeed").value = portspeed_info.egress[key - 1];
+                }
+                else
+                {
+                    for (i = 0; i < portNumber; i++)
+                    {
+                        if (_trunk_info[i] == key.replace("Trunk", ""))
+                        {
+                            $id("ingressSpeed").value = portspeed_info.ingress[i];
+                            $id("egressSpeed").value = portspeed_info.egress[i];
+                            break;
+                        }
+                    }
+                }
+                flag = 0;
+            }
+        }
+        port_index++;
+    }
+}
+
+function do_submit()
+{
+    const valueMaskEnum = {
+        IngressSpeedMASK: 0x01,
+        EngressSpeedMASK: 0x02,
+    };
+    const valueMaskAll = valueMaskEnum.IngressSpeedMASK | valueMaskEnum.EngressSpeedMASK;
+
+    var s;
+    valueMask = 0;
+
+    if(selMask == 0)
+        return alert(parent.window.bandwidth_info.alt_info0);
+    if (80000 < ($id("ingressSpeed").value) || 80000 < ($id("egressSpeed").value))
+    {
+        return alert(parent.window.bandwidth_info.alt_warn0);
+    }
+    /* compare last bmp*/
+    for (s = 0; s < portNumber; ++s)
+    {
+        if ((1 << s) & selMask)
+        {
+            if (!(valueMask & valueMaskEnum.IngressSpeedMASK) && $id("ingressSpeed").value != portspeed_info.ingress[s])
+            {
+                urlString += "&ingressSpeed=" + $id("ingressSpeed").value;
+                valueMask |= valueMaskEnum.IngressSpeedMASK;
+            }
+            if (!(valueMask & valueMaskEnum.EngressSpeedMASK) && $id("egressSpeed").value != portspeed_info.egress[s])
+            {
+                urlString += "&egressSpeed=" + $id("egressSpeed").value;
+                valueMask |= valueMaskEnum.EngressSpeedMASK;
+            }
+        }
+
+        if (valueMask == valueMaskAll)
+        {
+            break;
+        }
+    }
+
+    if (0 != valueMask)
+    {
+        return location.href = "port_speed_set.cgi?selMask=" + selMask + urlString + "&trunkBitMap="+ parent.window.g_getTrunkBitMap(_trunk_info);
+    }
+    else
+    {
+        return alert(parent.window.str_info.alt_nochange);
+    }
+}
+function onlyNum(e) {
+    e.target.value = e.target.value.replace(/\D/g,'');
+}
+window.onload = () => {
+    $id("portSel").onclick = (e) => chkSel(e);
+    $id("ingressSpeed").onkeyup = (e) => onlyNum(e);
+    $id("ingressSpeed").onafterpaste = (e) => onlyNum(e);
+    $id("egressSpeed").onkeyup = (e) => onlyNum(e);
+    $id("egressSpeed").onafterpaste = (e) => onlyNum(e);
+    $id("btn_apply").onclick = () => do_submit();
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <fieldset>
+    <legend><span class="NORMAL"><script>docW(parent.window.bandwidth_info.lgd_bandwidth)</script></span></legend>
+    <div id="div_sec_title">
+        <form name="port_speed_set" enctype="multipart/form-data">
+            <table class="BORDER">
+                <tbody>
+                    <tr class="TABLE_HEAD">
+                        <td class="TD_FIRST_COL"><script>docW(parent.window.str_info.td_port)</script></td>
+                        <td class="TD_FIRST_COL"><script>docW(parent.window.bandwidth_info.td_inspd)</script></td>
+                        <td class="TD_FIRST_COL"><script>docW(parent.window.bandwidth_info.td_outspd)</script></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select class="SELECT_PORTLIST" id="portSel" name="portindex" multiple="" size="5" overflow="scroll">
+                                <script type="text/javascript">
+                                for (let [key, value] of _port_list.entries())
+                                {
+                                    if (-1 == key.indexOf("Trunk"))
+                                    {
+                                        docW("<option value=" + value + ">" + parent.window.str_info.td_port + " " + key + "</option>")
+                                    }
+                                    else
+                                    {
+                                        newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                                        docW("<option value=" + value + ">" + newKey + "</option>")
+                                    }
+                                }
+                                </script>
+                            </select>
+                        </td>
+                        <td><input class="TEXT_ENABLE" type="text" id="ingressSpeed" maxlength="5"><span class="NORMAL">*32Kbps</span></td>
+                        <td><input class="TEXT_ENABLE" type="text" id="egressSpeed" maxlength="5"><span class="NORMAL">*32Kbps</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="BTN_WRAPPER" align="center">
+                <tbody>
+                    <tr>
+                        <td class="BTN_WRAPPER">
+                            <a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_apply"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <table class="BOTTOM_LINE">
+        <tbody>
+            <tr>
+                <td class="BOTTOM_LINE"> </td>
+            </tr>
+        </tbody>
+        </table>
+        <form>
+        <div>
+            <table class="BORDER">
+                <tbody>
+                    <tr class="TABLE_HEAD">
+                        <td class="TD_FIRST_COL"><script>docW(parent.window.str_info.td_port)</script></td>
+                        <td class="TD_FIRST_COL"><script>docW(parent.window.bandwidth_info.td_inspd)</script></td>
+                        <td class="TD_FIRST_COL"><script>docW(parent.window.bandwidth_info.td_outspd)</script></td>
+                    </tr>
+                    <script type="text/javascript">
+                        var port_index = 0;
+                        trunk_index = 0;
+
+                        for (let [key, value] of _port_list.entries())
+                        {
+                            docW("<tr>")
+                            if (-1 == key.indexOf("Trunk"))
+                            {
+                                port_index = key;
+                                docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port + " " + port_index + "</span></td>")
+                            }
+                            else
+                            {
+                                docW("<td><span class='NORMAL'>" + key.replace("Trunk", parent.window.trunk_info.opt_trunk) + "</span></td>")
+                                trunk_index = key.replace("Trunk", "");
+                                for (port_index = 1; port_index <= portNumber; port_index++)
+                                {
+                                    if (trunk_index == _trunk_info[port_index - 1])
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (port_index > portNumber)
+                            {
+                                docW("<td><span class='NORMAL'>" + parent.window.str_info.spn_error0 + "</span></td>")
+                                docW("<td><span class='NORMAL'>" + parent.window.str_info.spn_error0 + "</span></td>")
+                            }
+                            else
+                            {
+                                if (0 != portspeed_info.ingress[port_index - 1])
+                                {
+                                    docW("<td><span class='NORMAL'>"  + portspeed_info.ingress[port_index - 1]*32 + " Kbps</span></td>")
+                                }
+                                else
+                                {
+                                    docW("<td><span class='NORMAL'>" + parent.window.str_info.opt_disable + "</span></td>")
+                                }
+                                if (0 != portspeed_info.egress[port_index - 1])
+                                {
+                                    docW("<td><span class='NORMAL'>"  + portspeed_info.egress[port_index - 1]*32 + " Kbps</span></td>")
+                                }
+                                else
+                                {
+                                    docW("<td><span class='NORMAL'>" + parent.window.str_info.opt_disable + "</span></td>")
+                                }
+                            }
+                            docW("</tr>")
+                        }
+                    </script>
+                </tbody>
+            </table>
+        </div>
+        </form>
+    </div>
+</fieldset>
+</body>
+</html>

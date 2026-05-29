@@ -1,0 +1,9 @@
+subdir-$(CONFIG_DRIVER_CHIPSCU) += chipscu/
+subdir-$(CONFIG_DRIVER_GPIO) += gpio/
+subdir-$(CONFIG_DRIVER_I2C) += i2c/
+subdir-$(CONFIG_DRIVER_PDMA) += pdma/
+subdir-$(CONFIG_DRIVER_SPI) += spi/
+subdir-$(CONFIG_DRIVER_TIMER) += timer/
+subdir-$(CONFIG_DRIVER_UART) += uart/
+subdir-$(CONFIG_DRIVER_UTIL) += util/
+subdir-$(CONFIG_DRIVER_PINCTRL) += pinctrl/

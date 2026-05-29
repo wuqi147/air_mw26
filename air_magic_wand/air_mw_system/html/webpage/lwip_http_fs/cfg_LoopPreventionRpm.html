@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#loopprevention-->
+<!--#erpsCfg-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+table.BORDER td,th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+    font-size: 150%;
+    font-family: "Arial";
+}
+table .TD_SECOND_COL {
+    padding: 0 5px;
+    width: 400px;
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 150px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var cdbval='';
+const PORT_STATE_NORMAL = 0;
+const PORT_STATE_BLOCK  = 1;
+const PORT_STATE_LOOP   = 2;
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function do_submit()
+{
+    if (1 == $id("lpState").value && 1 == stpEn)
+    {
+        return (alert(parent.window.loopprevent_info.alt_info1), !1);
+    }
+    if ("undefined" != typeof(erpsInfo))
+    {
+        for (var i=0 ; i<erpsInfo.length ; i++)
+        {
+            if (1 == $id("lpState").value && 0 != erpsInfo[i][0])
+            {
+                return (alert(parent.window.loopprevent_info.alt_info2), !1);
+            }
+        }
+    }
+    if($id("lpState").value != lpEn)
+    {
+        if(cdbval.length == 0)
+        {
+            cdbval = "lpEn=" + $id("lpState").value;
+        }
+        else
+        {
+            cdbval += "&lpEn=" + $id("lpState").value;
+        }
+    }
+    if(cdbval.length == 0)
+    {
+        return (alert(parent.window.str_info.alt_nochange), !1);
+    }
+    return location.href = "loop_prevention_set.cgi?" + cdbval;
+}
+function loopStateInit()
+{
+    $id("lpState").value = lpEn;
+}
+
+function checkPortState(value)
+{
+    let port = [];
+    let i = 0;
+    let j = 0;
+    let port_state = PORT_STATE_NORMAL;
+    if(true == lpEn)
+    {
+        while(value > 0)
+        {
+            if(value & 1)
+            {
+                port.push(i);
+            }
+            value >>= 1;
+            i++;
+        }
+        if(port.length != 0)
+        {
+            for(j; j < port.length; j++)
+            {
+                if(PORT_STATE_LOOP == portState[port[j]])
+                {
+                    port_state = portState[port[j]];
+                }
+                if (PORT_STATE_BLOCK == portState[port[j]]) {
+                    port_state = portState[port[j]];
+                    break;
+                }
+            }
+        }
+    }
+    return port_state;
+}
+window.onload = function () {
+    $id("btn_submit").onclick = () => { do_submit(); };
+    $id("btn_submit").value = parent.window.str_info.btn_apply;
+    loopStateInit();
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.loopprevent_info.lgd_lpsetting)</script></span></legend>
+        <form action="loop_prevention_set.cgi" enctype="multipart/form-data">
+            <input type="hidden" name=hour id=hour>
+            <input type="hidden" name=min id=min>
+            <table class="BORDER">
+                <tbody>
+                    <tr>
+                    <td class="TD_FIRST_COL"><script>docW(parent.window.loopprevent_info.td_lpstate)</script></td>
+                    <td class="TD_SECOND_COL">
+                    <select class="SELECT_NORMAL" id="lpState">
+                        <option value="0" id = "opDis"><script>docW(parent.window.str_info.opt_disable)</script>&nbsp;&nbsp;</option>
+                        <option value="1" id = "opEn"><script>docW(parent.window.str_info.opt_enable)</script>&nbsp;&nbsp;&nbsp;</option>
+                    </select>
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="BTN_WRAPPER" align="center">
+                <tbody>
+                <tr>
+                    <td class="BTN_WRAPPER"><a class="BTN"><input type="button" class="BTN_NORMAL_BTN" id = "btn_submit"></a></td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+        <table class="BOTTOM_LINE">
+            <tbody>
+                <tr>
+                    <td class="BOTTOM_LINE"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="BORDER">
+        <tbody>
+            <tr class="TABLE_HEAD">
+               <td class="TD_FIRST_COL"><script>docW(parent.window.str_info.td_port)</script></td>
+               <td class="TD_FIRST_COL"><script>docW(parent.window.str_info.td_portsettingstate)</script></td>
+            </tr>
+            <script type="text/javascript">
+                let port_state = 0;
+                for(let [key, value] of _port_list.entries())
+                {
+                    docW("<tr>");
+                    if(-1 == key.indexOf("Trunk"))
+                        docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port + key + "</span></td>");
+                    else
+                    {
+                        newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                        docW("<td><span class='NORMAL'>" + newKey + "</span></td>");
+                    }
+                    port_state = checkPortState(value);
+                    if(PORT_STATE_BLOCK == port_state)
+                    {
+                        docW("<td><span class='NORMAL'>" + parent.window.loopprevent_info.td_block + "</span></td>");
+                    }
+                    else if(PORT_STATE_LOOP == port_state)
+                    {
+                        docW("<td><span class='NORMAL'>" + parent.window.loopprevent_info.td_loop + "</span></td>");
+                    }
+                    else
+                    {
+                        docW("<td><span class='NORMAL'>" + parent.window.loopprevent_info.td_normal + "</span></td>");
+                    }
+                    docW("<tr>");
+                }
+            </script>
+        </tbody>
+        </table>
+        <table class="BOTTOM_LINE">
+            <tbody>
+                <tr>
+                    <td class="BOTTOM_LINE"></td>
+                </tr>
+                <tr>
+                    <td><span id="t_cantion_title" class="BOLDER"><script>docW(parent.window.loopprevent_info.spn_attention)</script></span></td>
+                </tr>
+                <tr>
+                    <td><span class="NORMAL" id="t_loop_basic2"><script>docW(parent.window.loopprevent_info.spn_note0)</script></span></td>
+                </tr>
+            </tbody>
+        </table>
+    </fieldset>
+</body>
+</html>

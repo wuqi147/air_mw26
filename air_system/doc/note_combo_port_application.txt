@@ -1,0 +1,158 @@
+/*
+ *  Note    : note_combo_port_application
+ *  Chip    : EN8851(E3)
+ *  SDK     : AIR_SDK_v2.8.3
+ *  Update  : 2023-05-19
+ */
+
+(1) Overview
+
+    A combo port is an optoelectronic multiplexing interface to provide
+    different kinds of Ethernet interfaces. You can use either the RJ45 port or
+    the SFP port. They are paired in two and share the same switch fabric and
+    port number. That is to say, only one of the ports in pair can be active at
+    a time.
+
+(2) Combo Port Configuration
+
+(2.1) Port Mapping Customized Configuration
+
+    SDK has provided one mechanism that users can customize the port mapping to
+    meet their requirements. During SDK initialziation, SDK will get this port
+    mapping configuration and initialize each port accordingly. After that, all
+    SDK APIs' port or port bitmap will be these ports user has created.
+
+    The API, air_init_initSdkPortMap(), is for user to create SDK ports. Users
+    can simply configure the port attributes in _ref_board_port_map[] to create
+    the SDK ports in customer_ref.c.
+
+    - port type:
+        - AIR_INIT_PORT_TYPE_BASET : Configure port to be built-in GPHY port
+            - phy_pkg_id    : The PHY port package id
+
+        - AIR_INIT_PORT_TYPE_XSGMII : Configure port to be QSGMII, HSGMII or
+                                      external CPU port
+            - flags         : Specify the port to be an external CPU port or
+                              a combo port
+                              #define AIR_INIT_XSGMII_PORT_FLAGS_CPU   (1U<<0)
+                              #define AIR_INIT_XSGMII_PORT_FLAGS_COMBO (1U<<1)
+            - xsgmii_pkg_id : The SERDES id at the switch chip side
+            - phy_pkg_id    : The PHY port package id
+                              (set to 0 if one port case)
+
+        - AIR_INIT_PORT_TYPE_CPU: Configure port to be internal CPU port
+
+    - max port speed:
+        - AIR_INIT_PORT_SPEED_1000M
+        - AIR_INIT_PORT_SPEED_2500M
+
+    For example:
+    (a) Set port 0 to be an internal CPU port with max speed 1G:
+        {0, AIR_INIT_PORT_TYPE_CPU, AIR_INIT_PORT_SPEED_1000M}
+
+    (b) Set port 1-4 to be build-in GPHY port with max speed 1G
+        and package id 7-4:
+        {1, AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,
+         .baset_port={7}}
+        {2, AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,
+         .baset_port={6}}
+        {3, AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,
+         .baset_port={5}}
+        {4, AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,
+         .baset_port={4}}
+
+    (c) Set port 5-8 to be QSGMII ports with max speed 1G and are conneted to
+        switch SERDES id 4 with PHY package id 0-3
+        {5, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={0, 4, 0}}
+        {6, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={0, 4, 1}}
+        {7, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={0, 4, 2}}
+        {8, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={0, 4, 3}}
+
+    (d) Set port 25-28 to be the combo port with max speed 1G and are connected
+        to switch SERDES id 2 with PHY package id 0-3
+        {25, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={AIR_INIT_XSGMII_PORT_FLAGS_COMBO, 2, 0}}
+        {26, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={AIR_INIT_XSGMII_PORT_FLAGS_COMBO, 2, 1}}
+        {27, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={AIR_INIT_XSGMII_PORT_FLAGS_COMBO, 2, 2}}
+        {28, AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,
+         .xsgmii_port={AIR_INIT_XSGMII_PORT_FLAGS_COMBO, 2, 3}}
+
+        In example (d), the first parameter AIR_INIT_XSGMII_PORT_FLAGS_COMBO in
+        .xsgmii_port is to configure this port to be a combo port and the second
+        parameter 2 represent the SERDES id at switch chip side. (Refer to the
+        port type on section 2.1)
+
+    Please note that these port mapping configuration highly depends on user's
+    board schematics and there is no SDK API to control above behavior. These
+    port attributes are only applied once during SDK initialization.
+
+(2.2) Port Combo Mode
+
+    For the combo port interface, it is up to the user to decide which
+    interface to be enabled. SDK provides the API, air_port_setComboMode(),
+    to configure the combo port is enabled on the RJ45 port or the SFP port.
+
+    The port combo mode API will have:
+    - AIR_PORT_COMBO_MODE_PHY    : Force the combo port active on RJ45 port
+    - AIR_PORT_COMBO_MODE_SERDES : Force the combo port active on SFP port
+
+    Please note that the default setting to the port combo mode is
+    AIR_PORT_COMBO_MODE_PHY, and this API is only supported when the port is
+    set to be a combo port.
+
+(2.3) Port SERDES Mode
+
+    For the SFP port, there are wide variety of SFP modules. For example,
+    a copper SFP and a fiber SFP may require the differents setting of the
+    switch SERDES. SDK provides the API, air_port_setSerdesMode(), to configure
+    the different kinds of SFP modules.
+
+    The port SERDES mode API will have:
+    - AIR_PORT_SERDES_MODE_SGMII      : Force port SERDES to SGMII AN
+    - AIR_PORT_SERDES_MODE_1000BASE_X : Force port SERDES to 1000base-x
+    - AIR_PORT_SERDES_MODE_HSGMII     : Force port SERDES to HSGMII
+
+    In general, for fiber SFP usage, configure the port SERDES mode to be
+    AIR_PORT_SERDES_MODE_1000BASE_X. For copper SFP usage, configure the port
+    SERDES mode to be AIR_PORT_SERDES_MODE_SGMII. Currently the combo port only
+    supports 1G speed, so the AIR_PORT_SERDES_MODE_HSGMII should not be
+    configured on a combo port.
+
+    Please note that the port SERDES mode will be configured during SDK
+    initialization. Which mode to be applied depending on the settings of the
+    port speed on section 2.1. For case of port speed 2.5G, the mode will be
+    configured as AIR_PORT_SERDES_MODE_HSGMII. And for case of port speed 1G,
+    the mode will be configured as AIR_PORT_SERDES_MODE_SGMII.
+
+(3) Example of Combo Port Application Usage
+
+    We assume that the SFP port has priority over RJ45 port and we are using a
+    fiber SFP module on a combo port 25. Once the SFP module is inserted or
+    removed. The application need to handle the control signal (MOD_ABS) from
+    SFP and invoke SDK API to activate or deactive SFP port.
+
+    The steps to activate the fiber SFP module will be:
+    (a) Pull the TX_DISABLE signal down to the SFP module. The way to pull down
+        will depends on the schematics of the user's board.
+
+    (b) Configure port combo mode to SERDES mode by using SDK API:
+        air_port_setComboMode(unit, 25, AIR_PORT_COMBO_MODE_SERDES);
+
+    (c) Configure port SERDES mode to 1000base-x by using SDK API:
+        air_port_setSerdesMode(unit, 25, AIR_PORT_SERDES_MODE_1000BASE_X);
+
+    If user wants to use the RJ45 port on a combo port. Simply remove the SFP
+    module and follow those steps below to deactivate SFP port:
+    (a) Pull the TX_DISABLE signal high. (In case of power saving)
+
+    (b) Configure port combo mode to PHY mode by using SDK API:
+        air_port_setComboMode(unit, 25, AIR_PORT_COMBO_MODE_PHY);
+
+    (c) Configure port SERDES mode to SGMII AN by using SDK API:
+        air_port_setSerdesMode(unit, 25, AIR_PORT_SERDES_MODE_SGMII);

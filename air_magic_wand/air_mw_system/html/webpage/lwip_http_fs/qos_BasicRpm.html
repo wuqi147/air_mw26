@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#qosBasicInfo-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+tr.TABLE_HEAD {
+    height: 22px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 200px;
+}
+table .TD_SECOND_COL {
+    padding: 0 5px;
+    width: 150px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 120px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, 0%);
+}
+.CHKBOX_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 80px;
+}
+.HIDE {
+    display: none;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var tip = "";
+var selState = new Array(portNumber)
+var pTrunk = new Array(portNumber)
+var select_port = 0;
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+for (i = 0; i < portNumber; i++)
+{
+    pTrunk[i] = _trunk_info[i];
+    selState[i] = 0;
+}
+function selectedNum(num)
+{
+    var b = 0;
+    var a = 0;
+    for (a = 0; a < num; a++) {
+        if (selState[a]) {
+            b += 1
+        }
+    }
+    return b
+}
+function do_check_queue_weight(cb)
+{
+    let b = +cb.split("_")[1];
+    var d, c;
+    var a = 0;
+    for (d = 0; d < queueNumber; ++d)
+    {
+        selState[d] = $id("sel_" + (d + 1)).checked
+    }
+    if (1 == selectedNum(queueNumber))
+    {
+        for (d = 0; d < queueNumber; ++d)
+        {
+            if (selState[d])
+            {
+                $id("weightValue").value = weight_info_all_p[select_port][b];
+                break;
+            }
+        }
+    }
+    else
+    {
+        $id("weightValue").value = ""
+    }
+}
+function do_check_port_num(cb)
+{
+    let b = +cb.split("_")[1];
+    var d, c;
+    var a = 0;
+    var sel_port_num = 0;
+
+    for (d = 0; d < portNumber; d++)
+    {
+        if (pTrunk[b - 1] && pTrunk[d] == pTrunk[b - 1] && d != (b - 1))
+        {
+            $id("selPort_" + (d + 1)).checked = $id("selPort_" + b).checked
+            if (typeof pTrunk[b - 1] == 'string')
+                pTrunk[b - 1] = parseInt(pTrunk[b - 1]);
+            $id("selPort_" + (portNumber + pTrunk[b - 1])).checked = $id("selPort_" + b).checked
+        }
+
+        if($id("selPort_" + (d+1)).checked == true)
+        {
+            if (sel_port_num == 0)
+            {
+                select_port = d+1;
+            }
+            sel_port_num++;
+        }
+    }
+
+    $id("port_policy").value = schedule_all_p[select_port-1];
+    do_submit4();
+
+    if (sel_port_num != 0)
+    {
+        if ($id("port_policy").value == 1)
+        {
+            for (d = 0 ;d < queueNumber; d++)
+            {
+                $id("selQ_" + (d+1)).innerText = weight_info_all_p[select_port-1][d];
+            }
+        }
+        if ($id("port_policy").value == 2)
+        {
+            for (d = 0 ;d < queueNumber; d++)
+            {
+                $id("selQ_" + (d+1)).innerText = weight_info_all_p[select_port-1][d+queueNumber];
+            }
+        }
+    }
+    else
+    {
+        for (d = 0 ;d < queueNumber; d++)
+        {
+            $id("selQ_" + (d+1)).innerText = "";
+        }
+    }
+}
+
+function doSelAll(type)
+{
+    var a = $id("selAll_" + type).checked;
+    var b;
+    if(type == 0)
+    {
+        for (b = 1; b <= queueNumber; b++) {
+            $id("sel_" + b).checked = a
+        }
+        do_check_queue_weight("sel_0");
+    }
+    else if(type == 1)
+    {
+        for (b = 1; b <= portNumber; b++) {
+            $id("selPort_" + b).checked = a;
+            do_check_port_num("selPort_" + b);
+        }
+    }
+    return true
+}
+function do_submit4()
+{
+    var d;
+    var sel_port_num = 0;
+    if ($id("port_policy").value == 0)
+    {
+        $id("queue_weight_field").style.display = "none"
+        policyMode = 0;
+    }
+    else
+    {
+        $id("queue_weight_field").style.display = ""
+
+        if ($id("port_policy").value == 1)
+        {
+            policyMode = 1;
+        }
+        if ($id("port_policy").value == 2)
+        {
+            policyMode = 2;
+        }
+
+        for (d = 0; d < portNumber; d++)
+        {
+            if($id("selPort_" + (d+1)).checked == true)
+            {
+                if (sel_port_num == 0)
+                {
+                    select_port = d+1;
+                }
+                sel_port_num++;
+            }
+        }
+
+        if(sel_port_num != 0)
+        {
+            if ($id("port_policy").value == 1)
+            {
+                policyMode = 1;
+                for (d = 0 ;d < queueNumber; d++)
+                {
+                    $id("selQ_" + (d+1)).innerText = weight_info_all_p[select_port-1][d];
+                }
+            }
+            if ($id("port_policy").value == 2)
+            {
+                policyMode = 2;
+                for (d = 0 ;d < queueNumber; d++)
+                {
+                    $id("selQ_" + (d+1)).innerText = weight_info_all_p[select_port-1][d+queueNumber];
+                }
+            }
+        }
+    }
+}
+
+function do_submit1() {
+    var sel_bit_port = 0;
+    var tmpvalue;
+    for(i = 1; i <= portNumber; i++)
+    {
+        if($id("selPort_" + i).checked == true)
+        {
+            sel_bit_port |= 1 << (i - 1);
+        }
+    }
+    if (sel_bit_port == 0)
+    {
+        alert(parent.window.qosbasic_info.alt_info2);
+        return false
+    }
+    tmpvalue = $id("port_policy").value;
+    return location.href = "qos_policy_mode_set.cgi?policy_mode=" + tmpvalue + "&selBitPort=" + sel_bit_port + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+}
+function do_portbm_check()
+{
+    var sel_bit_port = 0;
+    for(i = 1; i <= portNumber; i++)
+    {
+       if($id("selPort_" + i).checked == true)
+       {
+          sel_bit_port |= 1 << (i - 1);
+       }
+    }
+    return sel_bit_port;
+}
+function do_submit2() {
+    var sel_bit = 0;
+    var i = 0;
+    var sel_bit_port = 0;
+    if (0 == policyMode)
+    {
+        alert(parent.window.qosbasic_info.alt_info0);
+        return false
+    }
+
+    for(i = 1; i <= queueNumber; i++)
+    {
+       if($id("sel_" + i).checked == true)
+       {
+          sel_bit |= 1 << (i - 1);
+       }
+    }
+    if (sel_bit == 0)
+    {
+        alert(parent.window.qosbasic_info.alt_info1);
+        return false
+    }
+    sel_bit_port = do_portbm_check();
+    if (0 == sel_bit_port)
+    {
+        alert(parent.window.qosbasic_info.alt_info2);
+        return false
+    }
+    if(Math.floor($id("weightValue").value) != $id("weightValue").value)
+    {
+        alert(parent.window.qosbasic_info.alt_info4);
+        return false;
+    }
+    if($id("weightValue").value  > 128 || $id("weightValue").value  < 1)
+    {
+        alert(parent.window.qosbasic_info.alt_info3);
+        return false;
+    }
+    return location.href = "qos_queue_weight_set.cgi?mode=" + policyMode +"&weightval=" + $id("weightValue").value + "&selBit=" + sel_bit + "&selBitPort=" + sel_bit_port +
+    "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+}
+window.onload = () => {
+    $id("selAll_1").onclick = () => doSelAll(1);
+    $id("selAll_0").onclick = () => doSelAll(0);
+    $id("port_policy").onclick = () => do_submit4();
+    for (let i = 1; i <= portNumber; i++) {
+        if (_trunk_info[i-1] == 0) {
+            $id("selPort_" + i).onclick = (e) => do_check_port_num(e.target.id);
+        }
+    }
+    $id("btn_apply1").value = parent.window.str_info.btn_apply;
+    $id("btn_apply1").onclick = () => do_submit1();
+    $id("btn_apply2").value = parent.window.str_info.btn_apply;
+    $id("btn_apply2").onclick = () => do_submit2();
+    for (i = 1; i <= queueNumber; i++) {
+        $id("sel_" + i).onclick = (e) => do_check_queue_weight(e.target.id);
+    }
+    do_submit4();
+    $id("selPort_" + (display_port + 1)).checked = 1;
+    do_check_port_num("selPort_" + (display_port + 1));
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <div id="div_tip_mask" class="TIP_MASK">
+    <div id="div_tip_svr" class="TIP"><span id="sp_tip_svr" class="TIP_CONTENT"></span></div>
+    </div>
+    <fieldset id="port_based_field">
+    <legend id="queue_weight_settingport"><span class="NORMAL"><script>docW(parent.window.qosbasic_info.lgd_portcfg)</script></span></legend>
+    <form method="get" action="qos_base_mode_value_set.cgi">
+        <table class="BORDER" id=tb_qos_base_port>
+           <tbody>
+              <tr class="TABLE_HEAD">
+             <script>
+                docW(
+                      '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosbasic_info.td_qoschoice +'</b></span></td>' +
+                      '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.str_info.td_port +'</b></span></td>' +
+                      '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosbasic_info.lgd_qospolicy +'</b></span></td>'
+                );
+             </script>
+              </tr>
+              <tr class="TABLE_HEAD">
+                 <td class="TD_FIRST_COL"><input type="checkbox" id="selAll_1" class="CHKBOX_NORMAL"></td>
+                 <td class="TD_FIRST_COL"></td>
+                  <td class="TD_FIRST_COL"><select id="port_policy" class="SELECT_NORMAL">
+                        <option value="0">SP</option>
+                        <option value="1">WRR</option>
+                        <option value="2">WFQ</option>
+                     </select> </td>
+
+              </tr>
+              <script>
+                var modeStr;
+                for (i = 1; i <= portNumber; i++)
+                {
+                    switch(schedule_all_p[i-1]){
+                    case 0:
+                        modeStr = "SP";
+                        break;
+                    case 1:
+                        modeStr = "WRR";
+                        break;
+                    case 2:
+                        modeStr = "WFQ";
+                        break;
+                    }
+                    docW("<tr>")
+                    if (_trunk_info[i-1] == 0)
+                    {
+                        docW("<td><input class='CHKBOX_NORMAL' type=checkbox id=selPort_" + i +' value=1 ></td>')
+                        docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port+ " " + i + "</span></td>")
+                        docW("<td><span class='NORMAL'><div id=mode_" + i + ">" + modeStr + "</div></span></td>");
+                    }
+                    else
+                    {
+                        docW('<td class="HIDE"><input class="CHKBOX_NORMAL" type=checkbox id=selPort_' + i +' value=1 ></td>')
+                    }
+                    docW("</tr>")
+                }
+              </script>
+              <script>
+                var idx;
+
+                for(let [key,value] of _port_list.entries())
+                {
+                    if(-1 != key.search("Trunk"))
+                    {
+                        var trunk_idx;
+                        var modeStr;
+
+                        trunk_idx = parseInt(key.replace("Trunk", ""));
+                        for (i = 0; i < portNumber; i++)
+                        {
+                            if(_trunk_info[i] == trunk_idx)
+                            {
+                                break;
+                            }
+                        }
+
+                        switch(schedule_all_p[i]){
+                        case 0:
+                            modeStr = "SP";
+                            break;
+                        case 1:
+                            modeStr = "WRR";
+                            break;
+                        case 2:
+                            modeStr = "WFQ";
+                            break;
+                        }
+
+                        idx = portNumber + parseInt(key.replace("Trunk", ""));
+                        pTrunk[idx - 1] = idx - portNumber;
+                        docW("<tr>")
+                        docW("<td><input class='CHKBOX_NORMAL' type=checkbox name=selPort_" + idx + " id=selPort_" + idx + " value=" + value + "></td>")
+                        docW("<td><span class='NORMAL'>" + parent.window.trunk_info.opt_trunk + (idx - portNumber) + "</span></td>")
+                        docW("<td><span class='NORMAL'><div id=mode_" + i + ">" + modeStr + "</div></span></td>");
+                        docW("</tr>")
+                    }
+                }
+                </script>
+            </tbody>
+        </table>
+      </form>
+
+      <form name="qos_policy_mode_set" method="get" action="qos_policy_mode_set.cgi">
+         <div id="div_sec_title">
+            <table>
+               <tbody>
+                  <tr>
+                     <tr>
+                        <table class="BTN_WRAPPER" align="center">
+                           <tbody>
+                              <tr>
+                                 <td class="BTN_WRAPPER"><a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_apply1"></a>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </tr>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </form>
+   </fieldset>
+
+   <fieldset id="queue_weight_field">
+      <legend id="queue_weight_title"><span class="NORMAL"><script>docW(parent.window.qosbasic_info.lgd_qosqueueweigthcfg)</script></span></legend>
+      <form method="get" action="qos_queue_weight_set.cgi">
+         <table class="BORDER" id=tb_qos_weight_mode>
+            <tbody>
+               <tr class="TABLE_HEAD">
+                  <script>
+                     docW(
+                           '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosbasic_info.td_qoschoice +'</b></span></td>' +
+                           '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosbasic_info.td_qosqueue +'</b></span></td>' +
+                           '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosbasic_info.td_qosweight +'</b></span></td>'
+                  );
+                  </script>
+               </tr>
+               <tr class="TABLE_HEAD">
+                  <td class="TD_FIRST_COL"><input class="CHKBOX_NORMAL" type="checkbox" id="selAll_0"></td>
+                  <td class="TD_FIRST_COL"></td>
+                  <td class="TD_FIRST_COL">
+                     <input maxlength="3" id="weightValue" value="" size="8" class="TEXT_ENABLE">
+                  </td>
+               </tr>
+               <script>
+                  var lagQueue, weightStr;
+                  for (i = 1; i <= queueNumber; i++)
+                     lagQueue = "Q" + (i-1),
+                     weightStr = weight_info_all_p[select_port][i-1],
+                     docW("<tr>"),
+                     docW("<td><input class='CHKBOX_NORMAL' type=checkbox id=sel_" + i +' value=1></td>'),
+                     docW("<td><span class='NORMAL'>" + lagQueue + "</span></td>"),
+                     docW("<td><span class='NORMAL' id=selQ_" + i + ">" + weightStr + "</span></td>"),
+                     docW("</tr>")
+               </script>
+            </tbody>
+         </table>
+         <table>
+         <table>
+            <tbody>
+               <tr>
+                  <td><a class="BTN"><input type="button" id="btn_apply2" class="BTN_NORMAL_BTN"></a> </td>
+               </tr>
+            </tbody>
+         </table>
+      </form>
+   </fieldset>
+</body>
+</html>

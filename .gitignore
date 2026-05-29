@@ -1,0 +1,40 @@
+#
+# airRTOSSystem - Git Ignore
+#
+
+# ===== 编译产物 =====
+*.elf
+*.bin
+*.img
+
+# ===== 编译输出目录 =====
+build/
+project/*/build/
+
+# ===== 自动生成的文件 =====
+*_cflags.mk
+linker_script.ld
+fsdata.c
+
+# ===== 编译工具二进制 =====
+project/*/fwheader
+tool/fwheader
+
+# ===== 日志文件 =====
+log.Makefile
+*.log
+
+# ===== Windows NTFS ADS (Zone.Identifier) =====
+*:Zone.Identifier
+
+# ===== 编辑器/IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.directory
+
+# ===== OS 文件 =====
+.DS_Store
+Thumbs.db

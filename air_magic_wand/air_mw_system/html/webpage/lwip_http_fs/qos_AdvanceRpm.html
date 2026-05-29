@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#qosAdvanceInfo-->
+<!--#voicevlan-->
+<!--#Surveilvlan-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+div.TIP_MASK {
+    height: 25px;
+    overflow: hidden;
+    width: 650px;
+    margin: 0 auto;
+    padding: 0 1em;
+    position: relative;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+tr.TABLE_HEAD {
+    height: 22px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 200px;
+}
+table .TD_SECOND_COL {
+    padding: 0 5px;
+    width: 200px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, 0%);
+}
+.CHKBOX_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 80px;
+}
+.HIDE {
+    display: none;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var selState = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0);
+var pTrunk = new Array(portNumber);
+var queue_info = new Array("Q0", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7");
+var submitType = 1;
+var dscpSelMask = new Array(0x0, 0x0, 0x0, 0x0);
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+for (i = 0; i < portNumber; i++)
+{
+    pTrunk[i] = _trunk_info[i];
+}
+function selectedNum(num)
+{
+    var b = 0;
+    var a = 0;
+    for (a = 0; a < num; a++)
+    {
+        if (selState[a])
+        {
+            b += 1
+        }
+    }
+    return b
+}
+function do_check_port_pri(b)
+{
+    var d, c;
+    var a = 0;
+    for (d = 0; d < portNumber; d++)
+    {
+        if (pTrunk[b - 1] && pTrunk[d] == pTrunk[b - 1] && d != (b - 1))
+        {
+            $id("selPort_" + (d + 1)).checked = $id("selPort_" + b).checked
+            if (typeof pTrunk[b - 1] == 'string')
+                pTrunk[b - 1] = parseInt(pTrunk[b - 1]);
+            $id("selPort_" + (portNumber + pTrunk[b - 1])).checked = $id("selPort_" + b).checked
+        }
+        selState[d] = $id("selPort_" + (d + 1)).checked
+    }
+    if (1 == selectedNum(portNumber))
+    {
+        for (d = 0; d < portNumber; ++d)
+        {
+            if (selState[d])
+            {
+                $id("port_pri").value = PriPort[d];
+                break;
+            }
+        }
+    }
+    else
+    {
+        $id("port_pri").value = 0
+    }
+}
+function do_check_dscp_pri(b)
+{
+    var d, c;
+    var a = 0;
+    for (d = 0; d < dscpNumber; d++)
+    {
+        selState[d] = $id("selDscp_" + (d + 1)).checked
+    }
+    if (1 == selectedNum(dscpNumber))
+    {
+        for (d = 0; d < dscpNumber; ++d)
+        {
+            if (selState[d])
+            {
+                $id("dscp_pri").value = PriDscp[d];
+                break
+            }
+        }
+    }
+    else
+    {
+        $id("dscp_pri").value = 0
+    }
+    if($id("selDscp_" + b).checked)
+    {
+        dscpSelMask[parseInt((b-1)/16)] |= 1<<((b-1)%16);
+    }
+    else
+    {
+        dscpSelMask[parseInt((b-1)/16)] &= ~(1<<((b-1)%16));
+    }
+}
+function do_check_pri_queue(b)
+{
+    var d, c;
+    var a = 0;
+    for (d = 0; d < priorityNumber; d++)
+    {
+        selState[d] = $id("selPriority_" + (d + 1)).checked
+    }
+    if (1 == selectedNum(priorityNumber))
+    {
+        for (d = 0; d < priorityNumber; ++d)
+        {
+            if (selState[d])
+            {
+                $id("priority_queue").value = PriQueue[d];
+                break
+            }
+        }
+    }
+    else
+    {
+        $id("priority_queue").value = 0
+    }
+}
+function doSelAll(type)
+{
+    var a = $id("selAll_" + type).checked;
+    var b;
+    if(type == 0)
+    {
+        for (b = 1; b <= portNumber; b++)
+        {
+            $id("selPort_" + b).checked = a
+            do_check_port_pri(b);
+        }
+    }
+    else if(type == 1)
+    {
+        for (b = 1; b <= dscpNumber; b++)
+        {
+            $id("selDscp_" + b).checked = a
+        }
+        dscpSelMask[0] = 0xFFFF;
+        dscpSelMask[1] = 0xFFFF;
+        dscpSelMask[2] = 0xFFFF;
+        dscpSelMask[3] = 0xFFFF;
+    }
+    else if(type == 2)
+    {
+        for (b = 1; b <= priorityNumber; b++) {
+            $id("selPriority_" + b).checked = a
+        }
+    }
+    return true
+}
+function do_submit3()
+{
+    submitType = 2;
+    $id("port_based_field").style.display = "none"
+    $id("base_port_title").style.display = "none"
+    $id("base_dscp_title").style.display = "none"
+    $id("tb_qos_base_port").style.display = "none"
+    $id("tb_qos_base_dscp").style.display = "none"
+    $id("tb_submit_qos_port").style.display = "none"
+    $id("tb_submit_qos_dscp").style.display = "none"
+
+    if ($id("rd_portbase").checked == true)
+    {
+        submitType = 1;
+        $id("port_based_field").style.display = ""
+        $id("base_port_title").style.display = ""
+        $id("tb_qos_base_port").style.display = ""
+        $id("tb_submit_qos_port").style.display = ""
+
+    }
+    else if($id("rd_dscpbase").checked == true)
+    {
+        submitType = 3;
+        $id("port_based_field").style.display = ""
+        $id("base_dscp_title").style.display = ""
+        $id("tb_qos_base_dscp").style.display = ""
+        $id("tb_submit_qos_dscp").style.display = ""
+    }
+    return true
+}
+function do_submit5()
+{
+    var sndStr = '';
+    if ((1 == qosMode) && (true != $id("rd_8021pbase").checked)
+        && ((1 == voiceinfo.state) || (1 == surveilinfo.state)))
+    {
+        alert(parent.window.qosad_info.alt_info7);
+        return false;
+    }
+
+    (($id("rd_portbase").checked == true) && (sndStr = $id("rd_portbase").value)) || (($id("rd_8021pbase").checked == true) && (sndStr = $id("rd_8021pbase").value)) || (($id("rd_dscpbase").checked == true) && (sndStr = $id("rd_dscpbase").value))
+    return location.href = "qos_base_mode_set.cgi?qosbasemode=" + sndStr;
+}
+function do_submit2(type) {
+    var sel_bit = 0;
+    var sel_bit_64 = 0;
+    var sel_id = "";
+    var i = 0, idx = 0;
+    var sel_bit_port = 0;
+
+    if(type == 1)
+    {
+        for(i = 1; i <= portNumber; i++)
+        {
+           sel_id = "selPort_" + i;
+           if($id(sel_id).checked == true)
+           {
+              sel_bit |= 1 << (i - 1);
+           }
+        }
+        if(sel_bit == 0)
+        {
+            alert(parent.window.qosad_info.alt_info1);
+            return false
+        }
+        return location.href = "qos_advance_set.cgi?portval=" + $id("port_pri").value + "&selBit=" + sel_bit + "&selBit_64=0"+ "&trunkBitMap="
+         + parent.window.g_getTrunkBitMap(_trunk_info);
+    }
+    else if(type == 2)
+    {
+        for(i = 1; i <= p8021Number; i++)
+        {
+           sel_id = "sel8021p_" + i;
+           if($id(sel_id).checked == true)
+           {
+              sel_bit |= 1 << (i - 1);
+           }
+        }
+        if (sel_bit == 0) {
+            alert(parent.window.qosad_info.alt_info3);
+            return false
+        }
+        return location.href = "qos_advance_set.cgi?8021pval=" + $id("p8021_pri").value + "&selBit=" + sel_bit + "&selBit_64=0";
+    }
+    else if(type == 3)
+    {
+        for(i = 1; i <= dscpNumber/2; i++)
+        {
+           sel_id = "selDscp_" + i;
+           if($id(sel_id).checked == true)
+           {
+              sel_bit |= 1 << (i - 1);
+           }
+        }
+        for(i = 1; i <= dscpNumber/2; i++)
+        {
+           idx = i+32;
+           sel_id = "selDscp_" + idx;
+           if($id(sel_id).checked == true)
+           {
+              sel_bit_64 |= 1 << (i - 1);
+           }
+        }
+        if (sel_bit == 0 && sel_bit_64 == 0)
+        {
+            alert(parent.window.qosad_info.alt_info5);
+            return false
+        }
+        return location.href = "qos_advance_set.cgi?weigthval=" + $id("dscp_pri").value + "&selBit=" + sel_bit + "&selBit_64=" + sel_bit_64;
+    }
+    else if(type == 4)
+    {
+        for(i = 1; i <= priorityNumber; i++)
+        {
+           sel_id = "selPriority_" + i;
+           if($id(sel_id).checked == true)
+           {
+              sel_bit |= 1 << (i - 1);
+           }
+        }
+        if (sel_bit == 0)
+        {
+            alert(parent.window.qosad_info.alt_info6);
+            return false
+        }
+        return location.href = "qos_advance_set.cgi?queueval=" + $id("priority_queue").value + "&selBit=" + sel_bit + "&selBit_64=0";
+    }
+    return true
+}
+window.onload = () => {
+    $id("rd_portbase").onclick = () => do_submit3();
+    $id("rd_8021pbase").onclick = () => do_submit3();
+    $id("rd_dscpbase").onclick = () => do_submit3();
+    $id("btn1").onclick = () => do_submit5();
+    $id("selAll_0").onclick = () => doSelAll(0);
+    $id("selAll_1").onclick = () => doSelAll(1);
+    $id("selAll_2").onclick = () => doSelAll(2);
+    $id("btn_apply1").onclick = () => do_submit2(submitType);
+    $id("btn_apply2").onclick = () => do_submit2(submitType);
+    $id("btn_apply3").onclick = () => do_submit2(4);
+    $id("btn_apply1").value = parent.window.str_info.btn_apply;
+    $id("btn_apply2").value = parent.window.str_info.btn_apply;
+    $id("btn_apply3").value = parent.window.str_info.btn_apply;
+    for (let i = 1; i <= portNumber; i++) {
+        if (_trunk_info[i-1] == 0) {
+            $id("selPort_" + i).onclick = (e) => do_check_port_pri(e.target.id);
+        }
+    }
+    for (let [key,value] of _port_list.entries()) {
+        if (-1 != key.search("Trunk")) {
+            let i = portNumber + parseInt(key.replace("Trunk", ""));
+            $id("selPort_" + i).onclick = (e) => do_check_port_pri(e.target.id);
+        }
+    }
+    for (let i = 1; i <= dscpNumber; i++) {
+        $id("selDscp_" + i).onClick = (e) => do_check_dscp_pri(e.target.id);
+    }
+    for (i = 1; i <= priorityNumber; i++) {
+        $id("selPriority_" + i).onClick = (e) => do_check_pri_queue(e.target.id);
+    }
+    do_submit3();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <fieldset>
+      <legend><span class="NORMAL"><script>docW(parent.window.qosad_info.lgd_glbcfg)</script></span></legend>
+      <form name="qos_base_mode_set" method="get" action="qos_base_mode_set.cgi">
+            <table>
+               <tbody>
+                  <tr>
+                     <td>
+                        <table class="BORDER">
+                           <tbody>
+                              <tr>
+                                <td class="TD_FIRST_COL" wid>
+                                    <span class="NORMAL"><b><script>docW(parent.window.qosad_info.td_qosmode)</script></b></span>
+                                </td>
+                                <td class="TD_SECOND_COL">
+                                    <input id="rd_portbase" name="qosbasemode" type="radio" value="0" checked="" class="RADIO_NORMAL">
+                                    <span class="NORMAL"><script>docW(parent.window.qosad_info.td_byport)</script></span>
+                                </td>
+                                <td class="TD_SECOND_COL">
+                                    <input id="rd_8021pbase" name="qosbasemode" type="radio" value="1" class="RADIO_NORMAL">
+                                    <span class="NORMAL"><script>docW(parent.window.qosad_info.td_by8021p)</script></span>
+                                </td>
+                                <td class="TD_SECOND_COL">
+                                    <input id="rd_dscpbase" name="qosbasemode" type="radio" value="2" class="RADIO_NORMAL">
+                                    <span class="NORMAL"><script>docW(parent.window.qosad_info.td_bydscp)</script></span>
+                                </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <script>
+                           document.qos_base_mode_set.qosbasemode[qosMode].checked = !0
+                        </script>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>
+                        <table class="BTN_WRAPPER" align="center">
+                           <tbody>
+                              <tr>
+                                 <td class="BTN_WRAPPER"><a class="BTN"> <input class="BTN_NORMAL_BTN" id="btn1" type="button"></a>
+                                 </td><script>$id("btn1").value = parent.window.str_info.btn_apply;</script>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+      </form>
+   </fieldset>
+   <fieldset id="port_based_field">
+      <script>
+         docW(
+            '<legend id="base_port_title"><span class="NORMAL">'+ parent.window.qosad_info.lgd_byport +'</span></legend>' +
+            '<legend id="base_dscp_title"><span class="NORMAL">'+ parent.window.qosad_info.lgd_bydscp +'</span></legend>'
+            )
+      </script>
+      <form method="get" action="qos_base_mode_value_set.cgi">
+         <table class="BORDER" id=tb_qos_base_port>
+            <tbody>
+               <tr class="TABLE_HEAD">
+                  <script>
+                     docW(
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosad_info.td_choice +'</b></span></td>'+
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.str_info.td_port +'</b></span></td>'+
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosad_info.td_priority +'</b></span></td>'
+                        )
+                  </script>
+               </tr>
+               <tr class="TABLE_HEAD">
+                  <td class="TD_FIRST_COL">
+                    <input type="checkbox" id="selAll_0" class="CHKBOX_NORMAL">
+                  </td>
+                  <td class="TD_FIRST_COL"></td>
+                  <td class="TD_FIRST_COL"><select id="port_pri" class="SELECT_NORMAL">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                     </select> </td>
+               </tr>
+               <script>
+                  var lagPort, priPortStr;
+                  for (i = 1; i <= portNumber; i++)
+                  {
+                      priPortStr = PriPort[i - 1]
+                      docW("<tr>")
+                      if (_trunk_info[i-1] == 0)
+                      {
+                          docW("<td><input class='CHKBOX_NORMAL' type=checkbox id=selPort_" + i +' value=1 ></td>')
+                          docW("<td><span class='NORMAL'>" + parent.window.str_info.td_port+ " " + i + "</span></td>")
+                          docW("<td><span class='NORMAL'>" + priPortStr + "</span></td>")
+                      }
+                      else
+                      {
+                          docW('<td class="HIDE"><input class="CHKBOX_NORMAL" type=checkbox id=selPort_' + i +' value=1></td>')
+                      }
+                      docW("</tr>")
+                  }
+               </script>
+               <script>
+                  var idx;
+                  for(let [key,value] of _port_list.entries())
+                  {
+                      if(-1 != key.search("Trunk"))
+                      {
+                          idx = portNumber + parseInt(key.replace("Trunk", ""));
+                          pTrunk[idx - 1] = idx - portNumber;
+                          docW("<tr>")
+                          docW("<td><input class='CHKBOX_NORMAL' type=checkbox name=selPort_" + idx + " id=selPort_" + idx + " value=" + value + "></td>")
+                          docW("<td><span class='NORMAL'>" + parent.window.trunk_info.opt_trunk + (idx - portNumber) + "</span></td>")
+                          for(i = 0; i < portNumber; i++)
+                          {
+                              if(value & (1 << i))
+                              {
+                                  docW("<td><span class='NORMAL'>" + PriPort[i] + "</span></td>");
+                                  break;
+                              }
+                          }
+                          docW("</tr>")
+                      }
+                  }
+               </script>
+            </tbody>
+
+         <table id=tb_submit_qos_port>
+            <tbody>
+               <tr>
+                  <td><a class="BTN"><input type="button" id="btn_apply1" class="BTN_NORMAL_BTN"></script></a></td>
+               </tr>
+            </tbody>
+         </table>
+         </table>
+      </form>
+      <form name="qos_base_dscp_value_set">
+      <table class="BORDER" id=tb_qos_base_dscp>
+         <tbody>
+            <tr class="TABLE_HEAD">
+               <script>
+                  docW(
+                     '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosad_info.td_choice +'</b></span></td>' +
+                     '<td class="TD_FIRST_COL"><span class="NORMAL"><b>DSCP</b></span></td>' +
+                    ' <td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosad_info.b_priority +'</b></span></td>'
+                  )
+               </script>
+            </tr>
+            <tr class="TABLE_HEAD">
+               <td class="TD_FIRST_COL"><input type="checkbox" id="selAll_1" class="CHKBOX_NORMAL"></td>
+               <td class="TD_FIRST_COL"></td>
+               <td class="TD_FIRST_COL"> <select id="dscp_pri" class="SELECT_NORMAL">
+                     <option value="0">0</option>
+                     <option value="1">1</option>
+                     <option value="2">2</option>
+                     <option value="3">3</option>
+                     <option value="4">4</option>
+                     <option value="5">5</option>
+                     <option value="6">6</option>
+                     <option value="7">7</option>
+                  </select> </td>
+            </tr>
+             <script>
+               var lagdscp, priDscpStr;
+               for (i = 1; i <= dscpNumber; i++)
+                  lagdscp = i-1,
+                  priDscpStr = PriDscp[i - 1],
+                  docW("<tr>"),
+                  docW("<td><input class='CHKBOX_NORMAL' type=checkbox id=selDscp_" + i +' value=1></td>'),
+                  docW("<td><span class='NORMAL'>" + lagdscp + "</span></td>"),
+                  docW("<td><span class='NORMAL'>" + priDscpStr + "</span></td>"),
+                  docW("</tr>")
+            </script>
+         </tbody>
+
+      <table id=tb_submit_qos_dscp>
+         <tbody>
+            <tr>
+               <td><a class="BTN"><input type="button" id="btn_apply2" class="BTN_NORMAL_BTN"></a> </td>
+            </tr>
+         </tbody>
+      </table>
+      </table>
+      </form>
+   </fieldset>
+   <fieldset id="priority_queue_field">
+      <legend id="priority_queue_title"><span class="NORMAL"><script>docW(parent.window.qosad_info.lgd_priorityqueue)</script></span></legend>
+      <form method="get" action="qos_priority_queue_set.cgi">
+         <table class="BORDER" id=tb_qos_base_port>
+            <tbody>
+               <tr class="TABLE_HEAD">
+                  <script>
+                     docW(
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosad_info.td_choice +'</b></span></td>' +
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosad_info.td_priority  +'</b></span></td>' +
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.qosad_info.b_queue +'</b></span></td>'
+                     )
+                  </script>
+               </tr>
+               <tr class="TABLE_HEAD">
+                  <td class="TD_FIRST_COL"><input type="checkbox" id="selAll_2" class="CHKBOX_NORMAL"></td>
+                  <td class="TD_FIRST_COL"></td>
+                  <td class="TD_FIRST_COL"> <select id="priority_queue" class="SELECT_NORMAL">
+                        <option value="0">Q0</option>
+                        <option value="1">Q1</option>
+                        <option value="2">Q2</option>
+                        <option value="3">Q3</option>
+                        <option value="4">Q4</option>
+                        <option value="5">Q5</option>
+                        <option value="6">Q6</option>
+                        <option value="7">Q7</option>
+                     </select> </td>
+               </tr>
+               <script>
+                  var lagPriority, priQueueStr;
+                  for (i = 1; i <= priorityNumber; i++)
+                     lagPriority = i-1,
+                     priQueueStr = queue_info[PriQueue[i-1]],
+                     docW("<tr>"),
+                     docW("<td><input class='CHKBOX_NORMAL' type=checkbox id=selPriority_" + i +' value=1></td>'),
+                     docW("<td><span class='NORMAL'>" + lagPriority + "</span></td>"),
+                     docW("<td><span class='NORMAL'>" + priQueueStr + "</span></td>"),
+                     docW("</tr>")
+               </script>
+            </tbody>
+         </table>
+         <table>
+            <tbody>
+               <tr>
+                  <td><a class="BTN"><input type="button" id="btn_apply3" class="BTN_NORMAL_BTN"></a> </td>
+               </tr>
+            </tbody>
+         </table>
+      </form>
+   </fieldset>
+</body>
+</html>

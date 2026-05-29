@@ -1,0 +1,46 @@
+USER_SECTIONS .dmem_flashbuffer, .gdmpbss, .gdmpdata, .dmem_monitor_dis_interrupt_buf
+
+#include "platform.sag"
+DEFINE SRAM_BASE_ADDR    DMEM_BASE
+DEFINE STACK_BOTTOM_ADDR (DMEM_BASE + DMEM_SIZE)
+DEFINE MAX_SRAM_SIZE     (DMEM_SIZE - DMEM_PDMA_SIZE - DMEM_MIN_HEAP)
+
+FLASH 0x20020000
+{
+	EXEC 0x20020000
+	{
+		* (+ISR)
+		* EXCLUDE_FILE(*spi_nor_entry.o *spi_controller.o *flash_util.o)(+RO)
+	}
+	SRAM SRAM_BASE_ADDR MAX_SRAM_SIZE
+	{
+		LOADADDR NEXT __data_lmastart
+		ADDR NEXT __data_start
+		* (+RW,+ZI)
+		ADDR __data_end
+		STACK = STACK_BOTTOM_ADDR
+	}
+
+	GDMP_SRAM GDMPSRAM_BASE GDMPSRAM_SIZE
+	{
+		LOADADDR NEXT __dmemimg_lmastart
+		ADDR NEXT __dmemimg_vmastart
+		*spi_nor_entry.o KEEP(+RO)
+		*spi_controller.o KEEP(+RO)
+		*flash_util.o KEEP(+RO)
+		ADDR __dmemimg_vmaend
+		ADDR NEXT __dmem_flashbuffer_vma
+		* KEEP(.dmem_flashbuffer | NOLOAD )
+		ADDR NEXT __dmem_monitor_dis_interrupt_vma
+		* KEEP(.dmem_monitor_dis_interrupt_buf | NOLOAD)
+
+		ADDR NEXT __gdmpbss_vma
+		* KEEP(.gdmpbss | NOLOAD)
+		ADDR NEXT __gdmpbss_vmaend
+
+		LOADADDR NEXT __gdmpdata_lma
+		ADDR NEXT __gdmpdata_vma
+		* KEEP(.gdmpdata)
+		ADDR __gdmpdata_vmaend
+	}
+}

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#erpsCfg-->
+<script>
+<!--#stpinfo-->
+<!--#stpportinfo-->
+</script>
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+  font-size: 12px;
+  width: 1000px;
+  margin: 1em auto;
+  padding: 1em;
+  border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+  font-weight: bold;
+  font-size: 150%;
+  color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+  font-family: Arial;
+}
+span.NORMAL {
+  font-size: 150%;
+  font-family: "Arial";
+}
+table {
+  margin: 1em auto;
+  border-collapse: collapse;
+  text-align: center;
+}
+table td {
+  height: 32px;
+  line-height: 21px;
+}
+TABLE.FRAMEWORK {
+  line-height: 25px;
+  margin: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 0;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+table.BORDER td, th {
+  border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_ROW {
+    FONT-SIZE: 150%;
+    font-family: Arial;
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+}
+TD.RADIO_WIDE {
+  width: 150px;
+}
+TD.FRAMEWORK_LEFT_TOP {
+  FONT-SIZE: 150%;
+  font-family: "Arial";
+  text-align: left;
+  vertical-align: top;
+  width: 250px;
+  padding: 0;
+}
+table.BTN_WRAPPER {
+  margin-top: 12px;
+}
+TD.BTN_WRAPPER {
+  width: 70px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 38px;
+    width: 100px;
+}
+input {
+  border-width: 1px;
+  border-style: solid;
+}
+INPUT.NUMBER {
+    font-size: 150%;
+    font-family: Arial;
+    height: 32px;
+    width: 100px;
+}
+tbody#tb_portSet tr:not(.TABLE_HEAD) td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 20ch;
+  white-space: nowrap;
+}
+#div_fwd_delay, #div_max_age, #div_tx_hold_cnt,
+#div_priority, #div_port_priority, #div_cost {
+    color: red;
+    display: none;
+    text-align: left;
+}
+#div_port_priority, #div_cost {
+    text-align: center;
+}
+</style>
+<meta name="referrer" content="no-referrer">
+<script>
+var docW = (a) => document.write(a), $ = (a) => document.getElementById(a),
+  incMeta = () => docW('<meta http-equiv="Content-Type" content="text/html; charset=' + ((0 == top.g_Lan) ? "gb2312" : "utf-8") + '">');
+var s_info = parent.window.spanningTree_info, selState = new Array(stp_ds.portNum), ps_cnt = 0,
+  g_plist = _port_list, g_pbmp = Array.from(g_plist.values());
+
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+function initPage() {
+  for (let i = 0; i < selState.length; ++i) selState[i] = !1;
+  $("stpEn").checked = !!stp_ds.state;
+  $("stpDis").checked = !stp_ds.state;
+  if (rstpSupport == 0)
+  {
+      $id("td_stp_version").style.display = "none";
+      $id("td_rstp_version").style.display = "none";
+  }
+  if (mstpSupport == 0)
+  {
+      $id("td_mstp_version").style.display = "none";
+  }
+  $("stpVerStp").checked = stp_ds.forceProtocolVersion == 0;
+  $("stpVerRstp").checked = stp_ds.forceProtocolVersion == 2;
+  $("stpVerMstp").checked = stp_ds.forceProtocolVersion == 3;
+  $("stp_fwd_delay").value = stp_ds.forwardDelay;
+  $("stp_max_age").value = stp_ds.maxAge;
+  $("stp_tx_hold_cnt").value = stp_ds.transmitHoldCount;
+  $("stp_priority").value = stp_ds.priority;
+}
+function initPageLang() {
+  let setT = (e,t) => e.innerText = t;
+  setT($("lgd_stp"), s_info.lgd_stp);
+  setT($("lgd_port_set"), s_info.lgd_port_set);
+  setT($("spn_stp_state"), s_info.spn_stp_state);
+  setT($("spn_enable"), parent.window.str_info.opt_enable);
+  setT($("spn_disable"), parent.window.str_info.opt_disable);
+  setT($("spn_stp_ver"), s_info.spn_stp_ver);
+  setT($("spn_stp"), s_info.stp);
+  setT($("spn_rstp"), s_info.rstp);
+  setT($("spn_mstp"), s_info.mstp);
+  setT($("spn_stp_fwd_delay"), s_info.fwd_delay);
+  setT($("spn_stp_max_age"), s_info.max_age);
+  setT($("spn_stp_tx_hold_cnt"), s_info.tx_hold_cnt);
+  setT($("spn_stp_priority"), s_info.priority);
+  setT($("spn_fwd_delay_unit"), s_info.fwd_delay_unit);
+  setT($("spn_max_age_unit"), s_info.max_age_unit);
+  setT($("spn_tx_hold_cnt_unit"), s_info.tx_hold_cnt_unit);
+  setT($("spn_priority_unit"), s_info.priority_unit);
+  setT($("spn_alt_fwd_delay"), s_info.alt_fwd_delay);
+  setT($("spn_alt_max_age"), s_info.alt_max_age);
+  setT($("spn_alt_tx_hold_cnt"), s_info.alt_tx_hold_cnt);
+  setT($("spn_alt_priority"), s_info.alt_priority);
+  setT($("tb1_port"), s_info.port);
+  setT($("tb1_status"), s_info.port_status);
+  setT($("tb1_priority"), s_info.port_priority);
+  setT($("tb1_edge"), s_info.edge)
+  setT($("tb1_cost"), s_info.port_cost);
+  setT($("tb1_auto_cost_enable"), s_info.auto_cost_hdr);
+  setT($("tb1_mcheck"), s_info.mcheck);
+  setT($("tb2_port"), s_info.port);
+  setT($("tb2_status"), s_info.port_status);
+  setT($("tb2_priority"), s_info.port_priority);
+  setT($("tb2_edge"), s_info.edge)
+  setT($("tb2_cost"), s_info.port_cost);
+  setT($("tb2_mode"), s_info.port_mode);
+  setT($("tb2_state"), s_info.port_state);
+  setT($("tb2_role"), s_info.port_role);
+  $("submitBtn1").value = s_info.btn_apply;
+  $("submitBtn2").value = s_info.btn_apply;
+}
+
+function initPsTbl() {
+  g_plist.forEach((e, k) => {
+    var ps = $("tb_portSet");
+    i = parent.window.g_getPort(e);
+
+    costStr = ""
+    if (stp_ds.autoCostSupport == 0) {
+      costStr += stp_ds.cost[i];
+    } else {
+      autoStr = (stp_ds.autoCostEnable[i] == 1) ? parent.window.spanningTree_info.auto : "";
+      if (stp_ds.state == 0) {
+        if (stp_ds.autoCostEnable[i] == 0) {
+          costStr = stp_ds.cost[i];
+        } else {
+          costStr = autoStr;
+        }
+      } else {
+        if (stp_ds.autoCostEnable[i] == 0) {
+          costStr = stp_ds.cost[i];
+        } else {
+          if (stp_oper_ds.role[i] == 0) {
+            costStr = autoStr;
+          } else {
+            costStr = stp_oper_ds.operCost[i] + "("+autoStr+")";
+          }
+        }
+      }
+    }
+
+    ps.innerHTML += "<tr><td width='10%'><span class='NORMAL'>" +
+    ((k.indexOf("Trunk") < 0) ? (s_info.port + k): (k.replace("Trunk", parent.window.trunk_info.opt_trunk))) +
+    "</span></td><td width='11%'><span class='NORMAL'>" + (stp_ds.portStatus[i] == 1 ? parent.window.str_info.opt_enable : parent.window.str_info.opt_disable) +
+    "</span></td><td width='9%'><span class='NORMAL'>" + stp_ds.portPriority[i] +
+    "</span></td><td width='11%'><span class='NORMAL'>" + (stp_ds.adminEdge[i] == 1 ? parent.window.str_info.opt_enable : parent.window.str_info.opt_disable)+
+    "</span></td><td width='10%'><span class='NORMAL'>" + costStr +
+    "</span></td><td width='12%'><span class='NORMAL'>" + ((stp_ds.portMode[i] == 3) ? s_info.disable : ((stp_ds.portMode[i] == 1) ? s_info.rstp : (stp_ds.portMode[i] == 0) ? s_info.stp : s_info.mstp)) +
+    "</span></td><td width='17%'><span class='NORMAL'>" + ((stp_oper_ds.portState[i] == 6) ? s_info.port_state_guard_down :
+                              (stp_oper_ds.portState[i] == 5) ? s_info.port_state_loop_inc :
+                              (stp_oper_ds.portState[i] == 4) ? s_info.port_state_root_inc :
+                              (stp_oper_ds.portState[i] == 3) ? s_info.port_state_discard :
+                              (stp_oper_ds.portState[i] == 2) ? s_info.port_state_forward :
+                              (stp_oper_ds.portState[i] == 1) ? s_info.port_state_learn   : s_info.disable) +
+    "</span></td><td width='20%'><span class='NORMAL'>" + ((stp_oper_ds.role[i] == 4) ? s_info.port_role_backup    :
+                              (stp_oper_ds.role[i] == 3) ? s_info.port_role_alternate :
+                              (stp_oper_ds.role[i] == 2) ? s_info.port_role_designated:
+                              (stp_oper_ds.role[i] == 1) ? s_info.port_role_root      : s_info.disable)+
+    "</span></td></tr>";
+  });
+
+  if (stp_ds.autoCostSupport == 1) {
+    $("tb1_auto_cost_enable").style.display = "run-in";
+    $("td_auto_cost_enable").style.display = "run-in";
+  } else {
+    $("tb1_auto_cost_enable").style.display = "none";
+    $("td_auto_cost_enable").style.display = "none";
+  }
+
+  if (stp_ds.forceProtocolVersion == 3)
+  {
+    $id("tb1_priority").style.display = "none";
+    $id("td_port_priority").style.display = "none";
+    $id("tb1_cost").style.display = "none";
+    $id("td_port_cost").style.display = "none";
+  }
+  else
+  {
+    $id("tb1_priority").style.display = "run-in";
+    $id("td_port_priority").style.display = "run-in";
+    $id("tb1_cost").style.display = "run-in";
+    $id("td_port_cost").style.display = "run-in";
+  }
+}
+function getSelNum() {
+  var t = 0;
+  selState.forEach((e) => { if (e) ++t; });
+  return t;
+}
+
+function chkAutoCostEnableSel(e) {
+  let ps = $("spanning_tree_portset");
+  if (ps.port_auto_cost_enable_sel.value == 1) {
+    ps.portCost.disabled = !!1
+  } else {
+    ps.portCost.disabled = !1
+  }
+}
+
+function chkSel(e) {
+  let portSel_options = $("portSel").options;
+  let portSel_length = portSel_options.length;
+  let portSel_index = 0;
+  let ps = $("spanning_tree_portset");
+
+  for (portSel_index = 0; portSel_index < portSel_length; ++portSel_index) {
+    selState[portSel_index] = portSel_options[portSel_index].selected;
+  }
+
+  let i = selState.indexOf(!0);
+  portSel_index = parent.window.g_getPort(g_pbmp[i]);
+  if (portSel_index >= 0) {
+    ps.port_status.value = stp_ds.portStatus[portSel_index];
+    ps.portPriority.value = stp_ds.portPriority[portSel_index];
+    ps.portCost.value = stp_ds.cost[portSel_index];
+    if (stp_ds.autoCostSupport == 1) {
+      ps.port_auto_cost_enable_sel.value = stp_ds.autoCostEnable[portSel_index];
+    }
+    ps.port_edge.value = stp_ds.adminEdge[portSel_index];
+    ps.port_mcheck.value = 0;
+    if ("none" != $("td_auto_cost_enable").style.display) {
+      if (ps.port_auto_cost_enable_sel.value == 1) {
+        ps.portCost.disabled = !!1
+      } else {
+        ps.portCost.disabled = !1
+      }
+    } else {
+      ps.portCost.disabled = !1
+    }
+    $("spanning_tree_portset").port_mcheck.disabled = !stp_ds.portStatus[portSel_index];
+  }
+}
+function chkRange(val, min, max) {
+    let valid = !1;
+    if ((min <= val) && (max >= val)) {
+        valid = 1;
+    }
+    return valid
+}
+function chkFwdDelay() {
+    val = $("stp_fwd_delay").value;
+    if (0 == chkRange(val, 4, 30) || "" == val)
+    {
+        $("div_fwd_delay").style.display = "block";
+    } else {
+        $("div_fwd_delay").style.display = "none";
+    }
+}
+function chkMaxAge() {
+    val = $("stp_max_age").value;
+    if (0 == chkRange(val, 6, 40) || "" == val)
+    {
+        $("div_max_age").style.display = "block";
+    } else {
+        $("div_max_age").style.display = "none";
+    }
+}
+function chkTxHoldCnt() {
+    val = $("stp_tx_hold_cnt").value;
+    if (0 == chkRange(val, 1, 10) || "" == val)
+    {
+        $("div_tx_hold_cnt").style.display = "block";
+    } else {
+        $("div_tx_hold_cnt").style.display = "none";
+    }
+}
+function chkPriority() {
+    val = $("stp_priority").value;
+    if (0 == chkRange(val, 0, 61440) || "" == val)
+    {
+        $("div_priority").style.display = "block";
+    } else {
+        $("div_priority").style.display = "none";
+    }
+}
+function activeAllInput(en) {
+  let ps = $("spanning_tree_portset"), setEn = (el) => el.disabled = !en;
+
+  setEn($("stpEn")), setEn($("stpDis")), setEn($("submitBtn1")), setEn($("submitBtn2")), setEn($("portSel"));
+  setEn(ps.portPriority), setEn(ps.cost), setEn(ps.opt82Mode);
+}
+
+function addParam(cnt, req, p) {
+    if (0 < cnt) {
+        req += "&";
+    }
+    req += p;
+    return req;
+}
+
+function chkMultiple(val, multiple) {
+    let valid = !1;
+    if (0 == (val % multiple)) {
+        valid = !0;
+    }
+    return valid;
+}
+
+function do_submit1() {
+  if ("block" == $("div_fwd_delay").style.display ||
+    "block" == $("div_max_age").style.display ||
+    "block" == $("div_tx_hold_cnt").style.display ||
+    "block" == $("div_priority").style.display) {
+    return !1;
+  }
+  let stpState = ($("stpEn").checked)? 1 : 0;
+  let stpVer = ($("stpVerRstp").checked)? 2 : 0;
+  if ($("stpVerMstp").checked)
+  {
+    stpVer = 3;
+  }
+  let stpFwdDelay = $("stp_fwd_delay").value;
+  let stpMaxAge = $("stp_max_age").value;
+  let stpTxHoldCnt = $("stp_tx_hold_cnt").value;
+  let stpPriority = $("stp_priority").value;
+  let cnt = 0;
+  let req = "stpCfg.cgi?";
+
+  if (1 == stpState && 1 == lpEn) {
+    alert(s_info.alt_info2);
+    return !1;
+  }
+  if ("undefined" != typeof(erpsInfo)) {
+    for (var i=0 ; i<erpsInfo.length ; i++) {
+      if (1 == stpState && 0 != erpsInfo[i][0]) {
+        alert(s_info.alt_info3);
+        return !1;
+      }
+    }
+  }
+  if (0 == chkMultiple(stpPriority, 4096)) {
+    alert(parent.window.spanningTree_info.alt_priority_multiple + "4096");
+    return !1;
+  }
+
+  if ((2 * (stpFwdDelay - 1)) < stpMaxAge) {
+    alert("2 * (Forward Delay - 1) >= Max Age");
+    return !1;
+  }
+
+  if (stpState != stp_ds.state) {
+    req = addParam(cnt++, req, "state=" + stpState);
+  }
+  if (stpVer != stp_ds.forceProtocolVersion) {
+    req = addParam(cnt++, req, "forceProtocolVersion=" + stpVer);
+  }
+  if (stpFwdDelay != stp_ds.forwardDelay) {
+    req = addParam(cnt++, req, "forwardDelay=" + stpFwdDelay);
+  }
+  if (stpMaxAge != stp_ds.maxAge) {
+    req = addParam(cnt++, req, "maxAge=" + stpMaxAge);
+  }
+  if (stpTxHoldCnt != stp_ds.transmitHoldCount) {
+    req = addParam(cnt++, req, "transmitHoldCount=" + stpTxHoldCnt);
+  }
+  if (stpPriority != stp_ds.priority) {
+    req = addParam(cnt++, req, "priority=" + stpPriority);
+  }
+
+  return location.href = req;
+}
+
+function getPortBmp() {
+  var p = 0;
+  selState.forEach((e, i) => { if (e) p |= g_pbmp[i]; });
+  return p;
+}
+
+function do_submit2() {
+  let valid = 1;
+  let ps = $("spanning_tree_portset");
+  let req = "stpPortCfg.cgi?pbmp=" + getPortBmp();
+  let cnt = 1;
+  if (getSelNum() == 0) { alert(s_info.alt_info1); return !1; }
+  if (0 == chkRange(ps.portPriority.value, 0, 240) || "" == ps.portPriority.value) {
+    alert(parent.window.spanningTree_info.alt_port_priority);
+    return !1;
+  }
+  req = addParam(cnt++, req, "portStatus=" + ps.port_status.value);
+  if (0 == chkMultiple(ps.portPriority.value, 16)) {
+    alert(parent.window.spanningTree_info.alt_priority_multiple + "16");
+    return !1;
+  }
+  if ((1 != ps.port_auto_cost_enable_sel.value) && (0 == chkRange(ps.portCost.value, 1, 200000000))) {
+    alert(parent.window.spanningTree_info.alt_cost);
+    return !1;
+  }
+  if ((("none" != $("td_auto_cost_enable").style.display) && (ps.port_auto_cost_enable_sel.value == 7)) ||
+      (ps.port_edge.value == 7)) {
+    alert(parent.window.spanningTree_info.alt_setting_empty);
+    return !1;
+  }
+
+  req = addParam(cnt++, req, "portPriority=" + ps.portPriority.value);
+  if ("" == ps.portCost.value) {
+    req = addParam(cnt++, req, "cost=0");
+  }
+  else
+  {
+    req = addParam(cnt++, req, "cost=" + ps.portCost.value);
+  }
+  req = addParam(cnt++, req, "trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info));
+  req = addParam(cnt++, req, "autoCostSupport=" + stp_ds.autoCostSupport);
+  if ("none" != $("td_auto_cost_enable").style.display) {
+  req = addParam(cnt++, req, "autoCostEnable=" + ps.port_auto_cost_enable_sel.value);
+  } else {
+    req = addParam(cnt++, req, "autoCostEnable=0");
+  }
+  req = addParam(cnt++, req, "adminEdge=" + ps.port_edge.value);
+  req = addParam(cnt++, req, "mcheck=" + ps.port_mcheck.value);
+
+  return location.href = req;
+}
+incMeta();
+
+window.onload = () => {
+    $("stp_fwd_delay").onblur = () => { return chkFwdDelay(); };
+    $("stp_max_age").onblur = () => { return chkMaxAge(); };
+    $("stp_tx_hold_cnt").onblur = () => { return chkTxHoldCnt(); };
+    $("stp_priority").onblur = () => { return chkPriority(); };
+
+    $("submitBtn1").onclick = () => { return do_submit1(); };
+    $("portSel").onclick = (event) => { return chkSel(event); };
+    $("port_auto_cost_enable_sel").onclick = (event) => { return chkAutoCostEnableSel(event); };
+    $("submitBtn2").onclick = () => { return do_submit2(); };
+}
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<fieldset>
+<legend><span class="NORMAL" id="lgd_stp"></span></legend>
+<form name="stpCfg" action="stpCfg.cgi">
+  <table class="FRAMEWORK">
+    <tbody>
+      <tr>
+        <td class="FRAMEWORK_LEFT_TOP"><span id="spn_stp_state"></span></td>
+        <td class="RADIO_WIDE" align="left">
+          <input name="stp_state" id="stpEn" type="radio" value="1" class="RADIO_NORMAL">
+          <span id="spn_enable" class="NORMAL"></span></td>
+        <td align="left">
+          <input name="stp_state" id="stpDis" type="radio" value="0" class="RADIO_NORMAL" checked="">
+          <span id="spn_disable" class="NORMAL"></span></td>
+      </tr>
+      <tr>
+        <td class="FRAMEWORK_LEFT_TOP"><span id="spn_stp_ver"></span></td>
+        <td class="RADIO_WIDE" align="left" id="td_stp_version">
+          <input name="stp_version" id="stpVerStp" type="radio" value="0" class="RADIO_NORMAL">
+          <span id="spn_stp" class="NORMAL"></span></td>
+        <td class="RADIO_WIDE" align="left" id="td_rstp_version">
+          <input name="stp_version" id="stpVerRstp" type="radio" value="2" class="RADIO_NORMAL" checked="">
+          <span id="spn_rstp" class="NORMAL"></span></td>
+        <td class="RADIO_WIDE" align="left" id="td_mstp_version">
+          <input name="stp_version" id="stpVerMstp" type="radio" value="3" class="RADIO_NORMAL">
+          <span id="spn_mstp" class="NORMAL"></span></td>
+      </tr>
+      <tr>
+        <td class="FRAMEWORK_LEFT_TOP"><span id="spn_stp_fwd_delay"></span></td>
+        <td colspan=4 align="left">
+          <input class="NUMBER" id="stp_fwd_delay" name="stp_fwd_delay" type="number" min=4 max=30>
+          <span class="NORMAL" id="spn_fwd_delay_unit"></span>
+          <div id="div_fwd_delay"><span class="NORMAL" id="spn_alt_fwd_delay"></span></div></td>
+      </tr>
+      <tr>
+        <td class="FRAMEWORK_LEFT_TOP"><span id="spn_stp_max_age"></span></td>
+        <td colspan=4 align="left">
+          <input class="NUMBER" id="stp_max_age" name="stp_max_age" type="number" min=6 max=40>
+          <span class="NORMAL" id="spn_max_age_unit"></span>
+          <div id="div_max_age"><span class="NORMAL" id="spn_alt_max_age"></span></div></td>
+      </tr>
+      <tr>
+        <td class="FRAMEWORK_LEFT_TOP"><span id="spn_stp_tx_hold_cnt"></span></td>
+        <td colspan=4 align="left">
+          <input class="NUMBER" id="stp_tx_hold_cnt" name="stp_tx_hold_cnt" type="number" min=1 max=10>
+          <span class="NORMAL" id="spn_tx_hold_cnt_unit"></span>
+          <div id="div_tx_hold_cnt"><span class="NORMAL" id="spn_alt_tx_hold_cnt"></span></div></td>
+      </tr>
+      <tr>
+        <td class="FRAMEWORK_LEFT_TOP"><span id="spn_stp_priority"></span></td>
+        <td colspan=4 align="left">
+          <input class="NUMBER" id="stp_priority" name="stp_priority" type="number" min=0 max=61440 step=4096>
+          <span class="NORMAL" id="spn_priority_unit"></span>
+          <div id="div_priority"><span class="NORMAL" id="spn_alt_priority"></span></div></td>
+      </tr>
+     </tbody>
+  </table>
+  <table class="BTN_WRAPPER" align="center">
+    <tbody><tr>
+    <td class="BTN_WRAPPER">
+      <a class="BTN"><input id="submitBtn1" class="BTN_NORMAL_BTN" type="button"></a></td>
+  </tr></tbody>
+  </table>
+</form>
+</fieldset>
+<fieldset>
+<legend><span class="NORMAL" id="lgd_port_set"></span></legend>
+<form id="spanning_tree_portset" action="stpPortCfg.cgi">
+  <table class="BORDER" width="90%">
+    <tbody>
+      <tr class="TABLE_HEAD">
+        <td id="tb1_port" class="TD_FIRST_ROW" width="12%"></td>
+        <td id="tb1_status" class="TD_FIRST_ROW" width="12%"></td>
+        <div id="div_priority_hdr"><td id="tb1_priority" class="TD_FIRST_ROW" width="12%"></td>
+        <td id="tb1_edge" class="TD_FIRST_ROW" width="12%"></td>
+        <div id="div_cost_hdr"><td id="tb1_cost" class="TD_FIRST_ROW" width="12%"></td>
+        <div id="div_auto_cost_enable_hdr"><td id="tb1_auto_cost_enable" class="TD_FIRST_ROW" width="12%"></td></div>
+        <td id="tb1_mcheck" class="TD_FIRST_ROW" width="12%"></td>
+      </tr>
+      <tr>
+        <td width="12%">
+          <select class="SELECT_PORTLIST" id="portSel" name="stpPort" multiple size="5" overflow="scroll">
+          </select></td>
+        <td witdh="12%">
+          <select class="SELECT_NORMAL" id="port_status" name="port_status">
+            <option value="7" hidden> </option>
+            <option value="0"><script>docW(parent.window.str_info.opt_disable)</script> </option>
+            <option value="1"><script>docW(parent.window.str_info.opt_enable)</script> </option>
+          </select>
+        </td>
+        <div id="div_port_priority"><td width="12%" id="td_port_priority">
+          <input class="NUMBER" id="portPriority" name="portPriority" type="number" min=0 max=240 step=16>
+          <div id="div_port_priority"><span class="NORMAL" id="spn_alt_port_priority"></span></div></td>
+        <td witdh="12%">
+          <select class="SELECT_NORMAL" id="port_edge" name="port_edge">
+            <option value="7" hidden> </option>
+            <option value="0"><script>docW(parent.window.str_info.opt_disable)</script> </option>
+            <option value="1"><script>docW(parent.window.str_info.opt_enable)</script> </option>
+          </select>
+        </td>
+        <div id="div_port_cost"><td width="12%" id="td_port_cost">
+          <input class="NUMBER" id="portCost" name="portCost" type="number" min=1 max=200000000>
+          <div id="div_cost"><span class="NORMAL" id="spn_alt_cost"></span></div></td>
+        <div id="div_auto_cost_enable"><td width="12%" id="td_auto_cost_enable">
+          <select class="SELECT_NORMAL" id="port_auto_cost_enable_sel" name="port_auto_cost_enable_sel">
+            <option value="7" hidden> </option>
+            <option value="0"><script>docW(parent.window.str_info.opt_disable)</script> </option>
+            <option value="1"><script>docW(parent.window.str_info.opt_enable)</script> </option>
+          </select>
+        </td></div>
+        <td witdh="12%">
+          <select class="SELECT_NORMAL" id="port_mcheck" name="port_mcheck">
+            <option value="0" selected><script></script> </option>
+            <option value="1"><script>docW(parent.window.spanningTree_info.perform)</script> </option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="BTN_WRAPPER" align="center">
+    <tbody>
+      <tr>
+        <td class="BTN_WRAPPER">
+          <a class="BTN"><input id="submitBtn2" class="BTN_NORMAL_BTN" type="button"></a></td>
+      </tr>
+    </tbody>
+  </table>
+  <table width="100%">
+    <tbody>
+        <tr>
+            <td class="BOTTOM_LINE"></td>
+        </tr>
+    </tbody>
+  </table>
+  <table class="BORDER" width="100%">
+    <tbody id="tb_portSet">
+      <tr class="TABLE_HEAD">
+        <td id="tb2_port" class="TD_FIRST_ROW"></td>
+        <td id="tb2_status" class="TD_FIRST_ROW"></td>
+        <td id="tb2_priority" class="TD_FIRST_ROW"></td>
+        <td id="tb2_edge" class="TD_FIRST_ROW"></td>
+        <td id="tb2_cost" class="TD_FIRST_ROW"></td>
+        <td id="tb2_mode" class="TD_FIRST_ROW"></td>
+        <td id="tb2_state" class="TD_FIRST_ROW"></td>
+        <td id="tb2_role" class="TD_FIRST_ROW"></td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+</fieldset>
+<script>
+  let psl = $("portSel");
+  psl.innerHTML = "";
+  g_plist.forEach((e, i) => {
+    psl.innerHTML += ('<option id="stpPort_' + i + '" value=' + e + '>' +
+      ((i.indexOf("Trunk") < 0) ? (s_info.port + i): (i.replace("Trunk", parent.window.trunk_info.opt_trunk))) + "</option>");
+  });
+  initPageLang();
+  initPage();
+  initPsTbl();
+</script>
+</body>
+</html>

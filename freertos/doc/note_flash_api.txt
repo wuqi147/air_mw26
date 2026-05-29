@@ -1,0 +1,76 @@
+/*
+ *  Note       : note_flash_api
+ *  Chip       : EN8851
+ *  SDK        : AIR_SDK_v2.8.5
+ *  Update     : 2023-12-11
+ */
+
+(1) Overview
+
+    SPI NOR flash memory is an ideal storage for embedded system due to its
+    fast, random read performance. This note describes how to use the flash
+    API to read and write SPI NOR flash memory device.
+
+(2) SPI NOR flash APIs Functionality
+
+(2.1) Flash APIs
+
+    SDK provide flash write API, which is declared in spinorwrite.h, and
+    the function prototype is :
+
+    - SPI_ERR_T
+      spinor_write(
+          uint32_t src_addr,
+          uint32_t flash_dst_addr,
+          uint32_t src_data_size
+      );
+
+    Where,
+    - src_addr       : the start address of data which user wants to write to
+                       SPI NOR flash
+    - flash_dst_addr : the SPI NOR flash destination address, notice that
+                       this parameter should not be greater than flash size.
+                       Furthermore, this address must be logical ORed with
+                       0x20000000 for chip bus system to locate the physical
+                       flash device.
+    - src_data_size  : write data size. The maximum size is 4096 bytes, and
+                       if user wants to write 4097 bytes, it should invoke
+                       spinor_write() API twice.
+
+    - SPI_ERR_T
+      spinor_instr_read(
+          unsigned char flash_ins,
+          unsigned int reg_data_len,
+          unsigned char *reg_data
+      );
+
+    Where,
+    - flash_ins       : the flash instruction is used for configuring or
+                        controlling flash memory
+    - reg_data_len    : the byte length of output value to corresponding
+                        flash instruction, the maximum length is 4096 bytes
+                        (this function does not support reading data larger
+                        than 4096 bytes)
+    - reg_data        : data buffer for storing output value.
+
+(3) Flash API Usage Examples
+
+(3.1) Flash Write Within 4096 Bytes
+
+    Assume user wants to write 3 bytes data to SPI NOR flash address 0x1f000.
+    Sample code is shown as following :
+
+    uint8_t data[3] = {0x12, 0x34, 0x56};
+    uint32_t flash_addr = (0x1f000 | 0x20000000);
+    uint32_t data_size = 3;
+
+    spinor_write((uint32_t)data, flash_addr, data_size);
+
+(3.2) Flash Instruction Read
+
+    Assume user wants to read 8 bytes uuid from SPI NOR flash.
+    Sample code is shown as following :
+
+    uint8_t uuid[8];
+
+    spinor_instr_read(0x4B, sizeof(uuid), uuid);

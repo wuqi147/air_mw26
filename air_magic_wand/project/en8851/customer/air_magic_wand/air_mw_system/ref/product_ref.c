@@ -1,0 +1,198 @@
+/*******************************************************************************
+*  Copyright Statement:
+*  --------------------
+*  This software is protected by Copyright and the information contained
+*  herein is confidential. The software may not be copied and the information
+*  contained herein may not be used or disclosed except with the written
+*  permission of Airoha Technology Corp. (C) 2024
+*
+*  BY OPENING THIS FILE, BUYER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
+*  THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("AIROHA SOFTWARE")
+*  RECEIVED FROM AIROHA AND/OR ITS REPRESENTATIVES ARE PROVIDED TO BUYER ON
+*  AN "AS-IS" BASIS ONLY. AIROHA EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
+*  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+*  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
+*  NEITHER DOES AIROHA PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
+*  SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
+*  SUPPLIED WITH THE AIROHA SOFTWARE, AND BUYER AGREES TO LOOK ONLY TO SUCH
+*  THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. AIROHA SHALL ALSO
+*  NOT BE RESPONSIBLE FOR ANY AIROHA SOFTWARE RELEASES MADE TO BUYER'S
+*  SPECIFICATION OR TO CONFORM TO A PARTICULAR STANDARD OR OPEN FORUM.
+*
+*  BUYER'S SOLE AND EXCLUSIVE REMEDY AND AIROHA'S ENTIRE AND CUMULATIVE
+*  LIABILITY WITH RESPECT TO THE AIROHA SOFTWARE RELEASED HEREUNDER WILL BE,
+*  AT AIROHA'S OPTION, TO REVISE OR REPLACE THE AIROHA SOFTWARE AT ISSUE,
+*  OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY BUYER TO
+*  AIROHA FOR SUCH AIROHA SOFTWARE AT ISSUE.
+*
+*  THE TRANSACTION CONTEMPLATED HEREUNDER SHALL BE CONSTRUED IN ACCORDANCE
+*  WITH THE LAWS OF THE STATE OF CALIFORNIA, USA, EXCLUDING ITS CONFLICT OF
+*  LAWS PRINCIPLES.  ANY DISPUTES, CONTROVERSIES OR CLAIMS ARISING THEREOF AND
+*  RELATED THERETO SHALL BE SETTLED BY ARBITRATION IN SAN FRANCISCO, CA, UNDER
+*  THE RULES OF THE INTERNATIONAL CHAMBER OF COMMERCE (ICC).
+*
+*******************************************************************************/
+
+/* FILE NAME:   product_ref.c
+ * PURPOSE:
+ *       Define the arrangement of icons for web page ports.
+ *
+ * NOTES:
+ *
+ */
+
+/* INCLUDE FILE DECLARATIONS
+ */
+#include "mw_types.h"
+#include "product_ref.h"
+
+/* NAMING CONSTANT DECLARATIONS
+*/
+
+/* MACRO FUNCTION DECLARATIONS
+ */
+
+/* DATA TYPE DECLARATIONS
+ */
+
+/* GLOBAL VARIABLE DECLARATIONS
+ */
+static const MW_PRODUCT_ID_INFO_T _mw_product_id_array[] = {
+    /* Description                      Product_ID */
+    {"EN8851C_8P",                    MW_PRODUCT_ID_EN8851C_8P},
+    {"EN8851C_RFB",                   MW_PRODUCT_ID_EN8851C_RFB},
+#ifdef AIR_SUPPORT_POE
+    {"EN8851C_RFB_AN8502_4P",         MW_PRODUCT_ID_EN8851C_RFB_AN8502_4P},
+    {"EN8851C_RFB_AN8503_8P",         MW_PRODUCT_ID_EN8851C_RFB_AN8503_8P},
+#endif
+    {"EN8851C_8P_2SFP",               MW_PRODUCT_ID_EN8851C_8P_2SFP},
+    {"EN8851C_8P_2SFP_L",             MW_PRODUCT_ID_EN8851C_8P_2SFP_L},
+
+    {"EN8853C_24P",                   MW_PRODUCT_ID_EN8853C_24P},
+    {"EN8853C_RFB",                   MW_PRODUCT_ID_EN8853C_RFB},
+    {"EN8853C_AN8808Q_RFB",           MW_PRODUCT_ID_EN8853C_AN8808Q_RFB},
+    {"EN8853C_24P_EN8804_4P_4SFP",    MW_PRODUCT_ID_EN8853C_24P_EN8804_4P_4SFP},
+    {"EN8853C_24P_1SFP",              MW_PRODUCT_ID_EN8853C_24P_1SFP},
+    {"EN8853C_8P_EN8804_4SFP",        MW_PRODUCT_ID_EN8853C_8P_EN8804_4SFP},
+    {"EN8853C_8P_EN8804_8SFP",        MW_PRODUCT_ID_EN8853C_8P_EN8804_8SFP},
+    {"EN8853C_8P_EN8804_12SFP",       MW_PRODUCT_ID_EN8853C_8P_EN8804_12SFP},
+    {"EN8853C_8P_EN8804_16SFP",       MW_PRODUCT_ID_EN8853C_8P_EN8804_16SFP},
+    {"EN8853C_16P_2SFP",              MW_PRODUCT_ID_EN8853C_16P_2SFP},
+};
+
+static const MW_LIGHTS_ARRAY_T _mw_product_lights_array[] = {
+    {
+        MW_PRODUCT_ID_EN8851C_8P,
+        "",
+        "1,2,3,4,5,6,7,8"
+    },
+    {
+        MW_PRODUCT_ID_EN8851C_RFB,
+        "",
+        "1,2,3,4,5,6,7,8,0,0,109,110"
+    },
+    {
+        MW_PRODUCT_ID_EN8851C_RFB_AN8502_4P,
+        "",
+        "1,2,3,4,5,6,7,8,0,0,109,110"
+    },
+    {
+        MW_PRODUCT_ID_EN8851C_RFB_AN8503_8P,
+        "",
+        "1,2,3,4,5,6,7,8,0,0,109,110"
+    },
+    {
+        MW_PRODUCT_ID_EN8851C_8P_2SFP,
+        "",
+        "1,2,3,4,5,6,7,8,0,0,109,110"
+    },
+    {
+        MW_PRODUCT_ID_EN8851C_8P_2SFP_L,
+        "0,0,0,0,7,5,3,1",
+        "110,109,0,0,8,6,4,2"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_24P,
+        "1,3,5,7,0,9,11,13,15,0,17,19,21,23",
+        "2,4,6,8,0,10,12,14,16,0,18,20,22,24"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_RFB,
+        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,25,27,0,0,125,127",
+        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,26,28,0,0,126,128"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_AN8808Q_RFB,
+        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,25,27,0,0,125,127",
+        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,26,28,0,0,126,128"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_24P_EN8804_4P_4SFP,
+        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,25,27,0,0,125,127",
+        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,26,28,0,0,126,128"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_24P_1SFP,
+        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,0,0",
+        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,0,125"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_8P_EN8804_4SFP,
+        "1,3,5,7,0,0,109,111",
+        "2,4,6,8,0,0,110,112"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_8P_EN8804_8SFP,
+        "1,3,5,7,0,0,109,111,113,115",
+        "2,4,6,8,0,0,110,112,114,116"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_8P_EN8804_12SFP,
+        "1,3,5,7,0,0,109,111,113,115,0,117,119",
+        "2,4,6,8,0,0,110,112,114,116,0,118,120"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_8P_EN8804_16SFP,
+        "1,3,5,7,0,0,109,111,113,115,0,117,119,121,123",
+        "2,4,6,8,0,0,110,112,114,116,0,118,120,122,124"
+    },
+    {
+        MW_PRODUCT_ID_EN8853C_16P_2SFP,
+        "1,3,5,7,0,9,11,13,15,0,0,0,0",
+        "2,4,6,8,0,10,12,14,16,0,0,117,118"
+    },
+};
+
+/* LOCAL SUBPROGRAM DECLARATIONS
+ */
+
+/* EXPORTED SUBPROGRAM SPECIFICATIONS
+ */
+const MW_PRODUCT_ID_INFO_T *
+mw_product_getProductIdArray(
+    void)
+{
+    return _mw_product_id_array;
+}
+
+UI32_T
+mw_product_getProductIdArraySize(
+    void)
+{
+    return sizeof(_mw_product_id_array) / sizeof(MW_PRODUCT_ID_INFO_T);
+}
+
+const MW_LIGHTS_ARRAY_T *
+mw_product_getLightsArray(
+    void)
+{
+    return _mw_product_lights_array;
+}
+
+UI32_T
+mw_product_getLightsArraySize(
+    void)
+{
+    return sizeof(_mw_product_lights_array) / sizeof(MW_LIGHTS_ARRAY_T);
+}
+

@@ -1,0 +1,86 @@
+/*
+ *  Note    : note_shared_vlan_allocation
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.6.0
+ *  Update  : 2022-09-02
+ */
+
+(1) Overview
+
+    One hardware table has 64 entries and is shared by three features, SVLAN,
+    MAC-based VLAN and IPv4-based VLAN which is one of Subnet-based VLAN. SDK
+    divides the table into three parts for the features. Each parts have
+    default entry count. User may need to adjust the entry count of features
+    with requirement. This note will describe how to allocate the entry count.
+
+    Subnet-based VLAN comprises IPv4-based VLAN and IPv6-based VLAN. IPv6-based
+    VLAN does not share the hardware table with IPv4-based VLAN. It has 16
+    independent entries. SDK put the indexes of IPv6-based VLAN behind the
+    indexes of IPv4-based VLAN. User can use the same APIs with different index
+    range to configure IPv4-based VLAN and IPv6-based VLAN.
+
+(2) SDK Default Entry Count Allocation
+
+    SDK default makes SVLAN, MAC-based and IPv4-based to use 16 entries, 16
+    entries and 32 entries respectively. Below table shows entry count and
+    index range of each features.
+
+    +-----------------------------------------------+
+    |               |  Entry Count  |  Index Range  |
+    |-----------------------------------------------|
+    |     SVLAN     |       16      |     0-15      |
+    |-----------------------------------------------|
+    |   MAC-based   |       16      |     0-15      |
+    |-----------------------------------------------|
+    |  IPv4-based   |       32      |     0-31      |
+    |-----------------------------------------------|
+    |  IPv6-based   |       16      |    32-47      |
+    +-----------------------------------------------+
+
+(3) Customized Entry Count Illustration
+
+    SDK provides three configuration types in air_cfg.h to indicate which
+    feature will be allocated entry count by user:
+    - AIR_CFG_TYPE_MAX_ENTRY_CNT_SERVICE_VLAN is used to allocate entry count
+      to SVLAN.
+    - AIR_CFG_TYPE_MAX_ENTRY_CNT_MAC_BASED_VLAN is used to allocate entry count
+      to MAC-based VLAN.
+    - AIR_CFG_TYPE_MAX_ENTRY_CNT_IPV4_BASED_VLAN is used to allocate entry
+      count to IPv4-based VLAN.
+
+    User can use these types and bind value in customer_ref.c. During SDK
+    initialization, it will check the types to determine entry count of
+    feature is allocated default value or customized value. When configuration
+    type of feature is not used in customer_ref.c, SDK will allocate default
+    value. Note that sum of entry count for SVLAN, MAC-based VLAN and
+    IPv4-based VLAN should be less than or equal to 64. Besides, the index
+    range of feature may be changed when entry count is not default value.
+
+(3.1) Adjust Entry Count Example
+
+    The following defines entry count of SVLAN, MAC-based VLAN and IPv4-based
+    VLAN as 8, 32 and 16.
+
+    static SDK_CFG_T _customer_ref_cfg[] =
+    {
+    /*  unit  AIR_CFG_TYPE_XXX                            param0  param1  value
+     *  ----  ----------------                            ------  ------  -----
+     */
+        {0,   AIR_CFG_TYPE_MAX_ENTRY_CNT_SERVICE_VLAN,    0,      0,       8},
+        {0,   AIR_CFG_TYPE_MAX_ENTRY_CNT_MAC_BASED_VLAN,  0,      0,      32},
+        {0,   AIR_CFG_TYPE_MAX_ENTRY_CNT_IPV4_BASED_VLAN, 0,      0,      16}
+    };
+
+    Below table shows entry count and index range of each features after
+    above code is applied.
+    +-----------------------------------------------+
+    |               |  Entry Count  |  Index Range  |
+    |-----------------------------------------------|
+    |     SVLAN     |        8      |     0-7       |
+    |-----------------------------------------------|
+    |   MAC-based   |       32      |     0-31      |
+    |-----------------------------------------------|
+    |  IPv4-based   |       16      |     0-15      |
+    |-----------------------------------------------|
+    |  IPv6-based   |       16      |    16-31      |
+    +-----------------------------------------------+

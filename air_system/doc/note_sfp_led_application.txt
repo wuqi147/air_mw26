@@ -1,0 +1,247 @@
+/*
+ *  Note    : note_sfp_led_application
+ *  Chip    : EN8851(E3)
+ *  SDK     : AIR_SDK_v2.8.6
+ *  Update  : 2024-02-15
+ */
+
+(1) Overview
+
+    SFP LED app is to control LED to indicate SFP port link and traffic status.
+    The configuration of SFP LED app is decided by users. SDK has provided
+    mechanisms for users to customize LED behavior and APIs to force control
+    LED behavior. This note will describe how to configure SFP LED app and
+    control it by SDK.
+
+(2) SFP LED Compile Flag Enable
+
+    In config.mk, there is a compile flag related to SFP LED app.
+
+    AIR_EN_SFP_LED: SFP LED app compile flag, set as "ENABLED" to build this
+    app into SDK.
+
+(3) SFP LED Configuration
+
+(3.1) SFP LED Customized Configuration
+
+    SFP LED app reuse the PHY LED customized behavior configuration to define
+    the SFP LED behavior. SDK has provided a mechanism that users can customize
+    the LED behavior to meet their requirements. During SDK initialziation,
+    SFP LED app will get this LED customized behavior configuration and control
+    LED based on it.
+
+    The LED customized behavior configuration are listed as below and please
+    refer to air_cfg.h on SDK for more detailed information.
+
+    - AIR_CFG_TYPE_PHY_LED_BEHAVIOR: Configure LED on/off and blinking behavior
+
+    The LED customized behavior configuration are only applied once during SDK
+    initialization.
+
+    - sfp_port_map[]: SFP port id and LED pin id mapping table, default value
+    will be like:
+
+    const static SFP_LED_PORT_MAP_T sfp_port_map[] =
+    {
+      /* unit,  port id,               led pin id */
+        {0,     SFP_LED_INVALID_ID,    0},
+        {0,     SFP_LED_INVALID_ID,    0}
+    };
+
+    Users need to define the correct SFP port id and LED pin id mapping in
+    compile time:
+
+    const static SFP_LED_PORT_MAP_T sfp_port_map[] =
+    {
+      /* unit,  port id,  led pin id */
+        {0,     9,        6},
+        {0,     9,        7},
+        {0,     10,       8},
+        {0,     10,       9}
+    };
+
+    If the sfp_port_map[] is not defined correctly, SFP LED app initialization
+    will fail.
+
+(3.2) SFP LED Port Id and LED Pin Id Mapping
+
+    Users need to define two configurations insides sfp_led.h
+    (air_system\app\sfp_led) in compile time.
+
+    - SFP_LED_PORT_CNT: how many SFP ports, default value is 2.
+
+	- SFP_LED_GPIO_PIN_CNT_PER_PORT: LED GPIO pin count for each port, default value is 2.
+
+
+(3.3) Config Peripheral Pin as GPIO
+
+    For the LED pin id in sfp_port_map[], users need to config these pins as
+    force GPIO.
+
+    The force GPIO pin configuration are listed as below and please refer to
+    air_cfg.h on SDK for more detailed information.
+
+    - AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN: Configure peripheral pin as GPIO
+
+(3.4) SFP LED Control Mode
+
+    Normally, SFP LED is controlled by SFP port status and its behavior will be
+    the configuration mentioned on session 3.1. In some cases, users might want
+    to control LED by themselves (SDK called it as force mode) to control SFP
+    LED to indicate something wrong. For examples, software detect loop
+    occurence on one SFP port and want to control corresponding LED to indicate
+    this situation.
+    In order to force SFP LED controlled by user, SFP LED app reuse the API,
+    air_port_setPhyLedCtrlMode(), to configure each SFP LED is controlled by
+    app or users. The LED control mode on this API will be:
+
+    - AIR_PORT_PHY_LED_CTRL_MODE_PHY    : PHY LED controlled by SFP port status
+    - AIR_PORT_PHY_LED_CTRL_MODE_FORCE  : PHY LED controlled by user
+
+    If the SFP LED is controlled by app, the LED state will depend on port
+    status and the behavior will follow the configuration on session 3.1.
+
+(3.5) LED State on Force Control Mode
+
+    If the SFP LED is controlled by user (force mode), SFP LED app reuse the
+    API, air_port_setPhyLedForceState(), to control force mode LED state.
+    Those force mode LED states will have:
+    - AIR_PORT_PHY_LED_STATE_FORCE_PATT : Force LED state to be force pattern,
+                                          The pattern is controlled by the API,
+                                          air_port_setPhyLedForcePattCfg()
+    - AIR_PORT_PHY_LED_STATE_OFF        : Force LED state to be OFF
+    - AIR_PORT_PHY_LED_STATE_ON         : Force LED state to be ON
+
+(3.6) LED Pattern Configuration on Force Control Mode
+
+    If the SFP LED is controlled by user (force mode), and the force state is
+    AIR_PORT_PHY_LED_STATE_FORCE_PATT, there is one option to indicate LED
+    pattern on force mode. SFP LED app reuse the API
+    air_port_setPhyLedForcePattCfg(), to configure this force mode pattern.
+    These patterns will have:
+
+    - AIR_PORT_PHY_LED_PATT_HZ_HALF : Blinking once every 2 seconds
+    - AIR_PORT_PHY_LED_PATT_HZ_ONE  : Blinking once per second
+    - AIR_PORT_PHY_LED_PATT_HZ_TWO  : Blinking twice per second
+
+(4) SFP LED Usage Example
+
+(4.1) SFP LED Configuration
+
+    If user wants to configure SPF LED with following configuration:
+
+    The behavior of LED on port 9:
+    - Turn on when 1G link up.
+    - Blink when 1G activity.
+    - Corresponding LED pin id is 6.
+
+    The behavior of LED on port 9:
+    - Turn on when 100M or 10M link up.
+    - Blink when 100M or 10M activity.
+    - Corresponding LED pin id is 7.
+
+    The behavior of LED on port 10:
+    - Turn on when 1G link up.
+    - Blink when 1G activity.
+    - Corresponding LED pin id is 8.
+
+    The behavior of LED on port 10:
+    - Turn on when 100M or 10M link up.
+    - Blink when 100M or 10M activity.
+    - Corresponding LED pin id is 9.
+
+    Please configure following arguments to set up _customer_ref_cfg[] in
+    customer_ref.c:
+
+    (a) Configure the behavior of LED 0 on port 9:
+        {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          9,      0,     0x861},
+
+    (b) Configure the behavior of LED 1 on port 9:
+        {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          9,      1,     0xF86},
+
+    (c) Configure the behavior of LED 0 on port 10:
+        {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          10,     0,     0x861},
+
+    (c) Configure the behavior of LED 1 on port 10:
+        {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          10,     1,     0xF86},
+
+    (c) Define SFP_LED_PORT_CNT and SFP_LED_GPIO_PIN_CNT_PER_PORT as 2
+
+        #define SFP_LED_PORT_CNT (2)
+
+		#define SFP_LED_GPIO_PIN_CNT_PER_PORT   (2)
+
+    (d) Define port id and LED pin id mapping table as below.
+        const static SFP_LED_PORT_MAP_T sfp_port_map[] =
+        {
+          /* unit,  port id,  led pin id */
+            {0,     9,        6},
+            {0,     9,        7},
+            {0,     10,       8},
+            {0,     10,       9}
+        };
+
+		(e)    Config led pin id as force GPIO
+        {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,      6,      0,        1},
+        {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,      7,      0,        1},
+        {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,      8,      0,        1},
+        {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,      9,      0,        1}
+
+    (d) Configure each LED to be controlled by PHY:
+        air_port_setPhyLedCtrlMode(unit, 9,
+            0, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+        air_port_setPhyLedCtrlMode(unit, 9,
+            1, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+        air_port_setPhyLedCtrlMode(unit, 10,
+            0, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+        air_port_setPhyLedCtrlMode(unit, 10,
+            1, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+
+(4.2) Using LED Force Mode on LED Diagnostic
+
+    If user wants to process LED diagnostic by force on/off LED, and the
+    default setting is controlled by SFP port status, please follow those steps
+    below:
+
+    (a) Configure the LED control mode to force mode:
+        air_port_setPhyLedCtrlMode(unit, port,
+            led_id, AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
+
+    (b) Configure the SFP LED state of the port to ON, and verify the state:
+        air_port_setPhyLedForceState(unit, port,
+            led_id, AIR_PORT_PHY_LED_STATE_ON);
+
+    (c) Configure the SFP LED state of the port to OFF, and verify the state:
+        air_port_setPhyLedForceState(unit, port,
+            led_id, AIR_PORT_PHY_LED_STATE_OFF);
+
+    (d) Recovery each LED to be controlled by PHY:
+        air_port_setPhyLedCtrlMode(unit, port,
+            led_id, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+
+
+(4.3) Using LED Force Mode on Loop Dectection
+
+    If SFP LED is in PHY mode currently, and user wants to present port loop by
+    blinking LED once per second, user should follow the steps described below:
+
+    (a) Configure the state of LED on specific port to force pattern state:
+        air_port_setPhyLedForceState(unit, port,
+            led_id, AIR_PORT_PHY_LED_STATE_FORCE_PATT);
+
+    (b) Configure the force pattern of LED on specific port to blinking once
+        per second:
+        air_port_setPhyLedForcePattCfg(unit, port,
+            led_id, AIR_PORT_PHY_LED_PATT_HZ_ONE);
+
+    (c) Configure the control mode of LED on specific port to force mode when
+        detected port loop, the the LED will start to blink once per second:
+        air_port_setPhyLedCtrlMode(unit, port,
+            led_id, AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
+
+    (d) When port loop is released, user need to change the control mode of LED
+        on specific
+        port back to PHY mode:
+        air_port_setPhyLedCtrlMode(unit, port,
+            led_id, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
+

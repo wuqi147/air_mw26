@@ -1,0 +1,82 @@
+/*
+ *  Note    : note_exception_debug
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.8.4
+ *  Update  : 2023-08-04
+ */
+
+(1) Overview
+    When user meet a exception occurs , there is a dump log for user
+    to narrow down the root casue of it. The purpose of this document is
+    to describe how to debug exception with dump log.
+
+(2) Dump log
+    Below is the format of dump log
+    PSW    :      *** | IPSW   :     ***| P_IPSW  :     ***
+    IVB    :      *** | EVA    :     ***| P_EVA   :     ***
+    ITYPE  :      *** | P_ITYPE:     ***| MERR    :     ***
+    IPC    :      *** | P_IPC  :     ***| OIPC    :     ***
+    r1     :      *** | r2     :     ***| r3      :     ***
+    r4     :      *** | r5     :     ***| r6      :     ***
+    r7     :      *** | r8     :     ***| r9      :     ***
+    r10    :      *** | fp     :     ***| gp      :     ***
+    sp     :      ***
+    *** is hex value
+
+    The most interest of dump log is interruption program counter (IPC).
+    This is the shadow register of the program counter. It is updated during
+    interruption stack level transition 0 to 1 by hardware.
+
+    User can use IPC to search airRTOSSystem.elf.txt to locate the address
+    of potential error code.
+
+(3) Exception Example
+    void test_exception(void)
+    {
+        printf(">>test_exception divide 0 \n");
+        volatile int x = 5;
+        x /= 0;
+        printf("<<test_exception\n");
+    }
+    main(void)
+    {
+        ...
+        test_exception();
+        ...
+    }
+
+    Below is dump log from uart console
+
+    >>test_exception divide 0
+    PSW    :        7000a | IPSW   :        70008 | P_IPSW  :       70009
+    IVB    :     2002480b | EVA    :     20020722 | P_EVA   :           0
+    ITYPE  :        100e3 | P_ITYPE:            0 | MERR    :           0
+    IPC    :     20020722 | P_IPC  :     200052f4 | OIPC    :           0
+    r1     :            0 | r2     :            5 | r3      :    20024d22
+    r4     :     80002f8c | r5     :            0 | r6      :       50044
+    r7     :            0 | r8     :            0 | r9      :           0
+    r10    :            0 | fp     :     ffffffff | gp      :    80017070
+    sp     :     80037bb4
+    E7
+
+    user can lookup airRTOSSystem.elf.txt by IPC(20020722) to
+    located test_exception()
+
+    // in airRTOSSystem.elf.txt
+    void test_exception(void)
+    {
+    2002070e:   fc 01           push25 $r6,#8    ! {$r6, $fp, $gp, $lp}
+        printf(">>test_exception divide 0 \n");
+    20020710:   46 02 00 6d     sethi $r0,#0x2006d
+    20020714:   58 00 03 e8     ori $r0,$r0,#0x3e8
+    20020718:   f9 df           ifcall9 20020ad6 <cmd_prompt+0x46>
+        volatile int x = 5;
+    2002071a:   84 05           movi55 $r0,#0x5
+    2002071c:   f0 81           swi37.sp $r0,[+#0x4]
+        x /= 0;
+    2002071e:   f2 01           lwi37.sp $r2,[+#0x4]
+    20020720:   84 20           movi55 $r1,#0x0
+    20020722:   40 31 04 76     divsr $r3,$r3,$r2,$r1 <== exception occurs here
+        printf("<<test_exception\n");
+    20020726:   46 02 00 6d     sethi $r0,#0x2006d
+    2002072a:   58 00 04 04     ori $r0,$r0,#0x404

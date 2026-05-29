@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--#portTrunkInfo-->
+  <script>
+    <!--#stpsecinfo-->
+  </script>
+  <style>
+    body,
+    input,
+    select {
+      color: <!--#subPageFont-->;
+      /* Subpage font color */
+    }
+
+    fieldset {
+      font-size: 12px;
+      width: 1000px;
+      margin: 1em auto;
+      padding: 1em;
+      border: 1px solid <!--#subPgFcGrpBdr-->;
+      /* Subpage function group border color */
+    }
+
+    legend {
+      font-weight: bold;
+      font-size: 150%;
+      color: <!--#subPgFcGrpTtl-->;
+      /* Subpage function group title font color */
+      font-family: Arial;
+    }
+
+    span.NORMAL {
+      font-size: 150%;
+      font-family: "Arial";
+    }
+
+    table {
+      margin: 1em auto;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    table td {
+      height: 32px;
+      line-height: 21px;
+    }
+
+    TABLE.FRAMEWORK {
+      line-height: 25px;
+      margin: 0;
+      border-collapse: collapse;
+      border-spacing: 0;
+      border: 0;
+    }
+
+    TD.BOTTOM_LINE {
+      background-color: <!--#subPageDivider-->;
+      /* Subpage divider color */
+      width: 580px;
+      height: 2px;
+    }
+
+    table.BORDER td,
+    th {
+      border: 1px solid <!--#subPageTblBr-->;
+      /* Subpage table boder color */
+    }
+
+    table .TD_FIRST_ROW {
+      FONT-SIZE: 150%;
+      font-family: Arial;
+      background-color: <!--#subPageThdBkGd-->;
+      /* Subpage table header background color */
+      padding: 0 5px;
+    }
+
+    TD.RADIO_WIDE {
+      width: 150px;
+    }
+
+    TD.FRAMEWORK_LEFT_TOP {
+      FONT-SIZE: 150%;
+      font-family: "Arial";
+      text-align: left;
+      vertical-align: top;
+      width: 250px;
+      padding: 0;
+    }
+
+    table.BTN_WRAPPER {
+      margin-top: 12px;
+    }
+
+    TD.BTN_WRAPPER {
+      width: 70px;
+    }
+
+    a.BTN {
+      background: url(button.gif) left -42px;
+      text-decoration: none;
+      height: 21px;
+      float: left;
+      margin: 0;
+      transform: scale(1.5, 1.5) translate(0%, 20%);
+    }
+
+    a.BTN input {
+      background: url(button.gif) right -42px;
+      padding: 4px 3px 4px 0;
+      margin: 0 0 0 3px;
+      float: left;
+      height: 21px;
+      border: none;
+    }
+
+    INPUT.BTN_NORMAL_BTN {
+      font-family: "Arial";
+      width: 60px;
+    }
+
+    .SELECT_PORTLIST {
+      font-size: 150%;
+      font-family: "Arial";
+      height: 120px;
+      width: 100px;
+    }
+
+    .RADIO_NORMAL {
+      transform: scale(1.5, 1.5) translate(-20%, -10%);
+    }
+
+    .SELECT_NORMAL {
+      font-size: 150%;
+      font-family: "Arial";
+      height: 38px;
+      width: 100px;
+    }
+
+    input {
+      border-width: 1px;
+      border-style: solid;
+    }
+
+    INPUT.NUMBER {
+      font-size: 150%;
+      font-family: Arial;
+      height: 32px;
+      width: 100px;
+    }
+
+    tbody#tb_portSet tr:not(.TABLE_HEAD) td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 20ch;
+      white-space: nowrap;
+    }
+  </style>
+  <meta name="referrer" content="no-referrer">
+  <script>
+    var docW = (a) => document.write(a),
+      $ = (a) => document.getElementById(a),
+      incMeta = () => docW('<meta http-equiv="Content-Type" content="text/html; charset=' + ((0 == top.g_Lan) ?
+        "gb2312" : "utf-8") + '">');
+    var s_info = parent.window.spanningTree_info,
+      selState = new Array(stp_sec_ds.portNum),
+      g_plist = _port_list,
+      g_pbmp = Array.from(g_plist.values());
+
+    function initPageLang() {
+      let setT = (e, t) => e.innerText = t;
+      let setH = (e, t) => e.innerHTML = t;
+      setT($("lgd_sec_port_set"), s_info.lgd_sec_port_set);
+      setT($("tb1_port"), s_info.port);
+      setT($("tb1_loop_protect"), s_info.security_loop_protect);
+      setT($("tb1_root_protect"), s_info.security_root_protect);
+      setT($("tb1_bpdu_guard"), s_info.security_BPDU_guard)
+      setT($("tb1_tc_guard"), s_info.security_TC_guard);
+      setT($("tb1_tc_status"), s_info.security_status);
+      setH($("tb1_tc_interval"), s_info.security_interval_with_range);
+      setH($("tb1_tc_bpdu_threshold"), s_info.security_threshold_with_range);
+      setT($("tb2_port"), s_info.port);
+      setT($("tb2_loop_protect"), s_info.security_loop_protect);
+      setT($("tb2_root_protect"), s_info.security_root_protect);
+      setT($("tb2_bpdu_guard"), s_info.security_BPDU_guard)
+      setT($("tb2_tc_guard"), s_info.security_TC_guard);
+      setT($("tb2_tc_status"), s_info.security_status);
+      setT($("tb2_tc_interval"), s_info.security_interval);
+      setT($("tb2_tc_bpdu_threshold"), s_info.security_threshold);
+      $("submitBtn").value = s_info.btn_apply;
+    }
+
+    function initPsTbl() {
+      g_plist.forEach((e, k) => {
+        var ps = $("tb_portSet");
+        i = parent.window.g_getPort(e);
+
+        ps.innerHTML += "<tr><td width='10%'><span class='NORMAL'>" +
+          ((k.indexOf("Trunk") < 0) ? (s_info.port + k) : (k.replace("Trunk", parent.window.trunk_info
+            .opt_trunk))) +
+          "</span></td><td width='10%'><span class='NORMAL'>" + (stp_sec_ds.portLP[i] == 1 ? parent.window.str_info.opt_enable : parent.window.str_info.opt_disable) +
+          "</span></td><td width='10%'><span class='NORMAL'>" + (stp_sec_ds.portRP[i] == 1 ? parent.window.str_info.opt_enable : parent.window.str_info.opt_disable) +
+          "</span></td><td width='15%'><span class='NORMAL'>" + (stp_sec_ds.portBPDUG[i] == 1 ? parent.window.str_info.opt_enable : parent.window.str_info.opt_disable) +
+          "</span></td><td width='10%'><span class='NORMAL'>" + (stp_sec_ds.portTC_st[i] == 1 ? parent.window.str_info.opt_enable : parent.window.str_info.opt_disable) +
+          "</span></td><td width='10%'><span class='NORMAL'>" + stp_sec_ds.portTC_intvl[i] +
+          "</span></td><td width='10%'><span class='NORMAL'>" + stp_sec_ds.portTC_thrhld[i] +
+          "</span></td></tr>";
+      });
+    }
+
+    function getSelNum() {
+      var t = 0;
+      selState.forEach((e) => {
+        if (e) ++t;
+      });
+      return t;
+    }
+
+    function chkSel(e) {
+      let portSel_options = $("portSel").options;
+      let portSel_length = portSel_options.length;
+      let portSel_index = 0;
+      let ps = $("spanning_tree_sec_portset");
+
+      for (portSel_index = 0; portSel_index < portSel_length; ++portSel_index) {
+        selState[portSel_index] = portSel_options[portSel_index].selected;
+      }
+
+      let i = selState.indexOf(!0);
+      portSel_index = parent.window.g_getPort(g_pbmp[i]);
+      if (portSel_index >= 0) {
+        ps.loop_protect.value = stp_sec_ds.portLP[portSel_index];
+        ps.root_protect.value = stp_sec_ds.portRP[portSel_index];
+        ps.bpdu_guard.value = stp_sec_ds.portBPDUG[portSel_index];
+        ps.tc_state.value = stp_sec_ds.portTC_st[portSel_index];
+        ps.tc_interval.value = stp_sec_ds.portTC_intvl[portSel_index];
+        ps.tc_bpdu_threshold.value = stp_sec_ds.portTC_thrhld[portSel_index];
+      }
+    }
+
+    function chkRange(val, min, max) {
+      let valid = !1;
+      if ((min <= val) && (max >= val)) {
+        valid = 1;
+      }
+      return valid
+    }
+
+    function activeAllInput(en) {
+      let ps = $("spanning_tree_sec_portset"),
+        setEn = (el) => el.disabled = !en;
+
+      setEn($("submitBtn")), setEn($("portSel"));
+      setEn(ps.loop_protect), setEn(ps.root_protect), setEn(ps.bpdu_guard), setEn(ps.tc_state), setEn(ps.tc_interval), setEn(ps.tc_bpdu_threshold);
+    }
+
+    function addParam(cnt, req, p) {
+      if (0 < cnt) {
+        req += "&";
+      }
+      req += p;
+      return req;
+    }
+
+    function getPortBmp() {
+      var p = 0;
+      selState.forEach((e, i) => {
+        if (e) p |= g_pbmp[i];
+      });
+      return p;
+    }
+
+    function do_submit() {
+      let valid = 1;
+      let ps = $("spanning_tree_sec_portset");
+      let req = "stpSecPortCfg.cgi?pbmp=" + getPortBmp();
+      let cnt = 1;
+      if (getSelNum() == 0) {
+        alert(s_info.alt_info1);
+        return !1;
+      }
+      if ((ps.loop_protect.value == 7) || (ps.root_protect.value == 7) || (ps.bpdu_guard.value == 7) || (ps.tc_state.value == 7)) {
+        alert(parent.window.spanningTree_info.alt_setting_empty);
+        return !1;
+      }
+      req = addParam(cnt++, req, "portLP=" + ps.loop_protect.value);
+      req = addParam(cnt++, req, "portRP=" + ps.root_protect.value);
+      req = addParam(cnt++, req, "portBPDUG=" + ps.bpdu_guard.value);
+      req = addParam(cnt++, req, "portTC_st=" + ps.tc_state.value);
+      if ("" == ps.tc_interval.value || 0 == chkRange(ps.tc_interval.value, parseInt(ps.tc_interval.min, 10), parseInt(ps.tc_interval.max, 10))) {
+        alert(parent.window.spanningTree_info.alt_tc_interval);
+        return !1;
+      }
+      req = addParam(cnt++, req, "portTC_intvl=" + ps.tc_interval.value);
+      if ("" == ps.tc_bpdu_threshold.value || 0 == chkRange(ps.tc_bpdu_threshold.value, parseInt(ps.tc_bpdu_threshold.min, 10), parseInt(ps.tc_bpdu_threshold.max, 10))) {
+        alert(parent.window.spanningTree_info.alt_tc_threshold);
+        return !1;
+      }
+      req = addParam(cnt++, req, "portTC_thrhld=" + ps.tc_bpdu_threshold.value);
+
+      return (activeAllInput(!1), location.href = req);
+    }
+    incMeta();
+
+    window.onload = () => {
+        $("portSel").onclick = (event) => { return chkSel(event); };
+        $("submitBtn").onclick = () => { return do_submit(); };
+    }
+  </script>
+</head>
+
+<body marginwidth="0" marginheight="0">
+  <fieldset>
+    <legend><span class="NORMAL" id="lgd_sec_port_set"></span></legend>
+    <form id="spanning_tree_sec_portset" action="stpSecPortCfg.cgi">
+      <table class="BORDER" width="100%">
+        <tbody>
+          <tr class="TABLE_HEAD">
+            <td id="tb1_port" class="TD_FIRST_ROW" rowspan="2" width="10%"></td>
+            <td id="tb1_loop_protect" class="TD_FIRST_ROW" rowspan="2" width="15%"></td>
+            <td id="tb1_root_protect" class="TD_FIRST_ROW" rowspan="2" width="15%"></td>
+            <td id="tb1_bpdu_guard" class="TD_FIRST_ROW" rowspan="2" width="15%"></td>
+            <td id="tb1_tc_guard" class="TD_FIRST_ROW" colspan="3" width="45%"></td>
+          </tr>
+          <tr class="TABLE_HEAD">
+            <td id="tb1_tc_status" class="TD_FIRST_ROW" width="15%"></td>
+            <td id="tb1_tc_interval" class="TD_FIRST_ROW" width="15%"></td>
+            <td id="tb1_tc_bpdu_threshold" class="TD_FIRST_ROW" width="15%"></td>
+          </tr>
+          <tr>
+            <td width="10%">
+              <select class="SELECT_PORTLIST" id="portSel" name="stpPort" multiple size="5" overflow="scroll">
+              </select></td>
+            <td witdh="15%">
+              <select class="SELECT_NORMAL" id="loop_protect" name="loop_protect">
+                <option value="7" hidden> </option>
+                <option value="0">
+                  <script>
+                    docW(parent.window.str_info.opt_disable)
+                  </script>
+                </option>
+                <option value="1">
+                  <script>
+                    docW(parent.window.str_info.opt_enable)
+                  </script>
+                </option>
+              </select>
+            </td>
+            <td witdh="15%">
+              <select class="SELECT_NORMAL" id="root_protect" name="root_protect">
+                <option value="7" hidden> </option>
+                <option value="0">
+                  <script>
+                    docW(parent.window.str_info.opt_disable)
+                  </script>
+                </option>
+                <option value="1">
+                  <script>
+                    docW(parent.window.str_info.opt_enable)
+                  </script>
+                </option>
+              </select>
+            </td>
+            <td witdh="15%">
+              <select class="SELECT_NORMAL" id="bpdu_guard" name="bpdu_guard">
+                <option value="7" hidden> </option>
+                <option value="0">
+                  <script>
+                    docW(parent.window.str_info.opt_disable)
+                  </script>
+                </option>
+                <option value="1">
+                  <script>
+                    docW(parent.window.str_info.opt_enable)
+                  </script>
+                </option>
+              </select>
+            </td>
+            <td witdh="15%">
+              <select class="SELECT_NORMAL" id="tc_state" name="tc_state">
+                <option value="7" hidden> </option>
+                <option value="0">
+                  <script>
+                    docW(parent.window.str_info.opt_disable)
+                  </script>
+                </option>
+                <option value="1">
+                  <script>
+                    docW(parent.window.str_info.opt_enable)
+                  </script>
+                </option>
+              </select>
+            </td>
+            <td witdh="15%">
+              <input class="NUMBER" id="tc_interval" name="tc_interval" type="number" min=1 max=10>
+            </td>
+            <td witdh="15%">
+              <input class="NUMBER" id="tc_bpdu_threshold" name="tc_bpdu_threshold" type="number" min=0 max=100>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="BTN_WRAPPER" align="center">
+        <tbody>
+          <tr>
+            <td class="BTN_WRAPPER">
+              <a class="BTN"><input id="submitBtn" class="BTN_NORMAL_BTN" type="button"></a></td>
+          </tr>
+        </tbody>
+      </table>
+      <table width="100%">
+        <tbody>
+          <tr>
+            <td class="BOTTOM_LINE"></td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="BORDER" width="100%">
+        <tbody id="tb_portSet">
+          <tr class="TABLE_HEAD">
+            <td id="tb2_port" class="TD_FIRST_ROW" rowspan="2" width="10%"></td>
+            <td id="tb2_loop_protect" class="TD_FIRST_ROW" rowspan="2" width="15%"></td>
+            <td id="tb2_root_protect" class="TD_FIRST_ROW" rowspan="2" width="15%"></td>
+            <td id="tb2_bpdu_guard" class="TD_FIRST_ROW" rowspan="2" width="15%"></td>
+            <td id="tb2_tc_guard" class="TD_FIRST_ROW" colspan="3" width="45%"></td>
+          </tr>
+          <tr class="TABLE_HEAD">
+            <td id="tb2_tc_status" class="TD_FIRST_ROW" width="15%"></td>
+            <td id="tb2_tc_interval" class="TD_FIRST_ROW" width="15%"></td>
+            <td id="tb2_tc_bpdu_threshold" class="TD_FIRST_ROW" width="15%"></td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </fieldset>
+  <script>
+    let psl = $("portSel");
+    psl.innerHTML = "";
+    g_plist.forEach((e, i) => {
+      psl.innerHTML += ('<option id="stpPort_' + i + '" value=' + e + '>' +
+        ((i.indexOf("Trunk") < 0) ? (s_info.port + i) : (i.replace("Trunk", parent.window.trunk_info
+          .opt_trunk))) + "</option>");
+    });
+    initPageLang();
+    initPsTbl();
+  </script>
+</body>
+
+</html>

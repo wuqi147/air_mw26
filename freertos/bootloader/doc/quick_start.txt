@@ -1,0 +1,20 @@
+[How to build bootloader]
+1. Enter the bootloader folder.
+2. Modify toolchain.mk.
+    2.1. Specify the CROSS_COMPILE_PATH according to where the toolchain is located.
+    2.2. Specify the compile options (CFLAGS, ...) according to your requirement.
+3. Modify config.mk.
+    3.1. Specify the which project is going to build.
+        default project
+        PROJECT := en8851
+4. Modify project/$(PROJECT)/make/config.mk.
+    4.1. Specify the BOOTMENU_COUNT_DOWN_TIME according to your requirement.
+         The unit is seconds and the default value is 2.
+5. Issue the command "make clean all" to build bootloader image.
+6. The output bootloader image will be named airRTOSBoot.bin and placed in the bootloader folder.
+7. Burning and upgrading the bootloader image.
+    7.1. Use the flash writer to program the flash memory with bootloader image.
+    7.2. Use the bootloader command to upgrade bootloader image through XMODEM.
+         Please note that this method is supported from bootloader version 1.6.
+         The command syntax:
+             upgrade fw-type=bootloader

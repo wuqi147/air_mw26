@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#pvlanconfigextra-->
+<!--#mvlanconfig-->
+<!--#erpsCfg-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+  font-size: 12px;
+  width: 1000px;
+  margin: 1em auto;
+  padding: 1em;
+  border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+  font-weight: bold;
+  font-size: 150%;
+  color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+  font-family: Arial;
+}
+table {
+  margin: 1em auto;
+  border-collapse: collapse;
+  text-align: center;
+}
+table td {
+  height: 32px;
+  line-height: 21px;
+}
+tr.TABLE_HEAD {
+  height: 22px;
+}
+table.BORDER td, th {
+  border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+  background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+  padding: 0 5px;
+  font-size: 150%;
+  font-family: Arial;
+  width: 400px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.RADIO_WIDTH {
+    width: 120px;
+}
+TD.FRAMEWORK_LEFT {
+    font-size: 150%;
+    font-family: "Arial";
+    text-align: left;
+    width: 200px;
+    padding: 0;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var portbmp = 0;
+var selState = new Array(portMaxNum);
+for (i = 0; i < portMaxNum; i++)
+{
+    selState[i] = 0;
+}
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+function initvlan() {
+  if (vlanState == 3) {
+    $id("mvlan_en").checked = true;
+    $id("mvlan_dis").checked = false;
+    $id("td_mtu_port").style.display = "";
+  }
+  else if ((vlanState == 1) || (vlanState == 2)) {
+    $id("mvlan_en").checked = false;
+    $id("mvlan_dis").checked = true;
+    $id("td_mtu_port").style.display = "none";
+  }
+  get_xml();
+}
+
+function chkSel(e)
+{
+    var h = document.getElementById("portSel");
+    var e = h.options;
+    var d = 1;
+    var c = 0;
+    var idx = 0;
+    var port_sel = 0;
+
+    for(c = 0; c < _port_list.size; ++c)
+    {
+        selState[c] = e[c].selected;
+    }
+
+    for(let value of _port_list.values())
+    {
+        if(selState[idx])
+        {
+            port_sel |= value;
+        }
+        idx++;
+    }
+    portbmp = port_sel << 1;
+}
+
+function do_mode_submit() {
+  var click_state = (true == $id("mvlan_en").checked)? 3 : 1;
+  if (((vlanState == 1) && (click_state == 1)) || ((vlanState == 2) && (click_state == 1)) || ((vlanState == 3) && (click_state == 3))) {
+    alert(parent.window.str_info.alt_nochange);
+    return;
+  }
+  if ("undefined" != typeof(erpsInfo)) {
+    for (var i=0 ; i<erpsInfo.length ; i++) {
+      if (0 != erpsInfo[i][0]) {
+        alert(parent.window.vlan_common_info.alt_info3); /* "Cannot change mode due to ERPS enabled." */
+        return;
+      }
+    }
+  }
+  if ((click_state == 3) && (vlanState == 2) && ((voiceinfo.state == 1) || (surveilinfo.state == 1))) {
+    alert(parent.window.vlan_common_info.alt_info2); /* "Cannot change mode due to voice VLAN or surveilinfo VLAN enable." */
+    return;
+  }
+
+  var confirm_val;
+  if (click_state == 3) {
+    confirm_val = confirm(parent.window.vlan_mtu_info.alt_info1); /* "MTU VLAN will be enabled ... */
+  }
+  else if (click_state == 1) {
+    confirm_val = confirm(parent.window.vlan_mtu_info.alt_info0); /* "MTU VLAN will be disabled ... */
+  }
+  if (0 == confirm_val) {
+    return;
+  }
+  var i, defIdx = 0, changeVbmp = 0;
+  for (i = 0; i < vlan_ds.count; i++) {
+    if (vlan_ds.vlan_info[i].vid == 1)
+    {
+      defIdx = vlan_ds.vlan_info[i].idx;
+    }
+    else
+    {
+      changeVbmp |= (1 << (vlan_ds.vlan_info[i].idx - 1));
+    }
+  }
+  return location.href = "mvlanModeSet.cgi?vlan_mode=" + click_state + "&changeVbmp=" + changeVbmp + "&defVidx=" + defIdx;
+}
+
+function do_submit()
+{
+    if(uplinkPort == portbmp)
+    {
+        alert(parent.window.str_info.alt_nochange);
+        return;
+    }
+    else if(0 == portbmp)
+    {
+        alert(parent.window.vlan_common_info.alt_info1);
+        return;
+    }
+    else
+    {
+        return location.href = "mvlanSet.cgi?portbmp=" + portbmp + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info);
+    }
+}
+function pbmToStrHandleTrunk(uplinkPort) {
+  var str = "", trunk_str = "";
+  var i, bit;
+  var trunkbmp;
+  for (let [key, value] of _port_list.entries())
+  {
+    if (-1 != key.indexOf("Trunk"))
+    {
+       trunkbmp = value << 1;
+       if ((uplinkPort & trunkbmp) == trunkbmp) {
+        uplinkPort -= trunkbmp;
+        trunk_str += key.replace("Trunk", parent.window.trunk_info.opt_trunk) + ",";
+      }
+    }
+  }
+  var portDec = parseInt(uplinkPort);
+  for (i = 0, bit = 1; i <= portMaxNum; ++i) {
+    if (portDec & bit) {
+      str += i;
+      b = i;
+      do {
+        bit <<= 1;
+      } while ((portDec & bit) && ++i);
+
+      if (b != i) {
+        str += "-" + i;
+      }
+      str += ",";
+      ++i;
+    }
+    bit <<= 1;
+  }
+  str += trunk_str;
+  if (str.charAt(str.length - 1) == ",") {
+    str = str.substr(0, str.length - 1);
+  }
+  return (str === "")? "-" : str;
+}
+var XML_SEND_COMPLETE = 4;
+var HTML_STATUS_OK = 200;
+var xmlReq;
+function state_change() {
+  var i = 0;
+  var vlan_entry;
+  var vlan_entry_val;
+  if ((XML_SEND_COMPLETE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status)) {
+    vlan_entry = xmlReq.responseText.split(";");
+    for (i = 0; i < vlan_ds.count; i++) {
+      /*{idx:1, vid:1, name:'', mbrs:268435455, tagMbrs:0, untagMbrs:268435455}, */
+      vlan_entry_val = vlan_entry[i].split(",");
+
+      var vlan_obj = new Object();
+      vlan_obj.idx = Number(vlan_entry_val[0]);
+      vlan_obj.vid = Number(vlan_entry_val[1]);
+      vlan_obj.name = vlan_entry_val[2];
+      vlan_obj.mbrs = Number(vlan_entry_val[3]);
+      vlan_obj.tagMbrs = Number(vlan_entry_val[4]);
+      vlan_obj.untagMbrs = Number(vlan_entry_val[5]);
+      vlan_ds.vlan_info.push(vlan_obj);
+    }
+  }
+}
+
+function get_xml() {
+  xmlReq = parent.getXMLObject();
+  if (null != xmlReq) {
+    xmlReq.onreadystatechange = state_change;
+    xmlReq.open("GET", "/vlanEntry.xml", true);
+    xmlReq.send(null);
+  }
+}
+window.onload = () => {
+  $id("btn_mode").value = parent.window.str_info.btn_apply;
+  $id("btn_mode").onclick = () => do_mode_submit();
+  $id("portSel").onclick = (e) => chkSel(e);
+  $id("btn_apply").value = parent.window.str_info.btn_apply;
+  $id("btn_apply").onclick = () => do_submit();
+  initvlan();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<div>
+  <fieldset>
+    <legend><span class="NORMAL"><script>docW(parent.window.vlan_mtu_info.lgd_vlanset)</script></span></legend>
+    <div id="div_sec_title">
+    <form action="mvlanModeSet.cgi">
+    <table>
+    <tbody>
+        <tr>
+            <td>
+                <table>
+                    <tbody>
+                        <tr>
+                        <td align="left" class="FRAMEWORK_LEFT">
+                            <script>docW(parent.window.vlan_mtu_info.spn_mvlanen + ':')</script>
+                        </td>
+                        <td class="RADIO_WIDTH" align="left">
+                            <input name="mvlan_mode" id="mvlan_en" type="radio" value="1" class="RADIO_NORMAL">
+                            <span class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span>
+                        </td>
+                        <td align="left">
+                            <input name="mvlan_mode" id="mvlan_dis" type="radio" value="0" class="RADIO_NORMAL" checked="">
+                            <span class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span>
+                        </td>
+                        <td class="RADIO_WIDTH"></td>
+                        <td class="BTN_WRAPPER"><a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_mode" name="vlan_mode"></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    </form>
+    <div id=td_mtu_port>
+      <form action="mvlanSet.cgi">
+            <table cellspacing="1" border="0.5" class="BORDER">
+            <tbody>
+                <tr class="TABLE_HEAD">
+                    <td class="TD_FIRST_COL" width="200px"><script>docW(parent.window.vlan_mtu_info.cur_upport)</script> </td>
+                    <td class="TD_FIRST_COL" width="350px"><script>
+                        docW(pbmToStrHandleTrunk(uplinkPort));
+                    </script> </td>
+                </tr>
+                <tr align="center">
+                <td class="TD_FIRST_COL" width="200px"><script>docW(parent.window.vlan_mtu_info.sel_upport)</script> </td>
+                    <td>
+                        <select class="SELECT_PORTLIST" id="portSel" multiple="" size="4" overflow="scroll">
+                        <script type="text/javascript">
+                            for (let [key, value] of _port_list.entries())
+                            {
+                                if (-1 == key.indexOf("Trunk"))
+                                {
+                                    docW("<option value=" + value + ">" + parent.window.str_info.td_port + " " + key + "</option>")
+                                }
+                                else
+                                {
+                                    newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                                    docW("<option value=" + value + ">" + newKey + "</option>")
+                                }
+                            }
+                        </script>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+        <div>
+          <table align="center">
+            <tbody><tr>
+              <td><a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_apply"></a></td>
+            </tr></tbody>
+          </table>
+        </div>
+      </form>
+    </div>
+  </fieldset>
+</div>
+</body>
+</html>

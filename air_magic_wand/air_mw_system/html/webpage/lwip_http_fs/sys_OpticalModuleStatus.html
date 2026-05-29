@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#sfpStart-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1200px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+    width: 400px;
+}
+tr.TABLE_HEAD {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 22px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+a.BTN:hover input {
+    cursor: pointer;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+const HTML_STATUS_OK = 200;
+const XML_HTTP_REQUEST_READY_STATE_UNSENT = 0;
+const XML_HTTP_REQUEST_READY_STATE_OPENED = 1;
+const XML_HTTP_REQUEST_READY_STATE_HEADERS_RECEIVED = 1;
+const XML_HTTP_REQUEST_READY_STATE_LOADING = 3;
+const XML_HTTP_REQUEST_READY_STATE_DONE = 4;
+const FLUSH_TIMER_REPEAT_INTERVAL = 1000;
+
+var xmlReq = 0;
+var buffer = 0;
+var sub_buffer = 0;
+
+var port_group_i;
+
+var method = ["port_", "temp_", "vol_", "cur_", "txp_", "rxp_", "loss_"];
+var flush_timer_id = 0;
+var debounce_timer_id = 0;
+var loss_state = new Array(parent.window.optical_module_info.lgd_loss_false, parent.window.optical_module_info.lgd_loss_true);
+
+function stop_flush_timer()
+{
+    if (0 < flush_timer_id)
+    {
+        clearTimeout(flush_timer_id);
+        flush_timer_id = 0;
+    }
+}
+
+function start_flush_timer()
+{
+    flush_timer_id = setTimeout(flush_timer_handler, FLUSH_TIMER_REPEAT_INTERVAL);
+    return flush_timer_id;
+}
+
+function state_change_handler()
+{
+    if((XML_HTTP_REQUEST_READY_STATE_DONE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status))
+    {
+        buffer = xmlReq.responseText.split(";");
+
+        var ddm_type_group = buffer[0].split(",");
+        var loss_of_signal_group = buffer[1].split(",");
+        var org_temp_group = buffer[2].split(",");
+        var org_voltage_group = buffer[3].split(",");
+        var org_current_group = buffer[4].split(",");
+        var org_tx_power_group = buffer[5].split(",");
+        var org_rx_power_group = buffer[6].split(",");
+
+        var ddm_type_group_d = ddm_type_group.map(item => parseInt(item, 10));
+
+        var loss_of_signal_i = loss_of_signal_group.map(item => parseInt(item, 10));
+        var loss_of_signal_s = loss_of_signal_i.map(function(item)
+        {
+                return loss_state[item];
+        });
+
+        var temp_group_i = org_temp_group.map(item => parseInt(item, 10));
+        var temp_group_f = temp_group_i.map(function(item)
+        {
+            return (parseFloat(item / 256).toFixed(2));
+        });
+
+        var vol_group_i = org_voltage_group.map(item => parseInt(item, 10));
+        var vol_group_f = vol_group_i.map(function(item)
+        {
+            item = item >>> 0;
+            return (parseFloat(item / 10000).toFixed(2));//unit:V
+        });
+
+        var cur_group_i = org_current_group.map(item => parseInt(item, 10));
+        var cur_group_f = cur_group_i.map(function(item)
+        {
+            item = item >>> 0;
+            return (parseFloat(item / 500).toFixed(2));//unit:mA
+        });
+
+        var txp_group_i = org_tx_power_group.map(item => parseInt(item, 10));
+        var txp_group_f = txp_group_i.map(function(item)
+        {
+            item = item >>> 0;
+            return (parseFloat(item / 10000).toFixed(2));//unit:mW
+        });
+
+        var rxp_group_i = org_rx_power_group.map(item => parseInt(item, 10));
+        var rxp_group_f = rxp_group_i.map(function(item)
+        {
+            item = item >>> 0;
+            return (parseFloat(item / 10000).toFixed(2));//unit:mW
+        });
+
+
+        for (var i = 0; i < memberNum; i++)
+        {
+            document.getElementById(method[0] + sfpPortNumber[i]).innerHTML = sfpPortNumber[i]; //port_num
+            if (ddm_type_group_d[i] & (1 << 6))
+            {
+                document.getElementById(method[1] + sfpPortNumber[i]).innerHTML = temp_group_f[i]; //temp_num
+                document.getElementById(method[2] + sfpPortNumber[i]).innerHTML = vol_group_f[i]; //vol_num
+                document.getElementById(method[3] + sfpPortNumber[i]).innerHTML = cur_group_f[i]; //cur_num
+                document.getElementById(method[4] + sfpPortNumber[i]).innerHTML = txp_group_f[i]; //txp_num
+                document.getElementById(method[5] + sfpPortNumber[i]).innerHTML = rxp_group_f[i]; //rxp_num
+                document.getElementById(method[6] + sfpPortNumber[i]).innerHTML = loss_of_signal_s[i]; //loss_ind
+            }
+            else
+            {
+                document.getElementById(method[1] + sfpPortNumber[i]).innerHTML = "N/A";
+                document.getElementById(method[2] + sfpPortNumber[i]).innerHTML = "N/A";
+                document.getElementById(method[3] + sfpPortNumber[i]).innerHTML = "N/A";
+                document.getElementById(method[4] + sfpPortNumber[i]).innerHTML = "N/A";
+                document.getElementById(method[5] + sfpPortNumber[i]).innerHTML = "N/A";
+                document.getElementById(method[6] + sfpPortNumber[i]).innerHTML = "N/A";
+            }
+        }
+
+        start_flush_timer();
+    }
+}
+
+function send_flush_request()
+{
+    if(null != xmlReq)
+    {
+        if ((XML_HTTP_REQUEST_READY_STATE_UNSENT < xmlReq.readystate) && (XML_HTTP_REQUEST_READY_STATE_DONE > xmlReq.readystate))
+        {
+            xmlReq.abort();
+        }
+        xmlReq.open("GET", "/sfpState.xml", true);
+        xmlReq.send(null);
+    }
+}
+
+function flush_timer_handler()
+{
+    flush_timer_id = 0;
+    send_flush_request();
+}
+
+function page_init()
+{
+    xmlReq = parent.getXMLObject();
+    if(null != xmlReq)
+    {
+        xmlReq.onreadystatechange = state_change_handler;
+        send_flush_request();
+    }
+}
+window.onload = () => {
+    page_init();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <div>
+      <fieldset>
+         <legend><span class="NORMAL"><script>document.write(parent.window.optical_module_info.lgd_cntoptical_module_status)</script></span></legend>
+            <div id=portstat>
+                  <table class="BORDER">
+                     <tbody>
+                        <tr class="TABLE_HEAD">
+                           <td class="TD_FIRST_COL"><script>document.write(parent.window.str_info.td_port)</script></td>
+                           <td class="TD_FIRST_COL"><script>document.write(parent.window.optical_module_info.lgd_temp)</script></td>
+                           <td class="TD_FIRST_COL"><script>document.write(parent.window.optical_module_info.lgd_voltage)</script></td></td>
+                           <td class="TD_FIRST_COL"><script>document.write(parent.window.optical_module_info.lgd_current)</script></td>
+                           <td class="TD_FIRST_COL"><script>document.write(parent.window.optical_module_info.lgd_output_power)</script></td>
+                           <td class="TD_FIRST_COL"><script>document.write(parent.window.optical_module_info.lgd_input_power)</script></td>
+                           <td class="TD_FIRST_COL"><script>document.write(parent.window.optical_module_info.lgd_loss_signal)</script></td>
+                        </tr>
+                        <script type="text/javascript">
+                        if(0 != memberNum)
+                        {
+                            for (let key = sfpPortNumber[0]; key <= sfpPortNumber[memberNum - 1]; key++)
+                            {
+                                if(true == sfpPortNumber.includes((Number(key))))
+                                {
+                                    document.write("<tr>");
+
+                                    document.write("<td><span class='NORMAL'><div id=port_" + key + "></div></span></td>");
+                                    document.write("<td><span class='NORMAL'><div id=temp_" + key + "></div></span></td>");
+                                    document.write("<td><span class='NORMAL'><div id=vol_" + key + "></div></span></td>");
+                                    document.write("<td><span class='NORMAL'><div id=cur_" + key + "></div></span></td>");
+                                    document.write("<td><span class='NORMAL'><div id=txp_" + key + "></div></span></td>");
+                                    document.write("<td><span class='NORMAL'><div id=rxp_" + key + "></div></span></td>");
+                                    document.write("<td><span class='NORMAL'><div id=loss_" + key + "></div></span></td>");
+
+                                    document.write("</tr>");
+                                }
+                            }
+                        }
+                        </script>
+                     </tbody>
+                  </table>
+            </div>
+      </fieldset>
+   </div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+/*******************************************************************************
+ *  Copyright Statement:
+ *  --------------------
+ *  This software is protected by Copyright and the information contained
+ *  herein is confidential. The software may not be copied and the information
+ *  contained herein may not be used or disclosed except with the written
+ *  permission of Airoha Technology Corp. (C) 2021
+ *
+ *  BY OPENING THIS FILE, BUYER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
+ *  THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("AIROHA SOFTWARE")
+ *  RECEIVED FROM AIROHA AND/OR ITS REPRESENTATIVES ARE PROVIDED TO BUYER ON
+ *  AN "AS-IS" BASIS ONLY. AIROHA EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
+ *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
+ *  NEITHER DOES AIROHA PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
+ *  SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
+ *  SUPPLIED WITH THE AIROHA SOFTWARE, AND BUYER AGREES TO LOOK ONLY TO SUCH
+ *  THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. AIROHA SHALL ALSO
+ *  NOT BE RESPONSIBLE FOR ANY AIROHA SOFTWARE RELEASES MADE TO BUYER'S
+ *  SPECIFICATION OR TO CONFORM TO A PARTICULAR STANDARD OR OPEN FORUM.
+ *
+ *  BUYER'S SOLE AND EXCLUSIVE REMEDY AND AIROHA'S ENTIRE AND CUMULATIVE
+ *  LIABILITY WITH RESPECT TO THE AIROHA SOFTWARE RELEASED HEREUNDER WILL BE,
+ *  AT AIROHA'S OPTION, TO REVISE OR REPLACE THE AIROHA SOFTWARE AT ISSUE,
+ *  OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY BUYER TO
+ *  AIROHA FOR SUCH AIROHA SOFTWARE AT ISSUE.
+ *
+ *  THE TRANSACTION CONTEMPLATED HEREUNDER SHALL BE CONSTRUED IN ACCORDANCE
+ *  WITH THE LAWS OF THE STATE OF CALIFORNIA, USA, EXCLUDING ITS CONFLICT OF
+ *  LAWS PRINCIPLES.  ANY DISPUTES, CONTROVERSIES OR CLAIMS ARISING THEREOF AND
+ *  RELATED THERETO SHALL BE SETTLED BY ARBITRATION IN SAN FRANCISCO, CA, UNDER
+ *  THE RULES OF THE INTERNATIONAL CHAMBER OF COMMERCE (ICC).
+ *
+ *******************************************************************************/
+
+/* FILE NAME:   air_error.c
+ * PURPOSE:
+ *      Define the software modules in AIR SDK.
+ * NOTES:
+ */
+
+/* INCLUDE FILE DECLARATIONS
+ */
+#include <air_error.h>
+
+#include <air_types.h>
+
+/* NAMING CONSTANT DECLARATIONS
+ */
+
+/* MACRO FUNCTION DECLARATIONS
+ */
+#define AIR_ERROR_CAUSE(error_no) (_air_error_cause[error_no])
+
+/* DATA TYPE DECLARATIONS
+ */
+
+/* GLOBAL VARIABLE DECLARATIONS
+ */
+
+/* LOCAL SUBPROGRAM DECLARATIONS
+ */
+
+/* STATIC VARIABLE DECLARATIONS
+ */
+static C8_T *_air_error_cause[AIR_E_LAST] = {
+    "OK",              /* AIR_E_OK */
+    "BAD_PARAMETER",   /* AIR_E_BAD_PARAMETER */
+    "NO_MEMORY",       /* AIR_E_NO_MEMORY */
+    "TABLE_FULL",      /* AIR_E_TABLE_FULL */
+    "ENTRY_NOT_FOUND", /* AIR_E_ENTRY_NOT_FOUND */
+    "ENTRY_EXISTS",    /* AIR_E_ENTRY_EXISTS */
+    "NOT_SUPPORT",     /* AIR_E_NOT_SUPPORT */
+    "ALREADY_INITED",  /* AIR_E_ALREADY_INITED */
+    "NOT_INITED",      /* AIR_E_NOT_INITED */
+    "OTHERS",          /* AIR_E_OTHERS */
+    "ENTRY_IN_USE",    /* AIR_E_ENTRY_IN_USE */
+    "TIMEOUT",         /* AIR_E_TIMEOUT */
+    "OP_INVALID",      /* AIR_E_OP_INVALID */
+    "OP_STOPPED",      /* AIR_E_OP_STOPPED */
+    "OP_INCOMPLETE"    /* AIR_E_OP_INCOMPLETE */
+};
+
+/* EXPORTED SUBPROGRAM BODIES
+ */
+
+/* FUNCTION NAME:   air_error_getString
+ * PURPOSE:
+ *      To obtain the error string of the specified error code
+ *
+ * INPUT:
+ *      The specified error code
+ * OUTPUT:
+ *      None
+ * RETURN:
+ *      Pointer to the target error string
+ *
+ * NOTES:
+ *
+ *
+ */
+C8_T *
+air_error_getString(
+    const AIR_ERROR_NO_T cause)
+{
+    if (cause < AIR_E_LAST)
+    {
+        return _air_error_cause[cause];
+    }
+    return "UNKNOWN_ERROR";
+}
+
+/* LOCAL SUBPROGRAM BODIES
+ */

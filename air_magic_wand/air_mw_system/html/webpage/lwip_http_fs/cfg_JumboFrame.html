@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#jumboframe-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(400%, 0%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 150px;
+}
+TD.SBLANK {
+    width: 21px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function initJumboFrame()
+{
+    if(jumboinfo_ds.enable == 0)
+    {
+        $id("jumboframe_en").checked = false;
+        $id("td_mtu_size").style.display = "none";
+    }
+    else
+    {
+        $id("jumboframe_en").checked = true;
+        $id("td_mtu_size").style.display = "";
+    }
+    $id("mtu_size").value = jumboinfo_ds.mtusize;
+
+    for (var i = 0; i < $id("mtu_size").options.length; i++)
+    {
+        if (i > jumboinfo_ds.maxJumbo)
+        {
+            $id("mtu_size_" + i).style.display = "none";
+        }
+    }
+}
+function docheck()
+{
+    if( $id("jumboframe_en").checked == true)
+    {
+        $id("td_mtu_size").style.display = "";
+    }
+    else
+    {
+        $id("td_mtu_size").style.display = "none";
+    }
+}
+function do_submit()
+{
+    var reqStr ="";
+    var is_change = false;
+    var is_jumboframe_enable = (true == $id("jumboframe_en").checked)? 1 : 0;
+    /* check input is valid */
+    if((true == $id("jumboframe_en").checked) && (0 == $id("mtu_size").value))
+    {
+        return alert(parent.window.jumboframe_info.alt_info0);
+    }
+    /* check jumbo enable is changed or not */
+    if(is_jumboframe_enable != jumboinfo_ds.enable)
+    {
+        is_change = true;
+    }
+    /* if jumbo enabled, check jumbo mtu is changed or not */
+    if((1 == is_jumboframe_enable) && ($id("mtu_size").value != jumboinfo_ds.mtusize))
+    {
+        is_change = true;
+    }
+    if(true == is_change)
+    {
+        if(true == $id("jumboframe_en").checked) /* jumbo enable */
+        {
+            reqStr = "?jumboframe_en=" + is_jumboframe_enable;
+            reqStr += "&mtu_size=" + $id("mtu_size").value;
+        }
+        else /* jumbo disable */
+        {
+           reqStr = "?jumboframe_en=" + is_jumboframe_enable;
+           reqStr += "&mtu_size=" + 0;
+        }
+    }
+    return location.href = "jumboframeSet.cgi" + reqStr;
+}
+window.onload = () => {
+    $id("jumboframe_en").onclick = () => docheck();
+    $id("jumboframe_dis").onclick = () => docheck();
+    $id("jumboframe_dis").checked = !0;
+    $id("btn_apply").onclick = () => do_submit();
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+    initJumboFrame();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.jumboframe_info.lgd_jfset)</script></span></legend>
+        <form action="jumboframeSet.cgi">
+            <table>
+            <tbody>
+                <tr>
+                    <td class="SBLANK"></td>
+                    <td>
+                        <table class="FRAMEWORK">
+                        <tbody>
+                            <tr>
+                                <td align="left"><span class="NORMAL"><script>docW(parent.window.jumboframe_info.lgd_jfen)</script></span></td>
+                                <td class="SBLANK"></td>
+                                <td>
+                                    <input name="jumboframe_en" id="jumboframe_en" type="radio" value="1" class="RADIO_NORMAL">
+                                    <span class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span>
+                                </td>
+                                <td class="SBLANK"></td>
+                                <td class="SBLANK"></td>
+                                <td>
+                                    <input name="jumboframe_en" id="jumboframe_dis" type="radio" value="0" class="RADIO_NORMAL">
+                                    <span class="NORMAL"><script>docW(parent.window.jumboframe_info.spn_jfdisable)</script></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                        <table id="td_mtu_size" class="FRAMEWORK">
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <span class="NORMAL"><script>docW(parent.window.jumboframe_info.spn_jfsize)</script></span>
+                                    <select class="SELECT_NORMAL" id="mtu_size">
+                                        <option id="mtu_size_0"  value ="0"><script>docW(parent.window.jumboframe_info.spn_jfnone)</script></option>
+                                        <option id="mtu_size_1"  value ="2">2k</option>
+                                        <option id="mtu_size_2"  value ="3">3k</option>
+                                        <option id="mtu_size_3"  value ="4">4k</option>
+                                        <option id="mtu_size_4"  value ="5">5k</option>
+                                        <option id="mtu_size_5"  value ="6">6k</option>
+                                        <option id="mtu_size_6"  value ="7">7k</option>
+                                        <option id="mtu_size_7"  value ="8">8k</option>
+                                        <option id="mtu_size_8"  value ="9">9k</option>
+                                        <option id="mtu_size_9"  value ="10">12k</option>
+                                        <option id="mtu_size_10" value ="11">15k</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td>
+                        <table class="BTN_WRAPPER" align="left">
+                            <tbody>
+                            <tr>
+                                <td><a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_apply"></a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+        </form>
+    </fieldset>
+</body>
+</html>

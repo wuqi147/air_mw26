@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#mirroringport-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+table.BORDER {
+    margin-bottom: 20px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+.TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+    font-size: 150%;
+    font-family: "Arial";
+}
+TABLE.BOTTOM_LINE {
+    width: 100%;
+    text-align: left;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 32px;
+    width: 150px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var submitUrlString='';
+var port_bit = 0;
+var sessionID = 0;
+var sessionStr = '';
+var selState = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+function docW(a)
+{
+    document.write(a)
+}
+
+function $id(a)
+{
+    return document.getElementById(a)
+}
+
+function portSelectedReset()
+{
+    $id("portSel").selectedIndex = -1;
+
+    for (var a = 0; a < max_port_num; a++)
+    {
+        if (selState[a])
+        {
+            selState[a] = 0;
+        }
+    }
+
+    update_ingress_egress_select();
+
+    return true;
+}
+
+/* Check if src_port indicated by src_port_option_idx is a current used src_port of sessions indicated by session_bitmap or not. */
+function check_src_port_by_session_bitmap(src_port_id, session_bitmap)
+{
+    return 0 < src_port_id && (mirr_info.ingress[src_port_id - 1] & session_bitmap || mirr_info.egress[src_port_id - 1] & session_bitmap) ? true : false;
+}
+
+function update_ingress_egress_select()
+{
+    var r = $id("portSel").options, t = r.length, count = 0, s = 0;
+    var ingress_select_value = 0, egress_select_value = 0;
+
+    for (s = 0; s < t; s++)
+    {
+        if (selState[s])
+        {
+            count++;
+            if (1 < count)
+            {
+                /* Do nothing if there are more than one ports selected. */
+                return true;
+            }
+            else
+            {
+                var key = Array.from(_port_list.keys())[s];
+                var lowest_port_id = get_trunk_lowest_port_id(key);
+                if (0 < lowest_port_id)
+                {
+                    ingress_select_value = (mirr_info.ingress[lowest_port_id - 1] & document.mirrored_port_set.session.value) ? 1 : 0;
+                    egress_select_value = (mirr_info.egress[lowest_port_id - 1] & document.mirrored_port_set.session.value) ? 1 : 0;
+                }
+            }
+        }
+    }
+
+    document.mirrored_port_set.ingressState.value = ingress_select_value;
+    document.mirrored_port_set.egressState.value  = egress_select_value;
+
+    return true;
+}
+
+
+/* It should be called after document.mirrored_port_set.ingressState.value and document.mirrored_port_set.egressState.value are updated. */
+function update_src_port_bitmap()
+{
+    var r = $id("portSel").options, t = r.length, s = 0;
+
+    port_bit = 0;
+    for (s = 0; s < t; s++)
+    {
+        if (selState[s])
+        {
+            if (document.mirrored_port_set.ingressState.value || document.mirrored_port_set.egressState.value)
+            {
+                port_bit |= r[s].value;
+            }
+        }
+    }
+
+    return true;
+}
+
+function showBitIndex(n)
+{
+    var bitindex="",
+    i = 0;
+    for (i = 0; i < max_mirror_num; i++)
+    {
+        if (n & (1 << i))
+        {
+            bitindex += (i+1).toString() + ",";
+        }
+    }
+    if (bitindex.length > 0)
+    {
+        bitindex = bitindex.substring(0, bitindex.length - 1);
+    }
+    return bitindex;
+}
+
+function appendString(param, value)
+{
+    if(value=='')
+        return;
+    if(submitUrlString=='')
+    {
+        submitUrlString += "?"+param+"="+value ;
+    }
+    else
+    {
+        submitUrlString += "&"+param+"="+value ;
+    }
+}
+
+function genPbm()
+{
+    var i;
+    var ingressAppend = false, egressAppend = false;
+    var ingress, egress;
+    var ingressPbm = 0, egressPbm = 0, old_ingressPbm = 0, old_egressPbm = 0;
+
+    update_src_port_bitmap();
+    if (0 == port_bit)
+    {
+        /* No change */
+        return false;
+    }
+
+    /* make array from DB pbm */
+    for(i=0; i < max_port_num; i++)
+    {
+        old_ingressPbm = ingressPbm |= !!(mirr_info.ingress[i] & document.mirrored_port_set.session.value)? (1 << i) : 0;
+        old_egressPbm = egressPbm |= !!(mirr_info.egress[i] & document.mirrored_port_set.session.value)? (1 << i) : 0;
+    }
+    /* Currently ingress setting */
+    if(1 == document.mirrored_port_set.ingressState.value) /* set enable */
+    {
+        ingressPbm |= port_bit;
+    }
+    else                                                  /* set disable */
+    {
+        ingressPbm &= ~port_bit;
+    }
+    /* Currently egress setting */
+    if(1 == document.mirrored_port_set.egressState.value) /* set enable */
+    {
+        egressPbm |= port_bit;
+    }
+    else                                                 /* set disable */
+    {
+        egressPbm &= ~port_bit;
+    }
+
+    if (old_ingressPbm == ingressPbm && old_egressPbm == egressPbm)
+    {
+        return false;
+    }
+
+    appendString("ingressState", ingressPbm.toString())
+    appendString("egressState", egressPbm.toString())
+    return true;
+}
+
+/* param trunk: key of g_port_list[] */
+function get_trunk_lowest_port_id(trunk)
+{
+    if (-1 != trunk.indexOf("Trunk"))
+    {
+        for (var i = 0; i < max_port_num; i++)
+        {
+            if (_trunk_info[i] == trunk.replace("Trunk", ""))
+            {
+                return i + 1;
+            }
+        }
+    }
+    else
+    {
+        return trunk;
+    }
+
+    return -1;
+}
+
+/* Check if port / trunk is the dst port of session */
+function check_mirror_dst_port_by_session(port, session)
+{
+    if (session >= 1)
+    {
+        var port_id = get_trunk_lowest_port_id(port);
+
+        if (-1 != port_id && port_id == mirr_info.mirrPort[session - 1])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/* Check if dst_port is selected by other sessions or not.
+ * dst_port_option_id[in]: option id of the dst_port in dst_port_list_X
+ * excluded_session[in]: skip check indicated session. 0: no skip
+ * return: true: selected by other sessions. false: not used.
+ */
+function check_dst_port_selected(dst_port_option_id, excluded_session)
+{
+    if (0 <= dst_port_option_id)
+    {
+        for (var i = 1; i <= max_mirror_num; i++)
+        {
+            if ((0 == excluded_session || i != excluded_session) &&
+                $id("dst_port_list_" + i).selectedIndex == dst_port_option_id)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function get_default_dst_port_option_of_session(session_idx)
+{
+    var option_idx = 0;
+    for (let [key, value] of _port_list.entries())
+    {
+        if (check_mirror_dst_port_by_session(key, session_idx))
+        {
+            return option_idx;
+        }
+
+        option_idx++;
+    }
+
+    return -1;
+}
+
+function get_port_bitmap_by_loweset_port_id(lowest_port_id)
+{
+    if (0 < lowest_port_id)
+    {
+        for (let [key, value] of _port_list.entries())
+        {
+            if (lowest_port_id == get_trunk_lowest_port_id(key))
+            {
+                return value;
+            }
+        }
+    }
+
+    return 0;
+}
+
+function init_port()
+{
+    for (var i = 1; i <= max_mirror_num; i++)
+    {
+        /* Select dst_port in mirr_info.mirrPort[] by default. */
+        $id("dst_port_list_" + i).selectedIndex = $id("dst_port_list_" + i).getAttribute('data-idx');
+        $id("session_enable_" + i).value = mirr_info.mirrEn[i - 1];
+        session_enable_onchange("session_enable_" + i);
+    }
+
+    document.mirrored_port_set.session.oldvalue = 1;
+    src_session_onchange();
+}
+
+/* CGI string if generated is contained in submitUrlString */
+function generate_session_enable_cgi_string()
+{
+    var dst_port_selected = -1, lowest_port_id = -1;
+    for (i = 1; i <= max_mirror_num; i++)
+    {
+        dst_port_selected = $id("dst_port_list_" + i).selectedIndex;
+        lowest_port_id = $id("dst_port_list_" + i).value;
+        if (-1 == dst_port_selected)
+        {
+            lowest_port_id = 0;
+        }
+
+        /* Enable sesion without dsp port selected. */
+        if (1 == $id("session_enable_" + i).value && 0 > dst_port_selected)
+        {
+            submitUrlString = '';
+            return -1;
+        }
+
+        /* Value of the selected option is invalid, for example the option selected is a trunk with no port in error senario. */
+        if (-1 != dst_port_selected && 0 >= lowest_port_id)
+        {
+            submitUrlString = '';
+            return -2;
+        }
+
+        /* Do not care if dst_port changes if session keeps being disabled. */
+        if (0 == mirr_info.mirrEn[i - 1] &&
+            $id("session_enable_" + i).value == mirr_info.mirrEn[i - 1])
+        {
+            continue;
+        }
+
+        if ($id("session_enable_" + i).value != mirr_info.mirrEn[i - 1] ||
+            lowest_port_id != mirr_info.mirrPort[i - 1])
+        {
+            var old_port_bitmap = get_port_bitmap_by_loweset_port_id(mirr_info.mirrPort[i - 1]);
+            /* If session is disabled, lowest_port_id must be 0. */
+            var port_bitmap = get_port_bitmap_by_loweset_port_id(lowest_port_id);
+            var session_enable = $id("session_enable_" + i).value;
+
+            if (0 < mirr_info.mirrPort[i - 1] && 0 == old_port_bitmap)
+            {
+                return -2;
+            }
+
+            appendString("state" + i, session_enable.toString());
+            appendString("oldDstPort" + i, old_port_bitmap.toString());
+            appendString("dstPort" + i, port_bitmap.toString());
+        }
+    }
+
+    return 0;
+}
+
+function do_submit2()
+{
+    var ret = generate_session_enable_cgi_string();
+
+    if (-1 == ret)
+    {
+        return alert(parent.window.str_info.alt_portsettingcheck0);
+    }
+    else if (-2 == ret)
+    {
+        return alert(parent.window.str_info.spn_error0);
+    }
+
+    ret = genPbm();
+    if("" == submitUrlString && !ret)
+    {
+        return alert(parent.window.str_info.alt_nochange);
+    }
+
+    if (ret)
+    {
+        for (j = 0; j < max_mirror_num;j++)
+        {
+            if (document.mirrored_port_set.session.value & (1 << j))
+            {
+                sessionID = j;
+                break;
+            }
+        }
+        appendString("session", sessionID.toString())
+    }
+
+    return location.href = "mirror_port_set.cgi" + submitUrlString + "&trunkBitMap=" + parent.window.g_getTrunkBitMap(_trunk_info), portSelectedReset(), !0
+}
+
+function chkSel(event)
+{
+    var portSel_options = $id("portSel").options,
+    portSel_length = portSel_options.length,
+    portSel_index = 0;
+
+    for (portSel_index = 0; portSel_index < portSel_length; ++portSel_index)
+    {
+        selState[portSel_index] = portSel_options[portSel_index].selected;
+    }
+    update_ingress_egress_select();
+}
+
+function session_enable_onchange(session)
+{
+    let session_idx = +session.split("_")[2];
+    let val = $id(session).value;
+
+    if (0 == val)
+    {
+        /* 1. If session is disabled:
+         *   1.1 Disable dst_port_list_X
+         */
+        $id("dst_port_list_" + session_idx).disabled = true;
+
+        /* 1.2 Select no option. */
+        $id("dst_port_list_" + session_idx).selectedIndex = -1;
+    }
+    else
+    {
+        /* 2. If session is enabled:
+         *   2.1 Enable dst_port_list_X
+         */
+        $id("dst_port_list_" + session_idx).disabled = false;
+
+        /* 2.2 Select default dst_port. */
+        $id("dst_port_list_" + session_idx).selectedIndex = get_default_dst_port_option_of_session(session_idx);
+    }
+
+    /* Handle new dst port selection via code above. */
+    dst_port_list_onchange("dst_port_list_" + session_idx);
+}
+
+/* Hint: session is enabled. Otherwise, dst_port cannot be changed. */
+function dst_port_list_onchange(session)
+{
+    let session_idx = +session.split("_")[3];
+    var old_dst_port_option_idx = $id("dst_port_list_" + session_idx).getAttribute('data-idx');
+    var new_dst_port_option_idx = $id("dst_port_list_" + session_idx).selectedIndex;
+
+    /* 1. If old dst_port is not used by any session, enable its corresponding option in src_port list. */
+    if (0 <= old_dst_port_option_idx)
+    {
+        $id("src_port_" + old_dst_port_option_idx).disabled = check_dst_port_selected(old_dst_port_option_idx, 0);
+    }
+
+    /* 2. Set data-idx to new dst_port */
+    $id("dst_port_list_" + session_idx).setAttribute('data-idx', new_dst_port_option_idx);
+
+    /* 3. Disable the corresponding option of new dst_port in src_port list.
+     * 4. Cancel the selection of the corresponding option of new dst_port in src_port list, if it is selected.
+     */
+    if (0 <= new_dst_port_option_idx)
+    {
+        if (selState[new_dst_port_option_idx])
+        {
+            var r = $id("portSel").options;
+
+            r[new_dst_port_option_idx].selected = false;
+            selState[new_dst_port_option_idx] = 0;
+            update_ingress_egress_select();
+        }
+
+        $id("src_port_" + new_dst_port_option_idx).disabled = true;
+    }
+}
+
+function src_session_onchange()
+{
+    /* Reset src_ports settings */
+    portSelectedReset();
+}
+
+function create_session_enable_form_row(session_idx)
+{
+    docW("<tr>")
+    docW("<td><span class='NORMAL'>" + session_idx + "</span></td>")
+    docW("<td><select class='SELECT_NORMAL' id=\"session_enable_" + session_idx + "\">")
+        docW("<option value=\"0\">" + parent.window.str_info.opt_disable + "</option>")
+        docW("<option value=\"1\">" + parent.window.str_info.opt_enable + "</option>")
+    docW("</select></td>")
+
+    /* data-idx indicates the dst_port option selected for the dst_port_list_X. */
+    docW("<td><select class='SELECT_NORMAL' id=\"dst_port_list_" + session_idx + "\" data-idx=-1>")
+    var option_idx = 0;
+    var lowest_dst_port = -1;
+    for (let [key, value] of _port_list.entries())
+    {
+        /* If no port for trunk in error senario, lowest_dst_port will be -1. */
+        lowest_dst_port = get_trunk_lowest_port_id(key);
+        if (-1 == key.indexOf("Trunk"))
+        {
+            docW("<option id = dst_port" + (session_idx - 1) + "_" + option_idx + " value=" + lowest_dst_port + ">" + parent.window.str_info.td_port + " " + key + "</option>")
+        }
+        else
+        {
+            newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+            docW("<option id = dst_port" + (session_idx - 1) + "_" + option_idx + " value=" + lowest_dst_port + ">" + newKey + "</option>")
+        }
+
+        /* mirr_info.mirrPort[] stores the lowest port ID of trunk members for a trunk. If no port for trunk in error senario, no
+         * option will be selected for dst_port_list_X even if corresponding mirr_info.mirrPort[] is not empty.
+         */
+        if (0 < lowest_dst_port && check_mirror_dst_port_by_session(key, session_idx))
+        {
+            $id("dst_port_list_" + session_idx).setAttribute('data-idx', option_idx);
+        }
+
+        /* If port is src port of any session, disable it. */
+        if (check_src_port_by_session_bitmap(lowest_dst_port, 0x0F))
+        {
+            $id("dst_port" + (session_idx - 1) + "_" + option_idx).disabled = true;
+        }
+
+        option_idx++;
+    }
+
+    docW("</select> </td> </tr>")
+}
+window.onload = () => {
+    init_port();
+    for (var i = 1; i <= max_mirror_num; i++) {
+        $id("session_enable_" + i).onchange = (e) => session_enable_onchange(e.target.id);
+        $id("dst_port_list_" + i).onchange = (e) => dst_port_list_onchange(e.target.id);
+    }
+    $id("session").onfocus = (e) => { e.target.oldvalue = e.target.value; };
+    $id("session").onchange  = (e) => { src_session_onchange(), e.target.oldvalue = e.target.value; };
+    $id("portSel").onclick = (e) => chkSel(e);
+    $id("btn_apply").value = parent.window.str_info.btn_apply;
+    $id("btn_apply").onclick = () => do_submit2();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <fieldset>
+    <legend><span class="NORMAL"><script>docW(parent.window.str_menu.portMirror)</script></span></legend>
+    <form name="mirrored_port_set" action="mirrored_port_set.cgi" enctype="multipart/form-data">
+        <table class="BORDER">
+            <tbody>
+               <tr>
+                  <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.mirror_session)</script></td>
+                  <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.td_enablemirror)</script></td>
+                  <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.lgd_mirror)</script></td>
+               </tr>
+               <script type="text/javascript">
+               for (var i = 0; i < max_mirror_num; i++)
+               {
+                   create_session_enable_form_row(i + 1);
+               }
+               </script>
+            </tbody>
+         </table>
+         <table class="BORDER" id="src_port_table">
+             <tbody>
+                 <tr>
+                     <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.mirror_session)</script> </td>
+                     <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.lgd_portmirrored)</script></td>
+                     <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.td_in)</script></td>
+                     <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.td_out)</script> </td>
+                 </tr>
+                 <tr>
+                 <td>
+                     <select class="SELECT_NORMAL" name="session" id="session">
+                         <option value="1" selected>1</option>
+                         <script type="text/javascript">
+                         for (var i = 1; i < max_mirror_num; i++)
+                         {
+                             docW("<option value='" + (0x1 << i) + "'>" + (i + 1) + "</option>");
+                         }
+                         </script>
+                     </select>
+                 </td>
+                 <td>
+                     <select class="SELECT_PORTLIST" id="portSel" name="mirroredport" multiple="" overflow="scroll">
+                         <script type="text/javascript">
+                             var option_idx = 0;
+                             for (let [key, value] of _port_list.entries())
+                             {
+                                 if (-1 == key.indexOf("Trunk"))
+                                 {
+                                     docW("<option id = src_port_" + option_idx + " value=" + value + ">" + parent.window.str_info.td_port + " " + key + "</option>")
+                                 }
+                                 else
+                                 {
+                                     newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                                     docW("<option id = src_port_" + option_idx + " value=" + value + ">" + newKey + "</option>")
+                                 }
+
+                                 /* Disable corresponding src port option if it is the dst port of any enabled session. */
+                                 for (var i = 0; i < max_mirror_num; i++)
+                                 {
+                                     if (check_mirror_dst_port_by_session(key, i + 1) && mirr_info.mirrEn[i])
+                                     {
+                                         $id("src_port_" + option_idx).disabled = true;
+                                     }
+                                 }
+
+                                 option_idx++;
+                             }
+                         </script>
+                     </select>
+                 </td>
+                 <td>
+                     <select class="SELECT_NORMAL" name="ingressState">
+                         <option value="0"><script>docW(parent.window.str_info.opt_disable)</script></option>
+                         <option value="1"><script>docW(parent.window.str_info.opt_enable)</script>&nbsp;</option>
+                     </select>
+                 </td>
+                 <td>
+                     <select class="SELECT_NORMAL" name="egressState">
+                         <option value="0"><script>docW(parent.window.str_info.opt_disable)</script></option>
+                         <option value="1"><script>docW(parent.window.str_info.opt_enable)</script>&nbsp;</option>
+                     </select>
+                 </td>
+                 </tr>
+             </tbody>
+         </table>
+         <table class="BTN_WRAPPER" align="center">
+             <tbody>
+                 <tr>
+                     <td class="BTN_WRAPPER">
+                     <a class="BTN">
+                         <input class="BTN_NORMAL_BTN" type="button" id="btn_apply" name="mirrored_submit">
+                     </a>
+                     </td>
+                 </tr>
+             </tbody>
+         </table>
+         <table class="BOTTOM_LINE">
+            <tbody>
+                <tr>
+                <td class="BOTTOM_LINE"> </td>
+                </tr>
+            </tbody>
+         </table>
+         <table class="BORDER">
+             <tbody>
+                 <tr>
+                     <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.lgd_portmirrored)</script></td>
+                     <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.td_in)</script></td>
+                     <td class="TD_FIRST_COL"><script>docW(parent.window.mirror_info.td_out)</script></td>
+                 </tr>
+                 <script type="text/javascript">
+                     var rxsession, txsession, lowest_port_id = -1;
+                     for (let [key, value] of _port_list.entries())
+                     {
+                         lowest_port_id = get_trunk_lowest_port_id(key);
+                         if (0 < lowest_port_id)
+                         {
+                             rxsession = mirr_info.ingress[lowest_port_id - 1] ? showBitIndex(mirr_info.ingress[lowest_port_id - 1]) : parent.window.str_info.opt_disable;
+                             txsession = mirr_info.egress[lowest_port_id - 1] ? showBitIndex(mirr_info.egress[lowest_port_id - 1]) : parent.window.str_info.opt_disable;
+                         }
+                         else
+                         {
+                             rxsession = txsession = parent.window.str_info.spn_error0;
+                         }
+
+                         if (-1 == key.indexOf("Trunk"))
+                         {
+                             docW("<tr><td><span class='NORMAL'>" + parent.window.str_info.td_port + "" + key + "</span></td><td><span class='NORMAL'>" + rxsession + "</span></td><td><span class='NORMAL'>" + txsession + "</span></td></tr>")
+                         }
+                         else
+                         {
+                             newKey = key.replace("Trunk", parent.window.trunk_info.opt_trunk);
+                             docW("<tr><td><span class='NORMAL'>" + newKey + "</span></td><td><span class='NORMAL'>" + rxsession + "</span></td><td><span class='NORMAL'>" + txsession + "</span></td></tr>")
+                         }
+                     }
+                 </script>
+             </tbody>
+         </table>
+    </form>
+</fieldset>
+</body>
+</html>

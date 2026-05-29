@@ -1,0 +1,1 @@
+subdir-$(CONFIG_NDS32) += NDS32/

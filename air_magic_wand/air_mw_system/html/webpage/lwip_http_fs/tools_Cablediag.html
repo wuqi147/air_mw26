@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#cableresult-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+table.BORDER td,
+th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 50px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var xmlReq;
+var XML_SEND_COMPLETE = 4;
+const HTML_STATUS_OK = 200;
+var state_info = new Array(parent.window.cablediag_info.td_info1, parent.window.cablediag_info.td_info2, parent.window.cablediag_info.td_info3);
+var caCount = 0;
+
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a) {
+    return document.getElementById(a)
+}
+
+
+function _cableDiagnostic_checkPortAvail(port_index)
+{
+    if( (parent.window.g_getPortMediaType().AIR_SFP_PORT_TYPE_SFP === portTypeList[port_index]) ||
+    (parent.window.g_getPortMediaType().AIR_SFP_PORT_TYPE_COMBO_SFP === portTypeList[port_index]) ||
+    (parent.window.g_getPortMediaType().AIR_SFP_PORT_TYPE_LAST === portTypeList[port_index]) )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+function curState()
+{
+    var rst;
+    var set, len, state, imp, port;
+    if(XML_SEND_COMPLETE == xmlReq.readyState)
+    {
+        if(HTML_STATUS_OK == xmlReq.status)
+        {
+            rst = xmlReq.responseText.split("&");
+            set = rst[0].split(",");
+            len = rst[1].split(",");
+            state = rst[2].split(",");
+            imp = rst[3].split(",");
+            port = rst[4].split(",");
+            if(0 == set[0])
+            {
+                for (i = 0; i < 4; i ++)
+                {
+                    document.getElementById("state_"+i).innerHTML = '<span class="NORMAL">'+ state_info[state[i]] +'</span>';
+                    document.getElementById("len_"+i).innerHTML = '<span class="NORMAL">'+ (len[i]*0.1).toFixed(1) +'</span>';
+                }
+            }
+            else if(99 == set[0])
+            {
+                alert(parent.window.cablediag_info.alt_info1);
+            }
+            else if(98 == set[0])
+            {
+                alert(parent.window.cablediag_info.alt_info2);
+            }
+            else
+            {
+                setTimeout(getCurrent, 1000);
+                return;
+            }
+            parent.window.document.getElementById("blockbg").style.display = "none";
+            parent.window.document.getElementById("blockmsg").style.display = "none";
+        }
+    }
+}
+
+function getCurrent()
+{
+    xmlReq = parent.getXMLObject();
+    if(null != xmlReq)
+    {
+        xmlReq.onreadystatechange = curState;
+        xmlReq.open("GET", "/cableCur.xml", true);
+        xmlReq.send(null);
+    }
+    caCount ++;
+    parent.window.document.getElementById("blockmsg").innerHTML = parent.window.cablediag_info.lgd_portdiag + " ... " + ((caCount < 40) ? (caCount * 2):(80 + (caCount - 40))) + "%";
+}
+
+function doSubmit()
+{
+    var cableTest = "cablediag.cgi?port_sel=" + $id("port_sel").value;
+    var i = 0;
+    for(i = 0; i < 4; i ++)
+    {
+        document.getElementById("state_"+i).innerHTML = '<span class="NORMAL">-</span>';
+        document.getElementById("len_"+i).innerHTML = '<span class="NORMAL">-</span>';
+    }
+    caCount = 0;
+    parent.window.document.getElementById("blockbg").style.display = "block";
+    parent.window.document.getElementById("blockmsg").style.display = "block";
+    parent.window.document.getElementById("blockmsg").innerHTML = parent.window.cablediag_info.lgd_portdiag + " ... " + (caCount * 2) + "%";
+    var calReq = parent.getXMLObject();
+    if(null != calReq)
+    {
+        calReq.open("GET", cableTest, true);
+        calReq.send(null);
+    }
+    setTimeout(getCurrent, 1000);
+}
+
+window.onload = () => {
+    $id("btn_test").onclick = () => doSubmit();
+    $id("btn_test").value = parent.window.cablediag_info.btn_test;
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <div>
+      <fieldset>
+         <legend><span class="NORMAL"><script>docW(parent.window.cablediag_info.lgd_portdiag)</script></span></legend>
+            <form action="cablediag.cgi">
+               <table width="100%">
+                  <tbody>
+                     <tr>
+                        <td align="left" width="10%">
+                            <span class="NORMAL"><script>docW(parent.window.str_info.td_portidx)</script></span>
+                        </td>
+                        <td align="left">
+                            <select id="port_sel" name="port_sel" class="SELECT_NORMAL">
+                            <script type="text/javascript">
+                                var port_idx = 0;
+                                for (; port_idx < portNumber; port_idx++)
+                                {
+                                    if(true == _cableDiagnostic_checkPortAvail(port_idx))
+                                    {
+                                        docW("<option"),docW(" value='" + port_idx + "'>"),docW(port_idx+1), docW("</option>");
+                                    }
+                                    else
+                                    {
+                                        docW("<option"),docW(" value='" + port_idx + "'" +"disabled='disabled'>"),docW(port_idx+1), docW("</option>");
+                                    }
+                                }
+                            </script>
+                            </select>
+                        </td>
+                        <td>
+                           <table class="BTN_WRAPPER" align="left">
+                              <tbody>
+                                 <tr>
+                                    <td> <a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_test"></a> </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+               <table class="BORDER">
+                  <tbody>
+                     <tr class="TABLE_HEAD">
+                        <script>
+                           docW(
+                              '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.cablediag_info.td_cablepair +'</span></td>' +
+                              '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.cablediag_info.td_result +'</span></td>' +
+                              '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.cablediag_info.td_cabledisance +'</span></td>'
+                           )
+
+                        </script>
+
+                     </tr>
+                     <tr>
+                        <script>
+                           var i=0;
+                           var pair_info = new Array("A", "B", "C", "D")
+                           for(i; i < 4; i++){
+                              docW("<tr>"),
+                              docW('<td id="pair_' + i + '"><span class="NORMAL">'+ pair_info[i] +'</span></td>'),
+                              docW('<td id="state_' + i + '"><span class="NORMAL">'+ "-" +'</span></td>'),
+                              docW('<td id="len_' + i + '"><span class="NORMAL">'+ "-" +'</span></td>'),
+                              docW("</tr>")
+                           }
+                        </script>
+                     </tr>
+                  </tbody>
+               </table>
+             <div>
+               <table width="100%">
+                  <tbody>
+                     <tr>
+                        <td align="left"><span id="t_note_title" class="BOLDER"><script>docW(parent.window.cablediag_info.spn_attention)</script></span></td>
+                     </tr>
+                     <tr>
+                        <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.cablediag_info.alt_info2)</script></span>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.cablediag_info.alt_info3)</script></span>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            </form>
+      </fieldset>
+   </div>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<!--#sysName-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+    width: 400px;
+}
+td.NORMAL_TAIL {
+    padding: 0;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 400px;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(400%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    font-size: 12px;
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 21px;
+    width: 280px;
+    text-align: center;
+}
+.TD_W_AUTO {
+    width:auto;
+}
+</style>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var ip6_auto = "Auto";
+var ip6_invaild = "Invalid";
+var ip6_none = "None"
+
+function docW(a)
+{
+    document.write(a)
+}
+function $id(a)
+{
+    return document.getElementById(a)
+}
+function isValid(s, e)
+{
+    return RegExp("^([a-zA-Z 0-9_-]){1," + e + "}$").test(s)
+}
+function doSubmit()
+{
+    if($id("tSysName").value.match(/^[ ]*$/))
+    {
+        return (alert(parent.window.str_info.alt_checknull), !1)
+    }
+    if(0 == isValid($id("tSysName").value, 32))
+    {
+        return (alert(parent.window.str_info.alt_checkdevdesc), !1)
+    }
+    if($id("tSysName").value != data_info.descriStr)
+    {
+        return location.href = "system_name_set.cgi?sysName=" + $id("tSysName").value;
+    }
+    else
+    {
+        return (alert(parent.window.str_info.alt_checksame), !1)
+    }
+}
+function check_charkey(s, e, n)
+{
+    var r, i = $id(s);
+    return !(i.value.length > n) && (8 == (r = (e = e || window.event).keyCode ? e.keyCode : e.which) || 32 <= r &&
+        r <= 126 && 34 != r)
+}
+function loadValue()
+{
+    $id("tSysName").value = data_info.sysnameStr
+    $id("sp_macaddress").innerHTML = data_info.macStr
+    $id("sp_ipv4address").innerHTML = data_info.ipStr
+    if(typeof data_info.linkLocalIpv6Str == "undefined")
+    {
+        const row = document.getElementById("linklocal_ipv6");
+        row.parentNode.removeChild(row);
+    }
+    else
+    {
+        $id("sp_llipv6address").innerHTML = data_info.linkLocalIpv6Str
+        $id("sp_llipv6address").innerHTML = $id("sp_llipv6address").innerHTML.replaceAll(ip6_auto, parent.window.str_info.spn_ipv6_auto_state)
+        $id("t_ipv4address").innerHTML = parent.window.str_info.spn_ipv4address
+    }
+    if(typeof data_info.globalIpv6Str == "undefined")
+    {
+        const row = document.getElementById("global_ipv6");
+        row.parentNode.removeChild(row);
+    }
+    else
+    {
+        $id("sp_glbipv6address").innerHTML = data_info.globalIpv6Str
+        $id("sp_glbipv6address").innerHTML = $id("sp_glbipv6address").innerHTML.replaceAll(ip6_none, parent.window.str_info.spn_ipv6_none)
+        $id("sp_glbipv6address").innerHTML = $id("sp_glbipv6address").innerHTML.replaceAll(ip6_auto, parent.window.str_info.spn_ipv6_auto_state)
+        $id("sp_glbipv6address").innerHTML = $id("sp_glbipv6address").innerHTML.replaceAll(ip6_invaild, parent.window.str_info.spn_ipv6_invalid_state)
+    }
+    $id("sp_netmask").innerHTML = data_info.netmaskStr
+    $id("sp_gateway").innerHTML = data_info.gatewayStr
+    $id("sp_dns").innerHTML = data_info.dnsStr
+    $id("sp_firewareversion").innerHTML = data_info.firmwareStr
+    $id("sp_hardwareversion").innerHTML = data_info.hardwareStr
+    $id("btn_submit").value = parent.window.str_info.btn_apply;
+    $id("btn_submit").onclick = () => { return doSubmit(); };
+    $id("tSysName").onkeypress = () =>  { return check_charkey("tSysName", event, 32); };
+}
+window.onload = () => {
+    loadValue();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+   <fieldset>
+      <legend><span id="systemInformation" class="NORMAL"><script>docW(parent.window.str_info.spn_deviceinfo)</script></span> </legend>
+      <table class="BORDER" width="800">
+         <tbody>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_systemname"><script>docW(parent.window.str_info.spn_systemname)</script></span></td>
+               <td><input id ="tSysName" name="sysName" class="TEXT_ENABLE" size="32" maxlength="32"></td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_macaddress"><script>docW(parent.window.str_info.spn_macaddress)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_macaddress"></span></td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_ipv4address"><script>docW(parent.window.str_info.spn_ipaddress)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_ipv4address"></span></td>
+            </tr>
+            <tr id="linklocal_ipv6">
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_llipv6address"><script>docW(parent.window.str_info.spn_linklocalipv6address)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_llipv6address"></span></td>
+            </tr>
+            <tr id="global_ipv6">
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_glbipv6address"><script>docW(parent.window.str_info.spn_globalipv6address)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_glbipv6address"></span></td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_netmask"><script>docW(parent.window.str_info.spn_netmask)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_netmask"></span></td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_gateway"><script>docW(parent.window.str_info.spn_gateway)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_gateway"></span></td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_dns"><script>docW(parent.window.str_info.spn_dns)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_dns"></span></td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_firewareversion"><script>docW(parent.window.str_info.spn_fwver)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_firewareversion"></span></td>
+            </tr>
+            <tr>
+               <td class="TD_FIRST_COL"><span class="NORMAL" id="t_hardwaredate"><script>docW(parent.window.str_info.spn_hwver)</script></span></td>
+               <td class="NORMAL_TAIL"><span class="NORMAL" id="sp_hardwareversion"></span></td>
+            </tr>
+         </tbody>
+      </table>
+      <form name="sysname_setting" action="system_name_set.cgi" method="get">
+      <table align="center" width="800">
+         <tbody>
+            <tr>
+               <td class="TD_W_AUTO"><a class="BTN"><input id="btn_submit" class="BTN_NORMAL_BTN" type="button"></a>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+   </form>
+      <div>
+         <table width="100%">
+            <tbody>
+               <tr>
+                  <td class="BOTTOM_LINE"></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div>
+         <table width="100%">
+            <tbody>
+               <tr>
+                  <td align="left"><span id="t_note_title" class="BOLDER"><script>docW(parent.window.str_info.spn_attention)</script></span></td>
+               </tr>
+               <tr>
+                  <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.str_info.spn_note)</script></span></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </fieldset>
+</body>
+</html>

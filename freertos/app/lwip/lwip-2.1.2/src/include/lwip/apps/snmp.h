@@ -1,0 +1,181 @@
+/**
+ * @file
+ * SNMP server main API - start and basic configuration
+ */
+
+/*
+ * Copyright (c) 2001, 2002 Leon Woestenberg <leon.woestenberg@axon.tv>
+ * Copyright (c) 2001, 2002 Axon Digital Design B.V., The Netherlands.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ *
+ * This file is part of the lwIP TCP/IP stack.
+ *
+ * Author: Leon Woestenberg <leon.woestenberg@axon.tv>
+ *         Martin Hentschel <info@cl-soft.de>
+ *
+ */
+#ifndef LWIP_HDR_APPS_SNMP_H
+#define LWIP_HDR_APPS_SNMP_H
+
+#include "lwip/apps/snmp_opts.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if LWIP_SNMP /* don't build if not configured for use in lwipopts.h */
+
+#include "lwip/err.h"
+#include "lwip/apps/snmp_core.h"
+
+/** SNMP variable binding descriptor (publically needed for traps) */
+struct snmp_varbind
+{
+  /** pointer to next varbind, NULL for last in list */
+  struct snmp_varbind *next;
+  /** pointer to previous varbind, NULL for first in list */
+  struct snmp_varbind *prev;
+
+  /** object identifier */
+  struct snmp_obj_id oid;
+
+  /** value ASN1 type */
+  u8_t type;
+  /** object value length */
+  u16_t value_len;
+  /** object value */
+  void *value;
+};
+
+struct snmpcallback_msg_trap {
+  u8_t trap_type;
+  u32_t ifIndex;
+};
+
+/**
+ * @ingroup snmp_core
+ * Agent setup, start listening to port 161.
+ */
+void snmp_init(void);
+void snmp_set_mibs(const struct snmp_mib **mibs, u8_t num_mibs);
+
+void snmp_set_device_enterprise_oid(const struct snmp_obj_id* device_enterprise_oid);
+const struct snmp_obj_id* snmp_get_device_enterprise_oid(void);
+
+void snmp_trap_dst_enable(u8_t dst_idx, u8_t enable);
+void snmp_trap_dst_ip_set(u8_t dst_idx, const ip_addr_t *dst);
+
+#define SNMP_ENABLE 1
+#define SNMP_DISABLE 0
+
+/** Generic trap: cold start */
+#define SNMP_GENTRAP_COLDSTART 0
+/** Generic trap: warm start */
+#define SNMP_GENTRAP_WARMSTART 1
+/** Generic trap: link down */
+#define SNMP_GENTRAP_LINKDOWN 2
+/** Generic trap: link up */
+#define SNMP_GENTRAP_LINKUP 3
+/** Generic trap: authentication failure */
+#define SNMP_GENTRAP_AUTH_FAILURE 4
+/** Generic trap: EGP neighbor lost */
+#define SNMP_GENTRAP_EGP_NEIGHBOR_LOSS 5
+/** Generic trap: enterprise specific */
+#define SNMP_GENTRAP_ENTERPRISE_SPECIFIC 6
+
+#define SNMP_NO_SUPPORT                 0
+#define SNMP_V1_SUPPORT                 0x01
+#define SNMP_V2_SUPPORT                 0x02
+#define SNMP_NO_TRAP_SUPPORT            0
+#define SNMP_TRAP_SUPPORT_V1            0x01
+#define SNMP_TRAP_SUPPORT_V2            0x02
+#define SNMP_NO_TRAP_TYPE_SUPPORT       0
+#define SNMP_COLD_WARM_START_SUPPORT    0x01
+#define SNMP_LINKUP_DOWN_SUPPORT        0x02
+#define SNMP_AUTHFAIL_SUPPORT           0x04
+
+#define SNMP_AUTH_TRAPS_DISABLED 0
+#define SNMP_AUTH_TRAPS_ENABLED  1
+
+#define SNMP_IF_MTU_DEFAULT 1518
+#define SNMP_IF_MTU_2K      2048
+#define SNMP_IF_MTU_3K      3072
+#define SNMP_IF_MTU_4K      4096
+#define SNMP_IF_MTU_5K      5120
+#define SNMP_IF_MTU_6K      6144
+#define SNMP_IF_MTU_7K      7168
+#define SNMP_IF_MTU_8K      8192
+#define SNMP_IF_MTU_9K      9216
+#define SNMP_IF_MTU_12K     12288
+#define SNMP_IF_MTU_15K     15360
+
+#define SNMP_SPEED_10M    (0)
+#define SNMP_SPEED_100M   (1)
+#define SNMP_SPEED_1000M  (2)
+#define SNMP_SPEED_2500M  (3)
+
+#define SNMP_IFADMIN_STATUS_UP      (1)
+#define SNMP_IFADMIN_STATUS_DOWN    (2)
+#define SNMP_IFOPER_STATUS_UP       (1)
+#define SNMP_IFOPER_STATUS_DOWN     (2)
+
+err_t snmp_send_trap_generic(s32_t generic_trap);
+err_t snmp_send_trap_specific(s32_t specific_trap, struct snmp_varbind *varbinds);
+err_t snmp_send_trap(const struct snmp_obj_id* oid, s32_t generic_trap, s32_t specific_trap, struct snmp_varbind *varbinds);
+err_t snmp_trap_callback(struct snmpcallback_msg_trap *trap_info);
+u8_t snmp_check_trap_enable(void);
+u8_t snmp_check_trap_type_support(void);
+
+void snmp_set_auth_traps_enabled(u8_t enable);
+u8_t snmp_get_auth_traps_enabled(void);
+
+u8_t snmp_v1_enabled(void);
+u8_t snmp_v2c_enabled(void);
+u8_t snmp_v3_enabled(void);
+void snmp_v1_enable(u8_t enable);
+void snmp_v2c_enable(u8_t enable);
+void snmp_v3_enable(u8_t enable);
+
+const char * snmp_get_community(void);
+const char * snmp_get_community_write(void);
+const char * snmp_get_community_trap(void);
+void snmp_set_community(const char * const community, u16_t len);
+void snmp_set_community_write(const char * const community, u16_t len);
+void snmp_set_community_trap(const char * const community, u16_t len);
+
+void snmp_coldstart_trap(void);
+void snmp_authfail_trap(void);
+void snmpv2_authfail_trap(void);
+
+typedef void (*snmp_write_callback_fct)(const u32_t* oid, u8_t oid_len, void* callback_arg);
+void snmp_set_write_callback(snmp_write_callback_fct write_callback, void* callback_arg);
+
+#endif /* LWIP_SNMP */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* LWIP_HDR_APPS_SNMP_H */

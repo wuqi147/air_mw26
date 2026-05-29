@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#portTrunkInfo-->
+<!--#pvlanconfig-->
+<!--#stpReginfo-->
+<!--#stpInsinfo-->
+<!--#stpInsPortState-->
+<!--#stpInsPortRole-->
+<script>
+<!--#stpinfo-->
+<!--#stpportinfo-->
+</script>
+<style>
+body, input, select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+
+table.FRAMEWORK {
+    line-height: 25px;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0;
+}
+
+td.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+
+table.BORDER td,
+table.BORDER th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table border color */
+}
+
+table .TD_FIRST_ROW {
+    font-size: 150%;
+    font-family: Arial;
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+}
+
+td.RADIO_WIDE {
+    width: 150px;
+}
+
+td.FRAMEWORK_LEFT_TOP {
+    font-size: 150%;
+    font-family: "Arial";
+    text-align: left;
+    vertical-align: top;
+    width: 250px;
+    padding: 0;
+}
+
+table.BTN_WRAPPER {
+    margin-top: 12px;
+}
+
+td.BTN_WRAPPER {
+    width: 70px;
+}
+
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+
+input.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+
+#btn_type_del {
+    transform: scale(1.5, 1.5) translate(-20%, 20%);
+}
+#btn_type_apply {
+    transform: scale(1.5, 1.5) translate(20%, 20%);
+}
+
+.SELECT_PORTLIST {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 100px;
+    width: 100px;
+}
+
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 38px;
+    width: 150px;
+}
+
+input {
+    border-width: 1px;
+    border-style: solid;
+}
+
+input.NUMBER {
+    font-size: 150%;
+    font-family: Arial;
+    height: 32px;
+    width: 100px;
+}
+
+input.TEXT {
+    font-size: 150%;
+    font-family: Arial;
+    height: 32px;
+    width: 300px;
+}
+
+.CHKBOX_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+
+tbody#tb_portSet tr:not(.TABLE_HEAD) td,
+tbody#tb_portSet_2 tr:not(.TABLE_HEAD) td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 20ch;
+    white-space: nowrap;
+}
+
+#div_priority,
+#div_port_priority,
+#div_cost,
+#div_ins,
+#div_vlan_id,
+#div_revision,
+#div_region_name {
+    color: red;
+    display: none;
+    text-align: left;
+}
+
+#div_port_priority,
+#div_cost {
+    text-align: center;
+}
+</style>
+<meta name="referrer" content="no-referrer">
+<script>
+var docW = (a) => document.write(a),
+    $ = (a) => document.getElementById(a),
+    incMeta = () => docW('<meta http-equiv="Content-Type" content="text/html; charset=' + ((0 == top.g_Lan) ? "gb2312" : "utf-8") + '">');
+
+var s_info = parent.window.spanningTree_info,
+    selState = new Array(stp_ds.portNum),
+    ps_cnt = 0,
+    g_plist = _port_list,
+    g_pbmp = Array.from(g_plist.values());
+
+var local_instance = [];
+var local_priority = [];
+var local_vlan_id = [];
+var local_pbmp = [];
+var del_bit = 0;
+var instance_0_vlan = [];
+var to_remove = [];
+var to_add = [];
+var ori_vlan_before_add;
+var vlan_is_valid;
+
+var XML_SEND_COMPLETE = 4;
+var HTML_STATUS_OK = 200;
+var xmlReq;
+var sel_ins_value = 0;
+var sel_ins_index = 0;
+var port_cost = [];
+var port_pri = [];
+
+function g_getPort(a) {
+    for (let i = 0; i < 28; i++) {
+        if (0 != (a & (0x01 << i)))
+            return i;
+    }
+}
+
+function $id(a) {
+    return document.getElementById(a);
+}
+
+function initPage() {
+    $id("stp_region_name").value = region_name;
+    $id("stp_revision").value = revision;
+
+    for (let i = 0; i < ins_cfg.length; i++) {
+        local_instance.push(ins_cfg[i].ins & 0x0FFF);
+        local_priority.push(ins_cfg[i].priority);
+        local_vlan_id.push(ins_cfg[i].vlan);
+        local_pbmp.push(ins_cfg[i].pbmp);
+    }
+
+    instance_0_vlan = expandRanges(local_vlan_id[0]);
+}
+
+function initPageLang() {
+    let setT = (e, t) => e.innerText = t;
+
+    setT($("lgd_stp_ins"), s_info.lgd_stp_ins);
+    setT($("lgd_instance_port_set"), s_info.lgd_ins_port_set);
+    setT($("lgd_stp_reg"), s_info.lgd_region_set);
+
+    setT($("spn_stp_region_name"), s_info.region_name);
+    setT($("spn_stp_revision"), s_info.revision);
+    setT($("spn_region_name_unit"), s_info.region_name_unit);
+    setT($("spn_revision_unit"), s_info.revision_unit);
+
+    setT($("spn_stp_ins"), s_info.instance);
+    setT($("spn_stp_priority"), s_info.priority);
+    setT($("spn_stp_vlan_id"), s_info.vlan_id);
+    setT($("spn_ins_unit"), s_info.ins_unit + max_mstp_ins_num);
+    setT($("spn_priority_unit"), s_info.priority_unit);
+    setT($("spn_vlan_id_unit"), s_info.vlan_id_unit);
+
+    setT($("tbl_instance"), s_info.tb_instance);
+    setT($("tbl_priority"), s_info.port_priority);
+    setT($("tbl_vlan_id"), s_info.tb_vlan_id);
+    setT($("tbl_delete"), s_info.tb_delete);
+    setT($("tb2_instance"), s_info.tb_instance);
+    setT($("tb2_port"), s_info.port);
+    setT($("tb2_priority"), s_info.port_priority);
+    setT($("tb2_cost"), s_info.port_cost);
+    setT($("tb3_port"), s_info.port);
+    setT($("tb3_priority"), s_info.port_priority);
+    setT($("tb3_cost"), s_info.port_cost);
+    setT($("tb3_state"), s_info.port_state);
+    setT($("tb3_role"), s_info.port_role);
+
+    setT($("spn_alt_region_name"), s_info.alt_region_name);
+    setT($("spn_alt_revision"), s_info.alt_revision);
+    setT($("spn_alt_ins"), s_info.alt_instance);
+    setT($("spn_alt_priority"), s_info.alt_priority);
+    setT($("spn_alt_vlan_id"), s_info.alt_vlan_id);
+
+    $("addBtn1").value = s_info.btn_add;
+    $("submitBtn1").value = s_info.btn_apply;
+    $("submitBtn2").value = s_info.btn_apply;
+    $("delBtn").value = parent.window.maccfg_info.btn_del;
+    $("applyBtn").value = s_info.btn_apply;
+}
+
+function initPsTbl() {
+    var ps = $("tb_portSet");
+
+    ps.innerHTML = "";
+    ps.innerHTML += "<tr><td><span class='NORMAL'>" + s_info.tb_instance +
+        "</span></td><td><span class='NORMAL'>" + s_info.port_priority +
+        "</span></td><td><span class='NORMAL'>" + s_info.tb_vlan_id +
+        "</span></td><td><span class='NORMAL'>" + s_info.tb_delete +
+        "</span></td>";
+
+    local_instance.forEach((e, k) => {
+        if (k == 0) {
+            ps.innerHTML += "<tr><td><span class='NORMAL'>" + local_instance[k] +
+                "</span></td><td><span class='NORMAL'>" + local_priority[k] +
+                "</span></td><td><span class='NORMAL'>" + local_vlan_id[k] +
+                "</span></td><td><input class='CHKBOX_NORMAL' type=checkbox disabled=true name=ins_" + k + " id=ins_" + k + " value=" + k + "></td>";
+        } else {
+            ps.innerHTML += "<tr><td><span class='NORMAL'>" + local_instance[k] +
+                "</span></td><td><span class='NORMAL'>" + local_priority[k] +
+                "</span></td><td><span class='NORMAL'>" + local_vlan_id[k] +
+                "</span></td><td><input class='CHKBOX_NORMAL' type=checkbox name=ins_" + k + " id=ins_" + k + " value=" + k + "></td>";
+        }
+    });
+}
+
+function hideInvalidPort() {
+    let stp_ins_portSet = $("spanning_tree_ins_portset");
+    let portSel_options = $("portSel").options;
+    let portSel_length = portSel_options.length;
+    let temp_pbmp = 0;
+
+    for (let i = 0; i < max_mstp_ins_num; i++) {
+        if (local_instance[i] == stp_ins_portSet.sel_ins.value) {
+            temp_pbmp = local_pbmp[i];
+        }
+    }
+
+    for (let portSel_index = 0; portSel_index < portSel_length; ++portSel_index) {
+        let j = parent.window.g_getPort(g_pbmp[portSel_index]);
+        if (((temp_pbmp >> (j+1)) & 1) != 1) {
+            portSel_options[portSel_index].disabled = true;
+            port_state[sel_ins_index][j] = 0;
+            port_role[sel_ins_index][j] = 0;
+        } else {
+            portSel_options[portSel_index].disabled = false;
+        }
+    }
+}
+
+function initInsPsTbl() {
+    var ps = $("tb_portSet_2");
+    let stp_ins_portSet = $("spanning_tree_ins_portset");
+    let portSel_options = $("portSel").options;
+    let portSel_length = portSel_options.length;
+    stp_ins_portSet.portPriority.value = "";
+    stp_ins_portSet.portCost.value = "";
+
+    if(sel_ins_value != stp_ins_portSet.sel_ins.value) {
+        do_submit4();
+    }
+
+    sel_ins_value = stp_ins_portSet.sel_ins.value;
+
+    get_xml();
+
+    // Deselect all port options
+    for (let portSel_index = 0; portSel_index < portSel_length; ++portSel_index) {
+        portSel_options[portSel_index].selected = false;
+    }
+
+    // Grey out invalid ports
+    hideInvalidPort();
+}
+
+function expandRanges(input) {
+    return input
+        .split(',')
+        .flatMap(part => {
+            if (part.includes('-')) {
+                let [start, end] = part.split('-').map(Number);
+                return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+            } else {
+                return [Number(part)];
+            }
+        });
+}
+
+function compactRanges(arr) {
+    arr.sort((a, b) => a - b);
+    let result = [];
+    let start = arr[0];
+    let end = arr[0];
+
+    for (let i = 1; i <= arr.length; i++) {
+        if (arr[i] == end + 1) {
+            end = arr[i];
+        } else {
+            if (start == end) {
+                result.push(start.toString());
+            } else {
+                result.push(start + '-' + end);
+            }
+            start = arr[i];
+            end = arr[i];
+        }
+    }
+    return result.join(',');
+}
+
+function getSelNum() {
+    var t = 0;
+    selState.forEach((e) => { if (e) ++t; });
+    return t;
+}
+
+function chkSel(e) {
+    var ins;
+    let portSel_options = $("portSel").options;
+    let portSel_length = portSel_options.length;
+    let ps = $("spanning_tree_ins_portset");
+    let stp_ins_portSet = $("spanning_tree_ins_portset");
+
+    for (let i = 0; i < max_mstp_ins_num; i++) {
+        if (local_instance[i] == stp_ins_portSet.sel_ins.value) {
+            ins = i;
+        }
+    }
+
+    for (let portSel_index = 0; portSel_index < portSel_length; ++portSel_index) {
+        selState[portSel_index] = portSel_options[portSel_index].selected;
+    }
+
+    let i = selState.indexOf(true);
+    let portSel_index = parent.window.g_getPort(g_pbmp[i]);
+    if (portSel_index >= 0) {
+        ps.portPriority.value = port_pri[portSel_index];
+        ps.portCost.value = port_cost[portSel_index];
+        if (stp_ds.autoCostSupport != 0)
+        {
+            if (stp_ds.autoCostEnable[portSel_index] != 0) {
+                $id("portCost").disabled = true;
+            }
+            else {
+                $id("portCost").disabled = false;
+            }
+        }
+    }
+}
+
+function chkRange(val, min, max) {
+    let valid = false;
+    if ((min <= val) && (max >= val)) {
+        valid = true;
+    }
+    return valid;
+}
+
+function chkRegionName() {
+    let val = $("stp_region_name").value;
+    let string_check = /^[A-Za-z0-9!"#$%&'()*+,\-./:;<=>?@^_`{|}~]+$/.test($("stp_region_name").value);
+
+    if (val == "") {
+        $("div_region_name").style.display = "block";
+    } else if (string_check == false) {
+        $("div_region_name").style.display = "block";
+    } else {
+        $("div_region_name").style.display = "none";
+    }
+}
+
+function chkRevision() {
+    let val = $("stp_revision").value;
+    if (!chkRange(val, 0, 65535) || val == "") {
+        $("div_revision").style.display = "block";
+    } else {
+        $("div_revision").style.display = "none";
+    }
+}
+
+function chkInstance() {
+    let val = $("stp_ins").value;
+    if (!chkRange(val, 1, 4095) || val == "") {
+        $("div_ins").style.display = "block";
+    } else {
+        $("div_ins").style.display = "none";
+    }
+}
+
+function chkPriority() {
+    let val = $("stp_priority").value;
+    if (!chkRange(val, 0, 61440) || val == "") {
+        $("div_priority").style.display = "block";
+    } else if ((val % 4096) != 0) {
+        $("div_priority").style.display = "block";
+    } else {
+        $("div_priority").style.display = "none";
+    }
+}
+
+function arraysAreIdentical(arr1, arr2) {
+    if (arr1.length != arr2.length) return false;
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] != arr2[i]) return false;
+    }
+    return true;
+}
+
+function chkVlanId() {
+    let r = $("stp_vlan_id").value;
+    vlan_is_valid = 1;
+    if (r.length == 0 || r.length > 160) {
+        $("div_vlan_id").style.display = "block";
+        vlan_is_valid = 0;
+        return false;
+    }
+
+    let str = r.replace(/-/gi, ",");
+    let vlan_id_array = str.split(",");
+    let output = expandRanges($("stp_vlan_id").value).join(',');
+    let total_vlan_id_array = output.split(",");
+    let instance_edit_vlan = [];
+
+    if (local_instance.indexOf(parseInt($("stp_ins").value, 10)) != -1) {
+        let ind = local_instance.indexOf(parseInt($("stp_ins").value, 10));
+        instance_edit_vlan = expandRanges(local_vlan_id[ind]);
+        ori_vlan_before_add = local_vlan_id[ind];
+    }
+
+    to_remove = [];
+
+    for (let i = 0; i < vlan_id_array.length; i++) {
+        if (!/^[0-9]{1,4}$/.test(vlan_id_array[i])) {
+            $("div_vlan_id").style.display = "block";
+            vlan_is_valid = 0;
+            return;
+        }
+
+        if (parseInt(vlan_id_array[i], 10) < 1 || parseInt(vlan_id_array[i], 10) > 4094) {
+            $("div_vlan_id").style.display = "block";
+            vlan_is_valid = 0;
+            return;
+        }
+
+        if (i >= 1 && parseInt(vlan_id_array[i - 1]) >= parseInt(vlan_id_array[i])) {
+            $("div_vlan_id").style.display = "block";
+            vlan_is_valid = 0;
+            return;
+        }
+    }
+
+    for (let i = 0; i < total_vlan_id_array.length; i++) {
+        var tmp_vlan_id = parseInt(total_vlan_id_array[i], 10);
+        to_remove.push(tmp_vlan_id);
+        if (instance_0_vlan.indexOf(tmp_vlan_id) == -1) {
+            if (instance_edit_vlan.length > 0 && instance_edit_vlan.indexOf(tmp_vlan_id) != -1) {
+                continue;
+            }
+            $("div_vlan_id").style.display = "block";
+            vlan_is_valid = 0;
+            return 1;
+        }
+    }
+
+    if (arraysAreIdentical(to_remove, instance_0_vlan)) {
+        $("div_vlan_id").style.display = "block";
+        vlan_is_valid = 0;
+        return 1;
+    }
+
+    $("div_vlan_id").style.display = "none";
+    return;
+}
+
+function addParam(cnt, req, p) {
+    if (cnt > 0) {
+        req += "&";
+    }
+    req += p;
+    return req;
+}
+
+function chkMultiple(val, multiple) {
+    return (val % multiple) == 0;
+}
+
+function modifyselectedbit() {
+    del_bit = 0;
+    local_instance.forEach((e, k) => {
+        if ($id("ins_" + k).checked == true) {
+            del_bit |= 1 << ($id("ins_" + k).value);
+        } else {
+            del_bit &= ~(1 << ($id("ins_" + k).value));
+        }
+    });
+}
+
+function delInstance() {
+    var idx_to_del = [];
+    local_instance.forEach((e, k) => {
+        if ($id("ins_" + k).checked == true) {
+            idx_to_del.push(k);
+        }
+    });
+
+    to_add = [];
+    for (let i = idx_to_del.length - 1; i >= 0; i--) {
+        let output = expandRanges(local_vlan_id[idx_to_del[i]]).join(',');
+        let total_vlan_id_array = output.split(",");
+        for (let j = 0; j < total_vlan_id_array.length; j++) {
+            let tmp_vlan_id = parseInt(total_vlan_id_array[j], 10);
+            if (tmp_vlan_id != 0) {
+                to_add.push(tmp_vlan_id);
+            }
+        }
+
+        local_instance.splice(idx_to_del[i], 1);
+        local_priority.splice(idx_to_del[i], 1);
+        local_vlan_id.splice(idx_to_del[i], 1);
+    }
+
+    let arr = expandRanges(local_vlan_id[0]).concat(to_add);
+    let output = compactRanges(arr);
+    local_vlan_id[0] = output;
+    instance_0_vlan = expandRanges(local_vlan_id[0]);
+
+    initPsTbl();
+}
+
+function do_add1() {
+    if (
+        $("stp_ins").value == "" ||
+        $("stp_priority").value == "" ||
+        $("stp_vlan_id").value == ""
+    ) {
+        return false;
+    }
+
+    var is_edit = 0;
+    var ori_vlan_id_0 = local_vlan_id[0];
+    var ori_pri_to_edit;
+    var ori_vlan_id_to_edit;
+    var ind;
+
+    if (ori_vlan_before_add != undefined && vlan_is_valid == 0) {
+        $("stp_vlan_id").value = ori_vlan_before_add;
+    }
+
+    if (local_instance.indexOf(parseInt($("stp_ins").value, 10)) != -1) {
+        is_edit = 1;
+        ind = local_instance.indexOf(parseInt($("stp_ins").value, 10));
+
+        // put vlan id back to vlan id of instance 0
+        to_add = [];
+        let tmp_output = expandRanges(local_vlan_id[ind]).join(',');
+        let total_vlan_id_array = tmp_output.split(",");
+        for (let i = 0; i < total_vlan_id_array.length; i++) {
+            to_add.push(parseInt(total_vlan_id_array[i], 10));
+        }
+
+        let tmp_arr = expandRanges(local_vlan_id[0]).concat(to_add);
+        tmp_arr = tmp_arr.filter(num => num !== 0);
+        let vlan_str = compactRanges(tmp_arr);
+        local_vlan_id[0] = vlan_str;
+        instance_0_vlan = expandRanges(local_vlan_id[0]);
+
+        ori_pri_to_edit = local_priority[ind];
+        ori_vlan_id_to_edit = local_vlan_id[ind];
+
+        // adjust local array
+        local_priority[ind] = parseInt($("stp_priority").value, 10);
+        local_vlan_id[ind] = $("stp_vlan_id").value;
+    }
+
+    chkInstance();
+    chkPriority();
+    chkVlanId();
+
+    if (
+        $("div_ins").style.display == "block" ||
+        $("div_vlan_id").style.display == "block" ||
+        $("div_priority").style.display == "block"
+    ) {
+        if (is_edit == 1) {
+            // restore
+            local_vlan_id[0] = ori_vlan_id_0;
+            instance_0_vlan = expandRanges(local_vlan_id[0]);
+            local_priority[ind] = ori_pri_to_edit;
+            local_vlan_id[ind] = ori_vlan_id_to_edit;
+        }
+        return false;
+    }
+
+    if (is_edit == 0 && local_instance.length >= max_mstp_ins_num) {
+        alert(s_info.max_instance_count_reached);
+        return 1;
+    }
+
+    let arr = expandRanges(local_vlan_id[0]).filter(n => !to_remove.includes(n));
+    let output = compactRanges(arr);
+    local_vlan_id[0] = output;
+    instance_0_vlan = expandRanges(local_vlan_id[0]);
+
+    if (is_edit == 0) {
+        local_instance.push(parseInt($("stp_ins").value, 10));
+        local_priority.push(parseInt($("stp_priority").value, 10));
+        local_vlan_id.push($("stp_vlan_id").value);
+    }
+
+    initPsTbl();
+}
+
+function do_submit1() {
+    if (
+        $("div_revision").style.display == "block" ||
+        $("div_region_name").style.display == "block"
+    ) {
+        return false;
+    }
+
+    if (
+        $("stp_region_name").value == "" ||
+        $("stp_revision").value == ""
+    ) {
+        return false;
+    }
+
+    let cnt = 0;
+    let req = "stpRegCfg.cgi?";
+
+    req = addParam(cnt++, req, "region=" + $("stp_region_name").value);
+    req = addParam(cnt++, req, "revision=" + $("stp_revision").value);
+
+    return location.href = req;
+}
+
+function do_submit2() {
+    let cnt = 0;
+    let req = "stpInsCfg.cgi?";
+
+    let ins_array = "";
+    let pri_array = "";
+    let vlan_id_array = "";
+
+    local_instance.forEach((e, k) => {
+        ins_array += (e | k << 12);
+        ins_array += ",";
+
+        pri_array += local_priority[k];
+        pri_array += ",";
+
+        vlan_id_array += '"' + local_vlan_id[k] + '"';
+        vlan_id_array += ",";
+    });
+
+    req = addParam(cnt++, req, "ins=" + ins_array);
+    req = addParam(cnt++, req, "pri=" + pri_array);
+    req = addParam(cnt++, req, "vlan_id=" + vlan_id_array);
+
+    return location.href = req;
+}
+
+function getPortBmp() {
+    var p = 0;
+    selState.forEach((e, i) => { if (e) p |= g_pbmp[i]; });
+    return p;
+}
+
+function do_submit3() {
+    let ps = $("spanning_tree_ins_portset");
+    let req = "stpInsPortCfg.cgi?pbmp=" + getPortBmp();
+    let cnt = 1;
+    if (getSelNum() == 0) {
+        alert(s_info.alt_info1);
+        return false;
+    }
+    if (!chkRange(ps.portPriority.value, 0, 240) || ps.portPriority.value == "") {
+        alert(parent.window.spanningTree_info.alt_port_priority);
+        return false;
+    }
+    if (!chkMultiple(ps.portPriority.value, 16)) {
+        alert(parent.window.spanningTree_info.alt_priority_multiple + "16");
+        return false;
+    }
+
+    for (let i = 0; i < max_mstp_ins_num; i++) {
+        if (local_instance[i] == ps.sel_ins.value) {
+            req = addParam(cnt++, req, "ins=" + i);
+        }
+    }
+
+    req = addParam(cnt++, req, "portPriority=" + ps.portPriority.value);
+    if (ps.portCost.value == "") {
+        req = addParam(cnt++, req, "cost=0");
+    } else {
+        req = addParam(cnt++, req, "cost=" + ps.portCost.value);
+    }
+
+    return location.href = req;
+}
+
+function do_submit4() {
+    let ps = $("spanning_tree_ins_portset");
+    let req = "stpInsPortCfg.cgi?pbmp=" + getPortBmp();
+    let cnt = 1;
+
+    if (ps.sel_ins.value == "") {
+        req = addParam(cnt++, req, "ins=" + 0);
+    } else {
+        for (let i = 0; i < max_mstp_ins_num; i++) {
+            if (local_instance[i] == ps.sel_ins.value) {
+                req = addParam(cnt++, req, "ins=" + i);
+            }
+        }
+    }
+
+    sel_ins_index = parseInt(ps.sel_ins.value, 10);
+
+    return location.href = req;
+}
+
+function state_change() {
+    if ((XML_SEND_COMPLETE == xmlReq.readyState) && (HTML_STATUS_OK == xmlReq.status)) {
+        var ps = $("tb_portSet_2");
+        let stp_ins_portSet = $("spanning_tree_ins_portset");
+        let portSel_options = $("portSel").options;
+        let portSel_length = portSel_options.length;
+
+        var stp_instance_port_cost = xmlReq.responseText.split(";");
+        sel_ins_index = parseInt(stp_instance_port_cost[0], 10);
+        port_cost = stp_instance_port_cost[1].split(",");
+        port_pri = stp_instance_port_cost[2].split(",");
+
+        console.log("Receive XML!, sel_ins_index = %s", sel_ins_index);
+        console.log("Receive XML!, port_cost = %s", port_cost);
+
+        stp_ins_portSet.sel_ins.options[sel_ins_index].selected = true;
+        hideInvalidPort();
+
+        // Table header
+        ps.innerHTML = "";
+        ps.innerHTML += "<tr>" +
+            "<td><span class='NORMAL'>" + s_info.port + "</span></td>" +
+            "<td><span class='NORMAL'>" + s_info.port_priority + "</span></td>" +
+            "<td><span class='NORMAL'>" + s_info.port_cost + "</span></td>" +
+            "<td><span class='NORMAL'>" + s_info.port_state + "</span></td>" +
+            "<td><span class='NORMAL'>" + s_info.port_role + "</span></td>" +
+            "</tr>";
+
+        for (let i = 0; i < max_mstp_ins_num; i++) {
+            if (local_instance[i] == stp_ins_portSet.sel_ins.value) {
+                g_plist.forEach((e, k) => {
+                    j = parent.window.g_getPort(e);
+                    if (stp_ds.portStatus[j] != 0) {
+                        ps.innerHTML += "<tr>" +
+                            "<td><span class='NORMAL'>" + ((k.indexOf("Trunk") < 0) ? (s_info.port + k): (k.replace("Trunk", parent.window.trunk_info.opt_trunk))) + "</span></td>" +
+                            "<td><span class='NORMAL'>" + port_pri[j] + "</span></td>" +
+                            "<td><span class='NORMAL'>" + port_cost[j] + "</span></td>" +
+                            "<td><span class='NORMAL'>" +
+                            (
+                                (port_role[i][j] != 5 && port_role[i][j] != 4 && port_role[i][j] != 3 && port_role[i][j] != 2 && port_role[i][j] != 1)? s_info.disable :
+                                ((port_state[i][j] == 6) ? s_info.port_state_guard_down :
+                                (port_state[i][j] == 5) ? s_info.port_state_loop_inc :
+                                (port_state[i][j] == 4) ? s_info.port_state_root_inc :
+                                (port_state[i][j] == 3) ? s_info.port_state_discard :
+                                (port_state[i][j] == 2) ? s_info.port_state_forward :
+                                (port_state[i][j] == 1) ? s_info.port_state_learn :
+                                s_info.disable)
+                            ) +
+                            "</span></td>" +
+                            "<td width='20%'><span class='NORMAL'>" +
+                            (
+                                (port_role[i][j] == 5) ? s_info.port_role_master :
+                                (port_role[i][j] == 4) ? s_info.port_role_backup :
+                                (port_role[i][j] == 3) ? s_info.port_role_alternate :
+                                (port_role[i][j] == 2) ? s_info.port_role_designated :
+                                (port_role[i][j] == 1) ? s_info.port_role_root :
+                                s_info.disable
+                            ) +
+                            "</span></td></tr>";
+                    } else {
+                        ps.innerHTML += "<tr>" +
+                            "<td><span class='NORMAL'>" + ((k.indexOf("Trunk") < 0) ? (s_info.port + k): (k.replace("Trunk", parent.window.trunk_info.opt_trunk))) + "</span></td>" +
+                            "<td><span class='NORMAL'>" + port_pri[j] + "</span></td>" +
+                            "<td><span class='NORMAL'>" + port_cost[j] + "</span></td>" +
+                            "<td><span class='NORMAL'>" + s_info.disable + "</span></td>" +
+                            "<td width='20%'><span class='NORMAL'>" + s_info.disable + "</span></td>" +
+                            "</tr>";
+                    }
+                });
+            }
+        }
+    }
+}
+
+function get_xml() {
+    xmlReq = parent.getXMLObject();
+    if (null != xmlReq) {
+        xmlReq.onreadystatechange = state_change;
+        xmlReq.open("GET", "/stpInstanceCost.xml", true);
+        xmlReq.send(null);
+    }
+}
+
+window.onload = () => {
+    initPageLang();
+    initPage();
+    initPsTbl();
+    initInsPsTbl();
+
+    let psl = $("portSel");
+    let opts = "";
+    g_plist.forEach((e, i) => {
+        opts += (
+            '<option id="stpPort_' + i + '" value="' + e + '">' +
+                ((i.indexOf("Trunk") < 0)
+                    ? (s_info.port + i)
+                    : (i.replace("Trunk", parent.window.trunk_info.opt_trunk))
+                ) +
+            "</option>"
+        );
+    });
+    psl.innerHTML = opts;
+
+    let sel_ins = $("sel_ins");
+    let opts2 = "";
+    local_instance.forEach((e, i) => {
+        opts2 += (
+            '<option value="' + local_instance[i] + '">' +
+                (s_info.tb_instance + local_instance[i]) +
+            "</option>"
+        );
+    });
+    sel_ins.innerHTML = opts2;
+    $("stp_region_name").onblur = () => { return chkRegionName(); };
+    $("stp_revision").onkeyup = () => {
+        let e = $("stp_revision");
+        let v = e.value;
+        e.value = v.replace(/[^0-9]/g,'');
+    };
+    $("stp_revision").onblur = () => { return chkRevision(); };
+    $("submitBtn1").onclick = () => { return do_submit1(); };
+    $("stp_ins").onkeyup = () => {
+        let e = $("stp_ins");
+        let v = e.value;
+        e.value = v.replace(/[^0-9]/g,'');
+    };
+    $("stp_ins").onblur = () => { return chkInstance(); };
+    $("stp_priority").onkeyup = () => {
+        let e = $("stp_priority");
+        let v = e.value;
+        e.value = v.replace(/[^0-9]/g,'');
+    };
+    $("stp_priority").onblur = () => { return chkPriority(); };
+    $("stp_vlan_id").onblur = () => { return chkVlanId(); };
+    $("addBtn1").onclick = () => { return do_add1(); };
+    $("sel_ins").onchange = () => { return initInsPsTbl(); };
+    $("portSel").onclick = (event) => { return chkSel(event); };
+    $("submitBtn2").onclick = () => { return do_submit3(); };
+    $("delBtn").onclick = () => { return delInstance(); };
+    $("applyBtn").onclick = () => { return do_submit2(); };
+
+    local_instance.forEach((e, k) => {
+        $("ins_" + k).onclick = () => { return modifyselectedbit(); };
+    });
+};
+incMeta();
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<fieldset>
+  <legend>
+    <span class="NORMAL" id="lgd_stp_reg"></span>
+  </legend>
+  <form name="stpRegCfg" action="stpRegCfg.cgi">
+    <table class="FRAMEWORK">
+      <tbody>
+        <tr>
+          <td class="FRAMEWORK_LEFT_TOP">
+            <span id="spn_stp_region_name"></span>
+          </td>
+          <td colspan="4" align="left">
+            <input class="TEXT" id="stp_region_name" name="stp_region_name" type="text" maxlength="32">
+            <span class="NORMAL" id="spn_region_name_unit"></span>
+            <div id="div_region_name">
+              <span class="NORMAL" id="spn_alt_region_name"></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="FRAMEWORK_LEFT_TOP">
+            <span id="spn_stp_revision"></span>
+          </td>
+          <td colspan="4" align="left">
+            <input class="NUMBER" id="stp_revision" name="stp_revision" type="number" min="0" max="65535">
+            <span class="NORMAL" id="spn_revision_unit"></span>
+            <div id="div_revision">
+              <span class="NORMAL" id="spn_alt_revision"></span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="BTN_WRAPPER" align="center">
+      <tbody>
+        <tr>
+          <td class="BTN_WRAPPER">
+            <a class="BTN">
+              <input id="submitBtn1" class="BTN_NORMAL_BTN" type="button">
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</fieldset>
+
+<fieldset>
+  <legend>
+    <span class="NORMAL" id="lgd_stp_ins"></span>
+  </legend>
+  <form name="stpInsCfg" action="stpInsCfg.cgi">
+    <table class="FRAMEWORK">
+      <tbody>
+        <tr>
+          <td class="FRAMEWORK_LEFT_TOP">
+            <span id="spn_stp_ins"></span>
+          </td>
+          <td colspan="4" align="left">
+            <input class="NUMBER" id="stp_ins" name="stp_ins" type="number" min="1" max="4095">
+            <span class="NORMAL" id="spn_ins_unit"></span>
+            <div id="div_ins">
+              <span class="NORMAL" id="spn_alt_ins"></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="FRAMEWORK_LEFT_TOP">
+            <span id="spn_stp_priority"></span>
+          </td>
+          <td colspan="4" align="left">
+            <input class="NUMBER" id="stp_priority" name="stp_priority" type="number" min="0" max="61440" step="4096">
+            <span class="NORMAL" id="spn_priority_unit"></span>
+            <div id="div_priority">
+              <span class="NORMAL" id="spn_alt_priority"></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="FRAMEWORK_LEFT_TOP">
+            <span id="spn_stp_vlan_id"></span>
+          </td>
+          <td colspan="4" align="left">
+            <input class="TEXT" id="stp_vlan_id" name="stp_vlan_id" type="text" maxlength="160">
+            <span class="NORMAL" id="spn_vlan_id_unit"></span>
+            <div id="div_vlan_id">
+              <span class="NORMAL" id="spn_alt_vlan_id"></span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="BTN_WRAPPER" align="center">
+      <tbody>
+        <tr>
+          <td class="BTN_WRAPPER">
+            <a class="BTN">
+              <input id="addBtn1" class="BTN_NORMAL_BTN" type="button">
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+  <div>
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td class="BOTTOM_LINE"></td>
+        </tr>
+      </tbody>
+    </table>
+    <form>
+      <table class="BORDER" width="100%">
+        <tbody id="tb_portSet">
+          <tr class="TABLE_HEAD">
+            <td id="tbl_instance" class="TD_FIRST_ROW"></td>
+            <td id="tbl_priority" class="TD_FIRST_ROW"></td>
+            <td id="tbl_vlan_id" class="TD_FIRST_ROW"></td>
+            <td id="tbl_delete" class="TD_FIRST_ROW"></td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="BTN_WRAPPER" align="center">
+        <tbody>
+          <tr>
+            <td class="BTN_WRAPPER">
+              <a class="BTN" id="btn_type_del">
+                <input class="BTN_NORMAL_BTN" id="delBtn" type="button" name="btn_del">
+              </a>
+            </td>
+            <td class="BTN_WRAPPER">
+              <a class="BTN" id="btn_type_apply">
+                <input class="BTN_NORMAL_BTN" id="applyBtn" type="button" name="btn_apply">
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+  <div>
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td class="BOTTOM_LINE"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td align="left">
+            <span id="t_note_title" class="BOLDER">
+              <script>
+                docW(parent.window.str_info.spn_attention)
+              </script>
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td align="left">
+            <span id="t_note_info" class="NORMAL">
+              <script>
+                docW(s_info.apply_after_add)
+              </script>
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>
+    <span class="NORMAL" id="lgd_instance_port_set"></span>
+  </legend>
+  <form id="spanning_tree_ins_portset" action="stpInsPortCfg.cgi">
+    <table class="BORDER" width="90%">
+      <tbody id="tb_ins_portSet">
+        <tr class="TABLE_HEAD">
+          <td id="tb2_instance" class="TD_FIRST_ROW" width="12%"></td>
+          <td id="tb2_port" class="TD_FIRST_ROW" width="12%"></td>
+          <td id="tb2_priority" class="TD_FIRST_ROW" width="12%"></td>
+          <td id="tb2_cost" class="TD_FIRST_ROW" width="12%"></td>
+        </tr>
+        <tr>
+          <td width="12%">
+            <select class="SELECT_NORMAL" id="sel_ins" name="sel_ins">
+            </select>
+          </td>
+          <td width="12%">
+            <select class="SELECT_PORTLIST" id="portSel" name="portSel" multiple size="5" overflow="scroll">
+            </select>
+          </td>
+          <td width="12%">
+            <input class="NUMBER" id="portPriority" name="portPriority" type="number" min="0" max="240" step="16">
+          </td>
+          <td width="12%" id="td_port_cost">
+            <input class="NUMBER" id="portCost" name="portCost" type="number" min="1" max="200000000">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="BTN_WRAPPER" align="center">
+      <tbody>
+        <tr>
+          <td class="BTN_WRAPPER">
+            <a class="BTN">
+              <input id="submitBtn2" class="BTN_NORMAL_BTN" type="button">
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td class="BOTTOM_LINE"></td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="BORDER" width="100%">
+      <tbody id="tb_portSet_2">
+        <tr class="TABLE_HEAD">
+          <td id="tb3_port" class="TD_FIRST_ROW"></td>
+          <td id="tb3_priority" class="TD_FIRST_ROW"></td>
+          <td id="tb3_cost" class="TD_FIRST_ROW"></td>
+          <td id="tb3_state" class="TD_FIRST_ROW"></td>
+          <td id="tb3_role" class="TD_FIRST_ROW"></td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</fieldset>
+</body>
+</html>

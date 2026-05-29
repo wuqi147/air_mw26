@@ -1,0 +1,1 @@
+obj-$(CONFIG_GPIO_COMMON) += gpio.o

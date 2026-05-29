@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--#portTrunkInfo-->
+        <script>
+        <!--#poeWatchDog-->
+        </script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+    font-size: 12px;
+    width: 1000px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+    font-weight: bold;
+    font-size: 150%;
+    color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+    font-family: Arial;
+}
+div.TIP_MASK {
+    height: 25px;
+    overflow: hidden;
+    width: 650px;
+    margin: 0 auto;
+    padding: 0 1em;
+    position: relative;
+}
+table {
+    margin: 1em auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+table td {
+    height: 32px;
+    line-height: 21px;
+}
+tr.TABLE_HEAD {
+    height: 22px;
+}
+table.BORDER td, th {
+    border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+    background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+    padding: 0 5px;
+    width: 200px;
+}
+table .TD_SECOND_COL {
+    padding: 0 5px;
+    width: 200px;
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, 0%);
+}
+.CHKBOX_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 150px;
+}
+TD.BOTTOM_LINE {
+    background-color: <!--#subPageDivider-->; /* Subpage divider color */
+    width: 580px;
+    height: 2px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 100px;
+}
+.poe-table {
+    width: 100%;
+}
+.poe-table td {
+    width: 25%;
+    text-align: left;
+    padding: 5px;
+}
+.poe-table .full-width {
+    width: 50%;
+}
+</style>
+<script>
+var tip = "";
+var selectPortbit = 0;
+var port_count = 0;
+var trunk_port = ["", " (Trunk1)", " (Trunk2)", " (Trunk3)", " (Trunk4)"];
+function docW(a)
+{
+    document.write(a);
+}
+
+function $id(a)
+{
+    return document.getElementById(a);
+}
+function do_check_port(b)
+{
+    var check_name = "selPort_" + b;
+
+    if($id(check_name).checked == true)
+    {
+        selectPortbit |= 1<<(b-1);
+        port_count += 1;
+    }
+    else
+    {
+        selectPortbit &= ~(1<<(b-1));
+        port_count -= 1;
+    }
+    $id("port_mode").value = poe_wdg.wd_mode[b-1];
+}
+function doSelAll()
+{
+    var a = $id("selAll").checked;
+    var b;
+
+    for (b = 1; b <= poe_wdg.max_poe_port; b++)
+    {
+        if (!(poe_wdg.is_poe_port & (1 << (b - 1))))
+        {
+            continue;
+        }
+        $id("selPort_" + b).checked = a;
+        do_check_port(b);
+    }
+
+    return true;
+}
+function getCurrent()
+{
+    var b;
+    for (b = 1; b <= poe_wdg.max_poe_port; b++)
+    {
+        if (!(poe_wdg.is_poe_port & (1 << (b - 1))))
+        {
+            continue;
+        }
+        if(((selectPortbit>>(b-1))&0x1))
+        {
+            if(1 == $id("port_mode").value)
+            {
+                $id("port_ex_"+b).innerHTML = '<span class="NORMAL">'+ parent.window.str_info.opt_enable  +'</span>';
+            }
+            else
+            {
+                $id("port_ex_"+b).innerHTML = '<span class="NORMAL">'+ parent.window.str_info.opt_disable  +'</span>';
+            }
+        }
+    }
+    parent.window.document.getElementById("blockbg").style.display = "none";
+    parent.window.document.getElementById("blockmsg").style.display = "none";
+}
+
+function do_submit() {
+    let wd_period = parseInt($id("wd_period").value, 10);
+    let wd_rx_packet_diff = parseInt($id("wd_rx_packet_diff").value, 10);
+
+    if (isNaN(wd_period) || wd_period < 1 || wd_period > 60) {
+        alert("Invalid input! Watchdog period must be between 1 and 60.");
+        return false;
+    }
+    if (isNaN(wd_rx_packet_diff) || wd_rx_packet_diff < 0 || wd_rx_packet_diff > 60000) {
+        alert("Invalid input! Packet threshold must be between 0 and 60000.");
+        return false;
+    }
+
+    let wd_period_seconds = wd_period * 60;
+
+    if (wd_period_seconds === poe_wdg.watchdog_period && wd_rx_packet_diff === poe_wdg.watchdog_threshold) {
+        return alert(parent.window.str_info.alt_nochange), false;
+    }
+
+    return location.href = "poeWatchDogConfig.cgi?wd_period=" + wd_period_seconds + "&wd_rx_packet_diff=" + wd_rx_packet_diff;
+}
+function do_submit2()
+{
+    if (selectPortbit === 0) {
+        alert(parent.window.poe_wd.alt_info1);
+        return false;
+    }
+    var poeWatchDogSet = "poeWatchDog.cgi?state=" + $id("port_mode").value + "&selBit=" + selectPortbit;
+    parent.window.document.getElementById("blockbg").style.display = "block";
+    parent.window.document.getElementById("blockmsg").style.display = "block";
+    parent.window.document.getElementById("blockmsg").innerHTML = parent.window.poe_wd.loading + " ... ";
+    var calReq = parent.getXMLObject();
+    if(null != calReq)
+    {
+        calReq.open("GET", poeWatchDogSet, true);
+        calReq.send(null);
+    }
+    setTimeout(getCurrent, (port_count/3)*1000);
+}
+
+function periodOnlyNum(e) {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '').replace(/^0+/, '');
+}
+
+function thresholdOnlyNum(e) {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    if (e.target.value.length > 1) {
+        e.target.value = e.target.value.replace(/^0+/, '');
+    }
+}
+
+window.onload = function() {
+    let wd_period = poe_wdg.watchdog_period / 60;  /* Convert to minutes for display */
+    let wd_rx_packet_diff = poe_wdg.watchdog_threshold;
+
+    $id("wd_period").value = wd_period;
+    $id("wd_rx_packet_diff").value = wd_rx_packet_diff;
+    $id("wd_period").oninput = (e) => { return periodOnlyNum(e); };
+    $id("wd_rx_packet_diff").oninput = (e) => { return thresholdOnlyNum(e); };
+    $id("wd_setting").value = parent.window.str_info.btn_apply;
+    $id("wd_setting").onclick = () => { return do_submit(); };
+    $id("wd_port_settings").value = parent.window.str_info.btn_apply;
+    $id("wd_port_settings").onclick = () => { return do_submit2(); };
+    $id("selAll").onclick = () => { return doSelAll(); };
+    for (let n = 1; n <= poe_wdg.max_poe_port; n++) {
+        if (!(poe_wdg.is_poe_port & (1 << (n - 1))))
+        {
+            continue;
+        }
+        var selPortId = "selPort_" + n;
+        $id(selPortId).onclick = () => { return do_check_port(n); };
+    }
+};
+
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+    <fieldset>
+        <legend><span class="NORMAL"><script>docW(parent.window.poe_wd.lgd_poe_wd_set)</script></span></legend>
+        <form name="poe_set">
+            <table class="poe-table">
+                <tbody>
+                    <tr>
+                        <td><span class="NORMAL"><script>docW(parent.window.poe_wd.wd_period)</script></span></td>
+                        <td>
+                            <input class="TEXT_ENABLE" id="wd_period" type="number" step="1" min="1" max="60"/>
+                            <span class="NORMAL"><script>docW(parent.window.poe_wd.wd_period_unit)</script></span>
+                        </td>
+                        <td class="full-width">
+                            <span class="NORMAL"><script>docW(parent.window.poe_wd.wd_period_max)</script></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="NORMAL"><script>docW(parent.window.poe_wd.wd_rx_packet_diff)</script></span></td>
+                        <td>
+                            <input class="TEXT_ENABLE" id="wd_rx_packet_diff" type="number" step="1" min="0" max="60000"/>
+                            <span class="NORMAL"><script>docW(parent.window.poe_wd.wd_rx_packet_diff_unit)</script></span>
+                        </td>
+                        <td class="full-width">
+                            <span class="NORMAL"><script>docW(parent.window.poe_wd.wd_rx_packet_max)</script></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table>
+                <tbody>
+                   <tr>
+                      <td><a class="BTN"> <input id="wd_setting" type="button" class="BTN_NORMAL_BTN"></script></a> </td>
+                   </tr>
+                </tbody>
+            </table>
+            <table class="BOTTOM_LINE">
+                <tbody>
+                    <tr>
+                        <td class="BOTTOM_LINE"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </fieldset>
+   <fieldset>
+      <legend><span class="NORMAL"><script>docW(parent.window.poe_wd.lgd_poe_wd_port_set)</script></span></legend>
+      <form action="poeWatchDog.cgi">
+         <table class="BORDER">
+            <tbody>
+               <tr class="TABLE_HEAD">
+                  <script>
+                     docW(
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.poe_wd.td_select +'</b></span></td>'+
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.poe_wd.td_port +'</b></span></td>'+
+                        '<td class="TD_FIRST_COL"><span class="NORMAL"><b>'+ parent.window.poe_wd.td_wd_mode +'</b></span></td>'
+                        )
+                  </script>
+               </tr>
+               <tr class="TABLE_HEAD">
+                  <td class="TD_FIRST_COL">
+                    <input type="checkbox" id="selAll" class="CHKBOX_NORMAL">
+                  </td>
+                  <td class="TD_FIRST_COL"></td>
+                  <td class="TD_FIRST_COL"><select id="port_mode" class="SELECT_NORMAL">
+                        <option value="0"><script>docW(parent.window.str_info.opt_disable)</script></option>
+                        <option value="1"><script>docW(parent.window.str_info.opt_enable)</script></option>
+                     </select> </td>
+               </tr>
+               <script>
+                  for (i = 1; i <= poe_wdg.max_poe_port; i++)
+                  {
+                      if (!(poe_wdg.is_poe_port & (1 << (i - 1))))
+                      {
+                        continue;
+                      }
+                      let t = _trunk_info[i-1];
+                      var trunk_str = "";
+                      if (t > 0 && t < trunk_port.length)
+                      {
+                        trunk_str = trunk_port[t].replace("Trunk", parent.window.trunk_info.opt_trunk);
+                      }
+
+                      docW("<tr>");
+                      docW("<td><input class='CHKBOX_NORMAL' type=checkbox id='selPort_" + i + "' value=1 ></td>");
+                      docW("<td><span class='NORMAL'>" +
+                           parent.window.str_info.td_port+ " " + i + trunk_str + "</span></td>");
+                      if (1 == poe_wdg.wd_mode[i-1])
+                      {
+                        docW("<td id = 'port_ex_"+ i + "'><span class='NORMAL'>" + parent.window.str_info.opt_enable + "</span></td>");
+                      }
+                        else
+                      {
+                        docW("<td id = 'port_ex_"+ i + "'><span class='NORMAL'>" + parent.window.str_info.opt_disable + "</span></td>");
+                      }
+                      docW("</tr>")
+                  }
+                  $id("port_mode").value = "";
+               </script>
+            </tbody>
+         <table>
+            <tbody>
+               <tr>
+                  <td><a class="BTN"><input id="wd_port_settings" type="button" class="BTN_NORMAL_BTN"></a> </td>
+               </tr>
+            </tbody>
+         </table>
+         </table>
+      </form>
+      <div>
+         <table width="100%">
+            <tbody>
+               <tr>
+                  <td class="BOTTOM_LINE"></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div>
+         <table width="100%">
+            <tbody>
+               <tr>
+                  <td align="left"><span id="t_note_title" class="BOLDER"><script>docW(parent.window.poe_wd.spn_attention)</script></span></td>
+               </tr>
+               <tr>
+                  <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.poe_wd.spn_note1)</script></span></td>
+               </tr>
+               <tr>
+                <td align="left"><span id="t_note_info" class="NORMAL"><script>docW(parent.window.poe_wd.spn_note2)</script></span></td>
+             </tr>
+            </tbody>
+         </table>
+      </div>
+    </fieldset>
+</body>
+</html>

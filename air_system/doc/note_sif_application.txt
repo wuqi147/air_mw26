@@ -1,0 +1,152 @@
+/*
+ *  Note    : note_sif_application
+ *  Chip    : EN8851
+ *  SDK     : AIR_SDK_v2.8.3
+ *  Update  : 2023-05-19
+ */
+
+ (1) Overview
+
+    SIF stands for Serial Interface (as known as I2C interface). It is used to
+    communicate with those devices whose access interface is I2C. This notes
+    will describe how to configure SIF interfaces and how to use those APIs
+    provided by SDK.
+
+ (2) SIF Functionality
+
+ (2.1) SIF Interface Configuration
+
+    SDK has provided one mechanism that users can customize the data
+    transmission rate. During SDK initialization, SDK will initialize the I2C
+    speed according to this configuration. The configuration listed below is
+    refered to air_cfg.h.
+
+    - AIR_CFG_TYPE_SIF_LOCAL_CLOCK: config the data transmission of the slave
+                                    device by I2C channel, slave_id and speed
+                                    options.
+ (2.2) SIF APIs
+
+    SDK provide I2C APIs for read and write, which are declared in air_sif.h,
+    and the function prototype are:
+
+    - AIR_ERROR_NO_T
+      air_sif_read(
+          const UI32_T            unit,
+          const AIR_SIF_INFO_T    *ptr_sif_info,
+          AIR_SIF_PARAM_T         *ptr_sif_param
+      );
+    - AIR_ERROR_NO_T
+      air_sif_write(
+          const UI32_T            unit,
+          const AIR_SIF_INFO_T    *ptr_sif_info,
+          AIR_SIF_PARAM_T         *ptr_sif_param
+      );
+
+    Where,
+    - ptr_sif_info is AIR_SIF_INFO_T type, include master channel and
+      slave_id
+    - ptr_sif_param is AIR_SIF_PARAM_T type, include subaddress, subaddress
+      length, data and data length.
+      Notice if your data length is less than 4, you can use the variable data,
+      if your data length is greater than 4, you need to use ptr_data, which
+      is defined in info.
+
+ (3) SIF Usage Examples
+
+ (3.1) Customize SIF Interface Clock
+
+    The config syntax for AIR_CFG_TYPE_SIF_LOCAL_CLOCK is shown as follow,
+    which is set up in customer_ref.c:
+
+    {chip_unit, AIR_CFG_TYPE_SIF_LOCAL_CLOCK, i2c_channel, slave_id, speed}
+
+    Where,
+    - chip_unit: chip id and only support one chip, whose id is 0, currently
+    - i2c_channel: the master channel
+    - slave_id: device slave id
+    - speed option: 0: 100kHz, 1: 400kHz, 2: 1MHz
+
+    Assume we want to config the I2C speed in 400kHz, and the master is
+    channel 0, slave_id is 0x51, we can config in customer_ref.c
+
+    {0, AIR_CFG_TYPE_SIF_LOCAL_CLOCK, 0, 0x51, 1}
+
+ (3.2) SIF Read Within Four Bytes
+
+    Assume we want to access an two bytes eeprom by using I2C master 0, the
+    slave_id is 0x50, data length is 4 bytes. Sample code is shown as
+    following, if you need more detail, you can refer sif_cmd.c
+
+    AIR_SIF_INFO_T   sif_info;
+    AIR_SIF_PARAM_T  sif_param;
+
+    sif_info.channel = 0;
+    sif_info.slave_id = 0x50;
+
+    sif_param.addr_len = 2;
+    sif_param.addr = 0x0;
+    sif_param.data_len = 4;
+
+    air_sif_read(unit, &sif_info, &sif_param);
+
+    printf("data = 0x%x\n", sif_param.info.data);
+
+ (3.3) SIF Write Within Four Bytes
+
+    Assume we want to access an two bytes eeprom by using I2C master 0, the
+    slave_id is 0x50, data length is 4 bytes. Sample code is shown as
+    following, if you need more detail, you can refer sif_cmd.c
+
+    AIR_SIF_INFO_T   sif_info;
+    AIR_SIF_PARAM_T  sif_param;
+
+    sif_info.channel = 0;
+    sif_info.slave_id = 0x50;
+
+    sif_param.addr_len = 2;
+    sif_param.addr = 0x0;
+    sif_param.data_len = 4;
+    sif_param.info.data = 0x12345678;
+
+    air_sif_write(unit, &sif_info, &sif_param);
+
+
+ (3.4) SIF Read More Than Four Bytes
+
+    Assume we want to access an two bytes eeprom by using I2C master 0, the
+    slave_id is 0x50, data length is 8 bytes. Sample code is shown as
+    following, if you need more detail, you can refer sif_cmd.c
+
+    AIR_SIF_INFO_T   sif_info;
+    AIR_SIF_PARAM_T  sif_param;
+    UI32_T           data[2];
+
+    sif_info.channel = 0;
+    sif_info.slave_id = 0x50;
+
+    sif_param.addr_len = 2;
+    sif_param.addr = 0x0;
+    sif_param.data_len = 8;
+    sif_param.info.ptr_data = (UI32_T *) data;
+
+    air_sif_read(unit, &sif_info, &sif_param);
+
+ (3.5) SIF Write More Than Four Bytes
+
+    Assume we want to access an two bytes eeprom by using I2C master 0, the
+    slave_id is 0x50, data length is 8 bytes. Sample code is shown as
+    following, if you need more detail, you can refer sif_cmd.c
+
+    AIR_SIF_INFO_T   sif_info;
+    AIR_SIF_PARAM_T  sif_param;
+    UI32_T           data[2] = {0x12345678, 0xabcdef};
+
+    sif_info.channel = 0;
+    sif_info.slave_id = 0x50;
+
+    sif_param.addr_len = 2;
+    sif_param.addr = 0x0;
+    sif_param.data_len = 8;
+    sif_param.info.ptr_data = (UI32_T *) data;
+
+    air_sif_write(unit, &sif_info, &sif_param);

@@ -1,0 +1,346 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+<!--#syslanguage-->
+<link id="web_ico" rel="icon" href="data:image/ico;base64,aWNv">
+<!--#custAddrbarFavicon-->
+
+<style type="text/css">
+#center {
+    margin: 0;
+    padding: 0;
+    border: solid 0;
+    height: 300px;
+    width: 400px;
+    position: relative;
+    left: 760px;
+    top: 176.7px;
+}
+#ret_info {
+    border:solid 1px #388BA9;
+    display:none;
+    padding:3px;
+    width:188px !important;
+    width:195px;
+    text-align:center;
+}
+body {
+    margin: 20px;
+    font-family: Arial;
+    font-size: 12px;
+    overflow: hidden
+}
+body,input,select {
+    color: <!--#loginFormFont--> /* Login form font color */
+}
+BODY.LOGIN_L {
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+    transform: scale(1.2,1.2);
+    display: block;
+}
+div.TOP {
+    width: 400px;
+    font-size: 0;
+    margin: 0;
+    padding: 0
+}
+DIV.MAIN_PAINT {
+    border: dotted 0 red;
+    width: 400px;
+    height: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0
+}
+TD.COLBLANK {
+    width: 20px
+}
+TR.ROWBLANK {
+    height:10px !important;
+}
+INPUT.BTN_NORMAL {
+    font-family: Arial;
+    font-size: 12px;
+    border-color: #7f9db9;
+    border-width: 1px;
+    border-style: solid;
+    width: 55px
+}
+TABLE.NORMAL {
+    font-size: 12px;
+    font-family: Arial
+}
+SPAN.NORMAL {
+    font-size: 12px;
+    font-family: Arial
+}
+SPAN.WARN_NORMAL {
+    font-size: 12px;
+    font-family: Arial;
+    color: red
+}
+TD.FRAMEWORK_LEFT {
+    text-align: left;
+    width: 100px
+}
+INPUT.TEXT_ENABLE {
+    font-family: Arial;
+    font-size: 12px;
+    border-color: #7f9db9;
+    border-width: 1px;
+    border-style: solid
+}
+SPAN.BTN {
+    font-size: 12px;
+    font-family: Arial;
+    display: block;
+    background-image: url(button.gif);
+    background-position: left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0
+}
+SPAN.BTN input {
+    background-image: url(button.gif);
+    background-position: right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none
+}
+SPAN.BTN_HOVER {
+    font-size: 12px;
+    font-family: Arial;
+    display: block;
+    background-image: url(button.gif);
+    background-position: left -20px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0
+}
+SPAN.BTN_HOVER input {
+    background-image: url(button.gif);
+    background-position: right -20px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    height: 21px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none
+}
+SPAN.COPY {
+    font-size: 12px;
+    font-family: Arial
+}
+TABLE.LAYOUT_FIXED {
+    table-layout: fixed;
+}
+IMG#img_logo {
+    cursor: pointer;
+}
+</style>
+<script>
+var g_Lan = 2;
+var g_year = 2021;
+var g_product = 2;
+var lang_js = "english";
+var ishttps = 'https:' == document.location.protocol;
+var $id = (e) => { return document.getElementById(e); };
+var docW = (a) => { return document.write(a); };
+function incJs(a)
+{
+    docW("<script type='text/javascript' src='" + a + "'><\/script>")
+}
+if(language == "chinese")
+{
+    lang_js = "str_info_chinese.js";
+}
+else if(language == "english")
+{
+    lang_js = "str_info_english.js";
+}
+incJs(lang_js);
+if (!ishttps)
+{
+    incJs("core.min.js");
+    incJs("sha256.min.js");
+}
+function resize(e)
+{
+    var t = (document.all)? document.body.offsetWidth: window.innerWidth,
+        o = (document.all)? document.body.offsetHeight: window.innerHeight,
+        el = $id(e);
+    el.style.left = .5 * (t - 400), el.style.top = .3 * (o - 300), el.style.display = "";
+}
+function doClear()
+{
+    $id("username").value = "", $id("password").value = "", window.focus && self.focus(), $id("username").focus(), $id("username").select(), $id("ret_info").style.display = "none"
+}
+function doPrintfTableHeadBorder(e, t, o, n, d)
+{
+    var l = "";
+    l += '<TABLE class="LAYOUT_FIXED" height=' + n + " cellSpacing=0 cellPadding=0 width=" + o +
+    " border=0>", l += "<TBODY><TR><TD>", l +=
+    '<TABLE class="LAYOUT_FIXED" height=3 cellSpacing=0 cellPadding=0 width=' + o + " border=0>",
+    l += "<TBODY><TR height=1><TD width=1></TD><TD width=1></TD><TD width=1></TD><TD bgColor=" + e +
+    "></TD><TD width=1></TD><TD width=1></TD><TD width=1></TD></TR>", l +=
+    "<TR height=1><TD colspan=2></TD><TD bgColor=" + e + "></TD><TD bgColor=" + t + "></TD><TD bgColor=" +
+    e + "><TD colspan=2></TD></TR>", l += "<TR height=1><TD width=1></TD><TD width=1 bgColor=" + e +
+    "></TD><TD width=1 bgColor=" + t + "><TD bgColor=" + t + "></TD><TD width=1 bgColor=" + t +
+    "></TD><TD width=1 bgColor=" + e + "></TD><TD width=1></TD></TR>", l += "</TBODY></TABLE></TD></TR>",
+    l += '<TR><TD><TABLE class="LAYOUT_FIXED" height=' + (n - 3) +
+    " cellSpacing=0 cellPadding=0 border=0>", l += "<TBODY><TR><TD width=1 bgColor=" + e + "></TD>", l += "<TD id=oINNER bgColor=" + t + " width=" + (
+    o - 2) + " align=center vAlign=middle>" + d + "</TD>", l += "<TD width=1 bgColor=" + e +
+    "></TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE>", document.write(l)
+}
+function doPrintfTableBottomBorder(e, t, o, n, d)
+{
+    var l = "";
+    l += '<TABLE class="LAYOUT_FIXED" height=' + n + " cellSpacing=0 cellPadding=0 width=" + o +
+    " border=0>", l += "<TBODY><TR><TD>", l +=
+    '<TABLE class="LAYOUT_FIXED" height=1 cellSpacing=0 cellPadding=0 width=' + o + " border=0>",
+    l += "<TBODY><TR height=1 width=" + o + "><TD bgColor=" + e + "></TD></TR></TBODY></TABLE></TD></TR>",
+    l += '<TR><TD><TABLE class="LAYOUT_FIXED" height=' + n +
+    " cellSpacing=0 cellPadding=0 border=0>", l += "<TBODY>", l += "<TR height=" + n +
+    "><TD width=1 bgColor=" + e + "></TD>", l += "<TD id=oINNER width=" + (o - 2) + " bgColor=" + t +
+    ' valign="top">' + d + "</TD>", l += "<TD width=1 bgColor=" + e +
+    "></TD></TR></TBODY></TABLE></TD></TR>", l += "<TR height=3 width=" + o + "><TD>", l +=
+    '<TABLE class="LAYOUT_FIXED" height=3 cellSpacing=0 cellPadding=0 width=' + o +
+    " border=0><TBODY>", l += "<TR height=1><TD width=1></TD><TD width=1 bgColor=" + e +
+    "></TD><TD width=1 bgColor=" + t + "><TD bgColor=" + t + "></TD><TD width=1 bgColor=" + t +
+    "></TD><TD width=1 bgColor=" + e + "></TD><TD width=1></TD></TR>", l +=
+    "<TR height=1><TD></TD><TD bgColor=" + e + " colSpan=2></TD><TD bgColor=" + t + "></TD><TD bgColor=" +
+    e + " colSpan=2></TD><TD width=1></TD></TR>", l += "<TR height=1><TD colSpan=3></TD><TD bgColor=" + e +
+    "></TD><TD colSpan=3></TD></TR>", l += "</TBODY></TABLE></TD></TR></TBODY></TABLE>", document.write(l)
+}
+function changelanguage()
+{
+    return location.href = "languagechange.cgi?lang_sel=" + $id("lang_sel").value;
+}
+
+function initlang()
+{
+    $id("lang_sel").value = language;
+}
+function checkInput() {
+    var e;
+    var f = $id('form0'), e_info = $id("ret_info");
+    return "" == f.username.value ? (e =
+        '<SPAN class="WARN_NORMAL" id="t_error6">'+ str_info.spn_error6 +'</SPAN>',
+        e_info.innerHTML = e, e_info.style.display = "block",
+        f.username.focus(), !1) : 16 < f.username.length ? (e =
+        '<SPAN class="WARN_NORMAL" id="t_error7">'+ str_info.spn_error7 +'</SPAN>',
+        e_info.innerHTML = e, e_info.style.display = "block",
+        f.username.focus(), !1) : "" == f.password.value ? (e =
+        '<SPAN class="WARN_NORMAL" id="t_error8">'+ str_info.spn_error8 +'</SPAN>',
+        e_info.innerHTML = e, e_info.style.display = "block",
+        f.password.focus(), !1) : 16 < f.password.legnth ? (e =
+        '<SPAN class="WARN_NORMAL" id="t_error9">'+ str_info.spn_error9 +'</SPAN>',
+        e_info.innerHTML = e, e_info.style.display = "block",
+        f.password.focus(), !1) : !!1;
+}
+function isSha256(str) {
+    return /^[a-f0-9]{64}$/i.test(str);
+}
+function submit1(e) {
+    e.preventDefault();
+    if (!checkInput())
+        return !1;
+    $id('logon').disabled = true;
+
+    const pwdInput = $id('password');
+    let password = pwdInput.value;
+    if (!isSha256(password)) {
+        pwdInput.value = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+    }
+    e.target.submit();
+}
+async function sha256Pwd(p) {
+    const txtenc = new TextEncoder();
+    const data = txtenc.encode(p);
+    const buffer = await crypto.subtle.digest('SHA-256', data);
+    const hash = Array.from(new Uint8Array(buffer));
+    return hash.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function submit2(e) {
+    e.preventDefault();
+    if (!checkInput())
+        return !1;
+    $id('logon').disabled = true;
+
+    const pwdInput = $id('password');
+    let password = pwdInput.value;
+    if (!isSha256(password)) {
+        pwdInput.value = await sha256Pwd(password);
+    }
+    e.target.submit();
+}
+window.onload = function () {
+    history.replaceState({}, null, "index.html");
+    var errType = "<!--#errorType-->";
+    var e = $id("username");
+    if (e.focus(), e.select(), resize("center"), (-1 != errType.indexOf("0")))
+    {
+        $id("ret_info").style.display = "none";
+    }
+    else if (-1 != errType.indexOf("1"))
+    {
+        $id("ret_info").style.display = "block", str = '<SPAN class="WARN_NORMAL" id="t_error1">'+ str_info.spn_error1 +'', $id("ret_info").innerHTML = str;
+    }
+    else if (-1 != errType.indexOf("2"))
+    {
+        $id("ret_info").style.display = "block", str = '<SPAN class="WARN_NORMAL" id="t_error1">'+ str_info.login_max +'', $id("ret_info").innerHTML = str;
+    }
+    $id('form0').addEventListener('submit', (!ishttps)? submit1: submit2);
+    $id("lang_sel").onchange = () => { changelanguage(); };
+    $id("btn_clear").onclick = () => { doClear(); };
+}
+window.onresize = () => { resize("center"); };
+</script>
+</head>
+<body class="LOGIN_L">
+    <div id="center">
+        <div id="center-top">
+            <script>
+                var banner='';
+                var indexPage_logo_bg_color = "<!--#topLgFmBkGd-->"; /* Top login form background color */
+                <!--#custLoginLogo-->
+                doPrintfTableHeadBorder(indexPage_logo_bg_color, indexPage_logo_bg_color, 400, 60, banner);
+            </script>
+        </div>
+        <div id="center-main">
+            <div class="MAIN_PAINT">
+                <script>
+                    function doPrintfTable(T, e) {
+                        let login_form_border_color = "<!--#loginFormBdr-->"; /* Login form border color */
+                        let bottom_login_form_background_color = "<!--#bottomLgFmBkGd-->"; /* Bottom login form background color */
+                        doPrintfTableBottomBorder(login_form_border_color, bottom_login_form_background_color, T, e,
+                            '<FORM id="form0" method="POST" name="submitForm"  action="logon.cgi"><TABLE align="center" valign="top" height="20px;" border=0><TR height="20px;"><TD width="76px"></TD><TD width="196px"></TD><TD><select id="lang_sel" value="'+ language +'"><option value="chinese">简体中文</option><option value="english">English</option></select></TD></TR><TR height="20px;"><TD></TD><TD><DIV id="ret_info"></DIV></TD><TD></TD></TR><TR height="10px;"><TD></TD></TR></TABLE><TABLE align="center" width="220px;" border=0 class="NORMAL" ><TR><TD class="FRAMEWORK_LEFT" ><SPAN id="t_username">'+ str_info.lbl_username+'</SPAN></TD><TD><INPUT type="text" value="" id="username" name="username" class="TEXT_ENABLE"  size="17" maxlength="16" tabindex="0"></TD></TR><TR><TD class="FRAMEWORK_LEFT"><SPAN id="t_userpwd">'+ str_info.lbl_password+'</SPAN></TD><TD><INPUT type="password" value="" id="password" name="password" class="TEXT_ENABLE"  size="17" maxlength="16" tabindex="0"></TD></TR><TR class="ROWBLANK"></TR></TABLE><TABLE align="center" border=0><TR height="0px;"><TD></TD></TR><TR><TD colspan="2"><TABLE cellpadding="0" cellspacing="0" align="center" border=0><TR><TD><SPAN class="BTN" ><INPUT type="submit" name="logon" id="logon" class="BTN_NORMAL" value="'+ str_info.btn_login+'" tabindex="0"></SPAN></TD><TD class="COLBLANK">&nbsp;</TD><TD><SPAN class="BTN"><INPUT type="button"  value="'+ str_info.btn_clear+'" id="btn_clear" name="btn_clear"  class="BTN_NORMAL" tabindex="0"/></SPAN></TD></TD></TR></TABLE></TD></TR></TABLE></FORM>'
+                        )
+                    }
+                    doPrintfTable(400, 200),
+                    initlang()
+                </script>
+                <table cellspacing="0" cellpadding="0" border="0" align="center" class="NORMAL">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <!--#custLoginCopyright-->
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,200 @@
+/*
+ *  Note    : note_acl_ipv6_reverse_application
+ *  Chip    : EN8851/AN8858
+ *  SDK     : AIR_SDK_v3.1.0
+ *  Update  : 2025-04-14
+ */
+
+(1) Overview
+
+    User may want to create an IPv6 ACL rule to filter IPv6 packets. In SDK
+    v3.1.0, only EN8851-series (including EN8851 and EN8853) and AN8858 support
+    IPv6 ACLs. But there are slightly differences in support IPv6 ACLs,
+    EN8851-series would create 4 entries for an IPv6 ACL rule while AN8858
+    would create 2 entries, and some fields will be in the different entries
+    due to RAM size limitation. In EN8851-series, each entry contains different
+    32bits value of the DIPv6 or SIPv6. In AN8858, the second entry would be
+    used to match the higher 96bits value of the DIPv6 or SIPv6, and the
+    flow-label value. And the first entry would be used to match the other
+    supported matching fields. To generate an IPv6 rule, SDK will create the
+    respective entries in a single API function call automatically.
+
+    The following restrictions applied when configuring ACL IPv6 rules:
+    - EN8851-series supports up to 512 entries, divided into 4 blocks.
+    - AN8858 supports up to 128 entries, divided into 32 sub-blocks.
+    - Every 4 entries considered as a sub-block, the entries in the same
+      sub-block can do aggregation, such as 0/1/2/3 or 4/5/6/7.
+    - Entries aggregation cannot cross different sub-blocks.
+    - The action binding would be different between EN8851-series and AN8858.
+
+(2) Permit IPv6 Address Configuration
+
+    In SDK v3.1.0, we provided AIR_ACL_DIPV6_KEY and AIR_ACL_SIPV6_KEY fields
+    in AIR_ACL_RULE_FIELD_T structure for supporting IPv6 address. User can
+    specify the DIPv6 or SIPv6 value in AIR_ACL_RULE_T directly and call
+    air_acl_getRule() API. SDK will create 4 entries and 2 entries in
+    EN8851-series and AN8858 respectively.
+
+    For example:
+    (a) Create an ACL rule 0 to match the destination IPv6 address 2000::1.
+        This configuration will create entry-id 0, 1, 2, 3 in EN8851-series,
+        while SDK will create entry-id 0, 1 in AN8855.
+
+        UI32_T entry_id = 0;
+        AIR_ACL_RULE_T rule;
+        osal_memset(&rule, 0, sizeof(AIR_ACL_RULE_T));
+
+        rule.rule_en = 1;
+        rule.isipv6 = 1;
+        rule.end = 1;
+        rule.key.dipv6 = {0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+        rule.mask.dipv6 = 0xffff;
+        rule.field_valid |= BIT(AIR_ACL_DIPV6_KEY);
+        rule.portmap[0] = 0x3ff;
+
+        air_acl_setRule(unit, entry_id, &rule);
+
+    (b) In EN8851-series, bind an ACL counter mib-id 1 to the rule with the
+        first entry-id 0.
+
+        UI32_T entry_id = 0;
+        AIR_ACL_ACTION_T action;
+        osal_memset(&action, 0, sizeof(AIR_ACL_ACTION_T));
+
+        action.acl_mib_id = 1;
+        action.field_valid |= BIT(AIR_ACL_MIB);
+
+        air_acl_setAction(unit, entry_id, &action);
+
+    (b) In AN8858, bind an ACL counter mib-id 1 to the IPv6 rule on entry-id 1.
+
+        UI32_T entry_id = 1;
+        AIR_ACL_ACTION_T action;
+        osal_memset(&action, 0, sizeof(AIR_ACL_ACTION_T));
+
+        action.acl_mib_id = 1;
+        action.field_valid |= BIT(AIR_ACL_MIB);
+
+        air_acl_setAction(unit, entry_id, &action);
+
+(3) Deny IPv6 Address Configuration
+
+    User can apply a rule and configure the reverse flag to 1, which determines
+    that deny the packet if the incoming packet matched all the conditions of
+    the rule. If there is no match, then the incoming packet is permitted, and
+    the switch continues processing the action that user configured to the rule.
+    The ACL matching mechanism are different between EN8851-series and AN8858.
+    In AN8858, ACL divides IPv6 packet fields into 2 rules. The lowest 32 bits
+    of DIP and SIP, and the next-header field are in the first entry. The
+    second entry would be used to match the highest 96 bits of DIP, SIP, and
+    flow-label. In current comparison mechanism, the reverse IPv6 rule in AN8858
+    cannot be applied to all IPv6 packets. Some traffic may mismatch. User needs
+    to set two reverse IPv6 rules to filter network traffic. While EN8851 needs
+    only one reverse IPv6 rule which also occupied 4 ACL rule entries.
+
+    For Example:
+    (a) In EN8851-series, create an ACL rule with entry-id 4, 5, 6, 7 to deny
+        source IPv6 address 2000::1 and bind an ACL counter to mib-id 2 for the
+        rule.
+
+        UI32_T entry_id = 4;
+        AIR_ACL_RULE_T rule;
+        AIR_ACL_ACTION_T action;
+        osal_memset(&rule, 0, sizeof(AIR_ACL_RULE_T));
+        osal_memset(&action, 0, sizeof(AIR_ACL_ACTION_T));
+
+        rule.rule_en = 1;
+        rule.isipv6 = 1;
+        rule.reverse = 1;
+        rule.end = 1;
+        rule.key.sipv6 = {0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+        rule.mask.sipv6 = 0xffff;
+        rule.field_valid |= BIT(AIR_ACL_SIPV6_KEY);
+        rule.portmap[0] = 0x3ff;
+
+        air_acl_setRule(unit, entry_id, &rule);
+
+        action.acl_mib_id = 2;
+        action.field_valid |= BIT(AIR_ACL_MIB);
+
+        air_acl_setAction(unit, entry_id, &action);
+
+    (b) In AN8858, create two ACL rules with entry-id 4, 5, and 6, 7 to deny
+        source IPv6 address 2000::1 and bind an ACL counter to mib-id 2 for
+        the rules. User needs to bind the same action to both rule 1 and 2.
+
+        UI32_T entry_id_1 = 4;
+        UI32_T entry_id_2 = 6;
+        AIR_ACL_RULE_T rule_1, rule_2;
+        AIR_ACL_ACTION_T action;
+        osal_memset(&rule_1, 0, sizeof(AIR_ACL_RULE_T));
+        osal_memset(&rule_2, 0, sizeof(AIR_ACL_RULE_T));
+        osal_memset(&action, 0, sizeof(AIR_ACL_ACTION_T));
+
+        rule_1.rule_en = 1;
+        rule_1.isipv6 = 1;
+        rule_1.reverse = 1;
+        rule_1.end = 1;
+        rule_1.key.sipv6 = {0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+        rule_1.mask.sipv6 = 0xf;
+        rule_1.field_valid |= BIT(AIR_ACL_SIPV6_KEY);
+        rule_1.portmap[0] = 0x3ff;
+
+        rule_2.rule_en = 1;
+        rule_2.isipv6 = 1;
+        rule_2.reverse = 1;
+        rule_2.end = 1;
+        rule_2.key.sipv6 = {0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+        rule_2.mask.sipv6 = 0xfff0;
+        rule_2.field_valid |= BIT(AIR_ACL_SIPV6_KEY);
+        rule_2.portmap[0] = 0x3ff;
+
+        air_acl_setRule(unit, entry_id_1, &rule_1);
+        air_acl_setRule(unit, entry_id_2, &rule_2);
+
+        action.acl_mib_id = 2;
+        action.field_valid |= BIT(AIR_ACL_MIB);
+
+        air_acl_setAction(unit, entry_id_1 + 1, &action);
+        air_acl_setAction(unit, entry_id_2 + 1, &action);
+
+    (c) In AN8858, create two ACL rules with entry-id 8, 9, and 10, 11 to deny
+        next-header 58 and flow-label 0 packets, and bind an ACL counter to
+        mib-id 3 for the rules. In this scenario, user needs to bind the same
+        action to both rule 1 and 2.
+
+        UI32_T entry_id_1 = 8;
+        UI32_T entry_id_2 = 10;
+        AIR_ACL_RULE_T rule_1, rule_2;
+        AIR_ACL_ACTION_T action;
+        osal_memset(&rule_1, 0, sizeof(AIR_ACL_RULE_T));
+        osal_memset(&rule_2, 0, sizeof(AIR_ACL_RULE_T));
+        osal_memset(&action, 0, sizeof(AIR_ACL_ACTION_T));
+
+        rule_1.rule_en = 1;
+        rule_1.isipv6 = 1;
+        rule_1.reverse = 1;
+        rule_1.end = 1;
+        rule_1.key.next_header = 58;
+        rule_1.field_valid |= BIT(AIR_ACL_NEXT_HEADER_KEY);
+        rule_1.portmap[0] = 0x3ff;
+
+        rule_2.rule_en = 1;
+        rule_2.isipv6 = 1;
+        rule_2.reverse = 1;
+        rule_2.end = 1;
+        rule_2.key.flow_label = 0;
+        rule_2.mask.flow_label = 0xf;
+        rule_2.field_valid |= BIT(AIR_ACL_FLOW_LABEL_KEY);
+        rule_2.portmap[0] = 0x3ff;
+
+        air_acl_setRule(unit, entry_id_1, &rule_1);
+        air_acl_setRule(unit, entry_id_2, &rule_2);
+
+        action.acl_mib_id = 3;
+        action.field_valid |= BIT(AIR_ACL_MIB);
+
+        air_acl_setAction(unit, entry_id_1 + 1, &action);
+        air_acl_setAction(unit, entry_id_2 + 1, &action);
+
+

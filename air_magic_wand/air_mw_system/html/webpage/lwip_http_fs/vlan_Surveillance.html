@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--#Surveilvlan-->
+<!--#qosAdvanceInfo-->
+<style>
+body,input,select {
+    color: <!--#subPageFont-->; /* Subpage font color */
+}
+fieldset {
+  font-size: 12px;
+  width: 1000px;
+  margin: 1em auto;
+  padding: 1em;
+  border: 1px solid <!--#subPgFcGrpBdr-->; /* Subpage function group border color */
+}
+legend {
+  font-weight: bold;
+  font-size: 150%;
+  color: <!--#subPgFcGrpTtl-->; /* Subpage function group title font color */
+  font-family: Arial;
+}
+table {
+  margin: 1em auto;
+  border-collapse: collapse;
+  text-align: center;
+}
+table td {
+  height: 32px;
+  line-height: 21px;
+}
+TABLE.FRAMEWORK {
+  line-height: 25px;
+  margin: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 0;
+}
+table.BORDER td, th {
+  border: 1px solid <!--#subPageTblBr-->; /* Subpage table boder color */
+}
+table .TD_FIRST_COL {
+  background-color: <!--#subPageThdBkGd-->; /* Subpage table header background color */
+  padding: 0 5px;
+  width: 400px;
+}
+TD.BOTTOM_LINE {
+  background-color: <!--#subPageDivider-->; /* Subpage divider color */
+  width: 580px;
+  height: 2px;
+}
+a.BTN1 {
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.2, 1.2) translate(100%, 0%);
+}
+a.BTN2 input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+a.BTN2 {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(50%, 0%);
+}
+a.BTN {
+    background: url(button.gif) left -42px;
+    text-decoration: none;
+    height: 21px;
+    float: left;
+    margin: 0;
+    transform: scale(1.5, 1.5) translate(0%, 20%);
+}
+a.BTN input {
+    background: url(button.gif) right -42px;
+    padding: 4px 3px 4px 0;
+    margin: 0 0 0 3px;
+    float: left;
+    height: 21px;
+    border: none;
+}
+INPUT.BTN_NORMAL_BTN {
+    font-family: "Arial";
+    width: 60px;
+}
+input.TEXT_ENABLE {
+    font-family: "Arial";
+    font-size: 150%;
+    height: 30px;
+    width: 120px;
+}
+span.BOLDER {
+    font-size: 150%;
+    font-family: "Arial";
+    font-weight: bolder;
+}
+span.NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+}
+.RADIO_NORMAL {
+    transform: scale(1.5, 1.5) translate(-20%, -10%);
+}
+.RADIO_WIDTH {
+    width: 120px;
+}
+.SELECT_NORMAL {
+    font-size: 150%;
+    font-family: "Arial";
+    height: 30px;
+    width: 130px;
+}
+TD.SBLANK {
+    width: 20px;
+}
+.CHKBOX_NORMAL {
+    transform: scale(1.5, 1.5) translate(0%, 0%);
+}
+.FIX_W {
+    width:65px;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+var surveilCnt = surveilinfo_ds.surveilOuiCount, surveilVid = surveilinfo.vid, surveilPri = surveilinfo.pri;
+function docW(a){
+  document.write(a);
+}
+function $id(a){
+  return document.getElementById(a);
+}
+function syncOUI() {
+  if ($id("default_desc").value == "3com")
+    $id("default_oui").value = "00:E0:BB";
+  else if($id("default_desc").value == "cisco")
+    $id("default_oui").value = "00:03:6B";
+  else if($id("default_desc").value == "veritel")
+    $id("default_oui").value = "00:E0:75";
+  else if($id("default_desc").value == "pingtel")
+    $id("default_oui").value = "00:D0:1E";
+  else if($id("default_desc").value == "siemens")
+    $id("default_oui").value = "00:01:E3";
+  else if($id("default_desc").value == "necphilips")
+    $id("default_oui").value = "00:60:B9";
+  else if($id("default_desc").value == "huawei3com")
+    $id("default_oui").value = "00:0F:E2";
+  else if($id("default_desc").value == "avaya")
+    $id("default_oui").value = "00:09:6E";
+}
+function showOuiCfg() {
+  if ($id("default_en").checked == true) {
+    $id("default_oui").disabled = false;
+    $id("default_desc").disabled = false;
+    $id("custom_desc").disabled = true;
+    $id("custom_oui").disabled = true;
+  }
+  else if ($id("custom_en").checked == true) {
+    $id("default_oui").disabled = true;
+    $id("default_desc").disabled = true;
+    $id("custom_desc").disabled = false;
+    $id("custom_oui").disabled = false;
+  }
+}
+function initSurveil() {
+  if (vlanState != 2) {
+    alert(parent.window.surv_info.alt_info1); /* "Please enable 802.1Q VLAN first." */
+    $id("vlan_sel").disabled = true;
+    $id("priority_sel").disabled = true;
+    $id("surveil_en").checked = false;
+    $id("ouicfg").style.display = "none";
+    return;
+  }
+  if (surveilinfo.state == 0) {
+    $id("vlan_sel").disabled = true;
+    $id("priority_sel").disabled = true;
+    $id("surveil_en").checked = false;
+    $id("ouicfg").style.display = "none";
+  }
+  else {
+    $id("vlan_sel").disabled = false;
+    $id("priority_sel").disabled = false;
+    $id("surveil_en").checked = true;
+    $id("ouicfg").style.display = "";
+    if (surveilVid != 0) {
+      $id("vlan_sel").value = surveilVid;
+      $id("priority_sel").value = surveilPri;
+    }
+  }
+  syncOUI();
+  showOuiCfg();
+}
+function chkVlanRange(val, min, max) {
+  var input_vid = (typeof val == 'string')? Number(val) : val;
+  if (min <= input_vid && input_vid <= max) {
+    return true;
+  }
+  return false;
+}
+function doSurvApply() {
+  var input_state = ($id("surveil_en").checked == true)? 1 : 0;
+  var input_vid = Number($id("vlan_sel").value);
+  var input_pri = Number($id("priority_sel").value);
+  if ((2 != vlanState) && (1 == input_state)) {
+    alert(parent.window.surv_info.alt_info1); /* "Please enable 802.1Q VLAN first." */
+    return;
+  }
+  if ((1 != qosMode) && (1 == input_state))
+  {
+    alert(parent.window.surv_info.alt_info8);/* "Please enable QoS mode to 802.1p first." */
+    return;
+  }
+  if (input_state != surveilinfo.state) {
+    return location.href = "surveilvlanSet.cgi?state=" + input_state + "&vid=" + surveilVid + "&pri=" + surveilPri;
+  }
+  if (1 == input_state) {
+    if ((input_vid != surveilVid) || (input_pri != surveilPri)) {
+      if (false == chkVlanRange($id("vlan_sel").value, 1, 4094)) {
+        alert(parent.window.surv_info.alt_info0); /* "The entered vid does not exist." */
+        return;
+      }
+      if (1 == input_vid) {
+        alert(parent.window.surv_info.alt_info6);
+        return;
+      }
+      return location.href = "surveilvlanSet.cgi?state="+ input_state + "&vid=" + input_vid + "&pri=" + input_pri;
+    }
+  }
+}
+function chkMacRegex(mac) {
+  var regexMac = /^([0-9A-F]{2}[:]){2}([0-9A-F]{2})$/i;
+  return regexMac.test(mac);
+}
+function chkDescRegex(desc) {
+  var regexDesc = /^([0-9A-Z_=-]{0,10})$/i;
+  return regexDesc.test(desc);
+}
+function findOuiTblFirstEmptyIdx() {
+  var i, j, count = 0;
+  for (i = 1; i <= ouiEntryMaxLimit; i++) {
+    for (j = 0; j < voiceinfo_ds.voiceOuiCount; j++) {
+      if (voiceinfo_ds.oui_info[j].index != i) {
+        count++;
+      }
+    }
+    for (j = 0; j < surveilinfo_ds.surveilOuiCount; j++) {
+      if (surveilinfo_ds.oui_info[j].index != i) {
+        count++;
+      }
+    }
+    if (count == (voiceinfo_ds.voiceOuiCount + surveilinfo_ds.surveilOuiCount)) {
+      return i;
+    }
+    else {
+      count = 0;
+    }
+  }
+}
+function addOui() {
+  var input_oui = "";
+  var input_desr = "";
+  var convert_oui = "";
+  if ($id("vlan_sel").value == '') {
+    alert(parent.window.surv_info.alt_info0);
+    return;
+  }
+  if (surveilinfo_ds.surveilOuiCount + voiceinfo_ds.voiceOuiCount >= ouiEntryMaxLimit) {
+    alert(parent.window.surv_info.alt_info2); /* "OUI has reached the upper limit of 16 and cannot be added." */
+    return;
+  }
+  if ($id("default_en").checked == true) {
+    input_oui = $id("default_oui").value;
+    input_desr = $id("default_desc").value;
+  }
+  else if ($id("custom_en").checked == true) {
+    input_oui = $id("custom_oui").value;
+    input_desr = $id("custom_desc").value;
+  }
+  if (false == chkMacRegex(input_oui)) {
+    alert(parent.window.surv_info.alt_info3); /* "The OUI format is incorrect, the correct format is 00:AA:BB." */
+    return;
+  }
+  if (false == chkDescRegex(input_desr)) {
+    alert(parent.window.surv_info.alt_info7); /* "The OUI description cotains illegal characters. Legal characters are: letters, numbers, dash(-), underscore(_) and equal sign(=)." */
+    return;
+  }
+  convert_oui = input_oui.replace(/:/g, '').toUpperCase();
+  for (var i = 0; i < surveilinfo_ds.surveilOuiCount; i++) {
+    if (input_oui.toUpperCase() ==  surveilinfo_ds.oui_info[i].oui.toUpperCase()) {
+      alert(parent.window.surv_info.alt_info4); /* "The same OUI already exists." */
+      return;
+    }
+  }
+  for (var i = 0; i < voiceinfo_ds.voiceOuiCount; i++) {
+    if (input_oui.toUpperCase() == voiceinfo_ds.oui_info[i].oui.toUpperCase()) {
+      alert(parent.window.surv_info.alt_info4); /* "The same OUI already exists."; */
+      return;
+    }
+  }
+  return location.href = "surveilOuiSet.cgi?idx=" + findOuiTblFirstEmptyIdx() + "&oui=" + convert_oui + "&descr=" + input_desr;
+}
+function delOui() {
+  var oui_bmp = 0, count = 0;
+  var oui_info = surveilinfo_ds.oui_info;
+  for (var i = 0; i < surveilCnt; i++) {
+    if (true == $id("oui_" + i).checked) {
+      oui_bmp |= (1 << (oui_info[i].index - 1)); /* NOTE: index need used 1-based */
+      count++;
+    }
+  }
+  if (0 == count) {
+    alert(parent.window.surv_info.alt_info5); /* "Please select the OUI to be deleted first." */
+    return;
+  }
+  return location.href = "surveilOuiDel.cgi?oui_bmp=" + oui_bmp + "&count=" + count;
+}
+function onlyNum(e) {
+  e.target.value = e.target.value.replace(/\D/g,'');
+}
+window.onload = () => {
+  $id("vlan_sel").oninput = (e) => onlyNum(e);
+  $id("btn_mode").value = parent.window.str_info.btn_apply;
+  $id("btn_mode").onclick = () => doSurvApply();
+  $id("default_en").onclick = () => showOuiCfg();
+  $id("default_desc").onchange = () => syncOUI();
+  $id("custom_en").onclick = () => showOuiCfg();
+  $id("btn_add").value = parent.window.vlan_common_info.btn_add;
+  $id("btn_add").onclick = () => addOui();
+  $id("btn_del").value = parent.window.vlan_common_info.btn_del;
+  $id("btn_del").onclick = () => delOui();
+  $id("ouicfg").style.display = "none";
+  initSurveil();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<div>
+  <fieldset>
+    <legend><span class="NORMAL"><script>docW(parent.window.surv_info.lgd_survvlancfg)</script></span></legend>
+    <div id="div_sec_title">
+      <form action="surveilvlanSet.cgi">
+        <table>
+          <tbody>
+            <tr>
+                <td>
+                    <table class="FRAMEWORK"><tbody>
+                        <tr>
+                            <td align="left">
+                                <span class="NORMAL"><script>docW(parent.window.surv_info.spn_survvlanenable + ':')</script></span>
+                            </td>
+                            <td class="SBLANK"></td>
+                            <td align="left" class="RADIO_WIDTH">
+                                <input name="surveil_en" id="surveil_en" type="radio" value="1" class="RADIO_NORMAL">
+                                <span class="NORMAL"><script>docW(parent.window.str_info.opt_enable)</script></span>
+                            </td>
+                            <td align="left">
+                                <input name="surveil_en" id="surveil_dis" type="radio" value="0" class="RADIO_NORMAL" checked="">
+                                <span class="NORMAL"><script>docW(parent.window.str_info.opt_disable)</script></span>
+                            </td>
+                        </tr>
+                    <tr>
+                        <td align="left">
+                            <span class="NORMAL"><script>docW(parent.window.surv_info.td_vlanid + ':')</script></span>
+                        </td>
+                    <td class="SBLANK"></td>
+                    <td>
+                        <input type="text" id="vlan_sel" name="vlan_sel" maxlength="4" class="TEXT_ENABLE">
+                    </td>
+                    </tr>
+                    <tr>
+                        <td align="left">
+                            <span class="NORMAL"><script>docW(parent.window.surv_info.spn_priority + ':')</script></span>
+                        </td>
+                        <td class="SBLANK"></td>
+                        <td align="left">
+                            <select id="priority_sel" name="priority_sel" class="SELECT_NORMAL">
+                                <script type="text/javascript">
+                                    for (var i = 0; i < 8; i++) {
+                                        docW("<option"),
+                                        docW(" value='" + i + "'>"),
+                                        docW(i),
+                                        docW("</option>")
+                                    }
+                                </script>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody></table>
+              </td>
+              <td class="RADIO_WIDTH">
+              <table class="BTN_WRAPPER" align="right">
+                <tbody>
+                    <tr>
+                        <td>
+                            <a class="BTN"><input class="BTN_NORMAL_BTN" type="button" id="btn_mode" name="vlan_mode"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </td>
+         </tr>
+        </tbody>
+      </table>
+      </form>
+      <div>
+         <table width="100%">
+            <tbody>
+                <tr>
+                    <td class="BOTTOM_LINE"></td>
+                </tr>
+            </tbody>
+        </table>
+      </div>
+      <div id=ouicfg>
+      <form id="ouiSet_f" name="ouiSet_f" action="surveilOuiSet.cgi">
+        <table>
+          <tbody>
+            <tr>
+                <td align="left">
+                    <span class="NORMAL"><script>docW(parent.window.surv_info.td_enabledefaultoui + '&nbsp')</script></span>
+                    <input type="radio" name="oui_mode" id="default_en" checked class="RADIO_NORMAL">
+                </td>
+                <td class="SBLANK"></td>
+                <td align="left">
+                    <span class="NORMAL"><script>docW(parent.window.surv_info.td_defaultouides + '&nbsp' + '&nbsp')</script></span>
+                    <select id="default_desc" class="SELECT_NORMAL">
+                        <option value="3com">3com</option>
+                        <option value="cisco">cisco</option>
+                        <option value="veritel">veritel</option>
+                        <option value="pingtel">pingtel</option>
+                        <option value="siemens">siemens</option>
+                        <option value="necphilips">necphilips</option>
+                        <option value="huawei3com">huawei3com</option>
+                        <option value="avaya">avaya</option>
+                    </select>
+                </td>
+                <td class="SBLANK"></td>
+                <td>
+                    <span class="NORMAL"><script>docW(parent.window.surv_info.td_oui + '&nbsp')</script></span>
+                    <input size="8" maxlength="10" id="default_oui" name="default_oui" class="TEXT_ENABLE">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td align="left">
+                    <span class="NORMAL"><script>docW(parent.window.surv_info.td_enableCustomOui + '&nbsp')</script></span>
+                    <input type="radio" name="oui_mode" id="custom_en" class="RADIO_NORMAL">
+                </td>
+                <td class="SBLANK"></td>
+                <td>
+                    <span class="NORMAL"><script>docW(parent.window.surv_info.td_customouides + '&nbsp')</script></span>
+                    <input size="11" maxlength="10" id="custom_desc" name="custom_desc" class="TEXT_ENABLE">
+                </td>
+                <td class="SBLANK"></td>
+                <td>
+                    <span class="NORMAL"><script>docW(parent.window.surv_info.td_oui + '&nbsp')</script></span>
+                    <input size="8" maxlength="10" id="custom_oui" name="custom_oui" class="TEXT_ENABLE">
+                </td>
+                <td>
+                    <a class="BTN2">
+                        <input class="BTN_NORMAL_BTN FIX_W" type="button" id="btn_add" name="oui_add">
+                    </a>
+                </td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+      <form action="surveilOuiDel.cgi">
+        <table class="BORDER">
+          <tbody>
+            <tr class="TABLE_HEAD">
+              <script>
+                docW(
+                  '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.surv_info.td_ordernumber +'</span></td>'+
+                  '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.surv_info.td_ouides +'</span></td>'+
+                  '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.surv_info.td_oui +'</span></td>'+
+                  '<td class="TD_FIRST_COL"><span class="NORMAL">'+ parent.window.vlan_common_info.btn_del +'</span></td>'
+                )
+              </script>
+            </tr>
+            <script type="text/javascript">
+              for (var i = 0; i < surveilCnt; i++) {
+                docW("<tr>"),
+                docW("<td><span class='NORMAL'>" + (i + 1) + "</span></td>"),
+                docW("<td><span class='NORMAL'>" + surveilinfo_ds.oui_info[i].desc + "</span></td>"),
+                docW("<td><span class='NORMAL'>" + surveilinfo_ds.oui_info[i].oui + "</span></td>"),
+                docW("<td><input class='CHKBOX_NORMAL' type=checkbox name=oui_"+ i +" id=oui_" + i + "></td>"),
+                docW("</tr>")
+              }
+            </script>
+          </script>
+          </tbody>
+        </table>
+        <table class="BTN_WRAPPER" align="center">
+          <tbody><tr>
+            <td class="BTN_WRAPPER"><a class="BTN"><input type="button" id="btn_del" name="del" class="BTN_NORMAL_BTN"></a></td>
+            <td class="SBLANK"></td>
+            </tr></tbody>
+        </table>
+      </form>
+      <table width="100%">
+        <tbody>
+          <tr>
+            <td class="BOTTOM_LINE"></td>
+          </tr>
+        </tbody>
+      </table>
+      <table width="100%">
+        <tbody>
+          <tr>
+            <td align="left"><span class="BOLDER"><script>docW(parent.window.str_info.spn_attention)</script></span></td>
+          </tr>
+          <tr>
+            <td align="left"><span class="NORMAL"><script>docW(parent.window.surv_info.spn_note)</script></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </fieldset>
+</div>
+</body>
+</html>

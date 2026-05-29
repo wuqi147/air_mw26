@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style>
+.POSUP{
+    transform: scale(1, 1) translate(0%, 10%);
+    position: relative;
+}
+.POSDOWN{
+    transform: scale(1, 1) translate(0%, 0%);
+    position: relative;
+}
+span.NORMAL {
+    font-size: 10%;
+    font-family: "Arial";
+    width: 100%;
+}
+td.NUMUP {
+    color: <!--#portNumFont-->; /* Port number font color */
+    font-size: 15px;
+    font-family: Arial;
+    width: 1%;
+    transform: translate(0%, 10%);
+}
+td.NUMDWN {
+    color: <!--#portNumFont-->; /* Port number font color */
+    font-size: 15px;
+    font-family: Arial;
+    width: 1%;
+    transform: translate(0%, 0%);
+}
+.BSP {
+    width: 1%;
+}
+</style>
+<!--#top_led-->
+<script>
+var ledImg_up = new Array();
+ledImg_up[0] = new Image();
+ledImg_up[0].src = "./copper_up_dis.png";
+ledImg_up[1] = new Image();
+ledImg_up[1].src = "./copper_up_high.png";
+ledImg_up[2] = new Image();
+ledImg_up[2].src = "./copper_up_high_loop.png";
+ledImg_up[3] = new Image();
+ledImg_up[3].src = "./copper_up_low.png";
+ledImg_up[4] = new Image();
+ledImg_up[4].src = "./copper_up_low_loop.png";
+ledImg_up[5] = new Image();
+ledImg_up[5].src = "./copper_up_poe.png";
+ledImg_up[6] = new Image();
+ledImg_up[6].src = "./copper_up_block.png";
+var ledImg_dwn = new Array();
+ledImg_dwn[0] = new Image();
+ledImg_dwn[0].src = "./copper_dwn_dis.png";
+ledImg_dwn[1] = new Image();
+ledImg_dwn[1].src = "./copper_dwn_high.png";
+ledImg_dwn[2] = new Image();
+ledImg_dwn[2].src = "./copper_dwn_high_loop.png";
+ledImg_dwn[3] = new Image();
+ledImg_dwn[3].src = "./copper_dwn_low.png";
+ledImg_dwn[4] = new Image();
+ledImg_dwn[4].src = "./copper_dwn_low_loop.png";
+ledImg_dwn[5] = new Image();
+ledImg_dwn[5].src = "./copper_dwn_poe.png";
+ledImg_dwn[6] = new Image();
+ledImg_dwn[6].src = "./copper_dwn_block.png";
+var sfp_up = new Array();
+sfp_up[0] = new Image();
+sfp_up[0].src = "./sfp_up_dis.png";
+sfp_up[1] = new Image();
+sfp_up[1].src = "./sfp_up_high.png";
+sfp_up[2] = new Image();
+sfp_up[2].src = "./sfp_up_high_loop.png";
+sfp_up[3] = new Image();
+sfp_up[3].src = "./sfp_up_low.png";
+sfp_up[4] = new Image();
+sfp_up[4].src = "./sfp_up_low_loop.png";
+sfp_up[5] = new Image();
+sfp_up[5].src = "./sfp_up_poe.png";
+sfp_up[6] = new Image();
+sfp_up[6].src = "./sfp_up_block.png";
+var sfp_dwn = new Array();
+sfp_dwn[0] = new Image();
+sfp_dwn[0].src = "./sfp_dwn_dis.png";
+sfp_dwn[1] = new Image();
+sfp_dwn[1].src = "./sfp_dwn_high.png";
+sfp_dwn[2] = new Image();
+sfp_dwn[2].src = "./sfp_dwn_high_loop.png";
+sfp_dwn[3] = new Image();
+sfp_dwn[3].src = "./sfp_dwn_low.png";
+sfp_dwn[4] = new Image();
+sfp_dwn[4].src = "./sfp_dwn_low_loop.png";
+sfp_dwn[5] = new Image();
+sfp_dwn[5].src = "./sfp_dwn_poe.png";
+sfp_dwn[6] = new Image();
+sfp_dwn[6].src = "./sfp_dwn_block.png";
+var curXml;
+const HTML_SEND_COMPLETE = 4;
+const HTML_STATUS_OK = 200;
+var IS_READY = 1;
+var xmlWorker = null;
+var workerParams = {
+    timerInterval: 1500,
+    doUpgrade: parent.window.doUpgarde
+};
+function $id(a)
+{
+    return document.getElementById(a);
+}
+function normal_timer()
+{
+    xmlSend();
+    setInterval(xmlSend, 1500);
+}
+function xmlSend()
+{
+    if(null == curXml)
+    {
+        curXml = parent.getXMLObject();
+    }
+    if(null != curXml && 1 == IS_READY && parent.window.doUpgarde == false)
+    {
+        curXml.onreadystatechange = postXMLRsp;
+        curXml.open("GET", "/topLed.xml", true);
+        curXml.send(null);
+        IS_READY = 0;
+    }
+}
+function postXMLRsp()
+{
+    var xmlRspData = {
+    data: {
+        readyState: curXml.readyState,
+        status: curXml.status,
+        responseText: curXml.responseText
+    }};
+    loadStatus(xmlRspData);
+}
+function loadStatus(event)
+{
+    var ledState = 0;
+    var idx = 0;
+    var img = 0;
+    var xmlRsp = event.data;
+
+    if(HTML_SEND_COMPLETE == xmlRsp.readyState)
+    {
+        if(HTML_STATUS_OK == xmlRsp.status)
+        {
+            ledState = xmlRsp.responseText.split(",");
+
+            for(i = 0; i < port_up_row.length; i++)
+            {
+                idx = Number(port_up_row[i]) < 100 ? Number(port_up_row[i]) : Number(port_up_row[i]) - 100;
+                if(0 != Number(port_up_row[i]))
+                {
+                    if(100 < Number(port_up_row[i]))
+                    {
+                        img = (ledState[idx - 1] < 100) ? 0 : ledState[idx - 1] - 100;
+                        $id("up" + Number(port_up_row[i])).src = sfp_dwn[img].src;
+                    }
+                    else
+                    {
+                        img = (ledState[idx - 1] < 100) ? ledState[idx - 1] : 0;
+                        $id("up" + Number(port_up_row[i])).src = ledImg_up[img].src;
+                    }
+                }
+            }
+            for(i = 0; i < port_down_row.length; i++)
+            {
+                idx = Number(port_down_row[i]) < 100 ? Number(port_down_row[i]) : Number(port_down_row[i]) - 100;
+                if(0 != Number(port_down_row[i]))
+                {
+                    if(100 < Number(port_down_row[i]))
+                    {
+                        img = (ledState[idx - 1] < 100) ? 0 : ledState[idx - 1] - 100;
+                        $id("dwn" + Number(port_down_row[i])).src = sfp_up[img].src;
+                    }
+                    else
+                    {
+                        img = (ledState[idx - 1] < 100) ? ledState[idx - 1] : 0;
+                        $id("dwn" + Number(port_down_row[i])).src = ledImg_dwn[img].src;
+                    }
+                }
+            }
+        }
+        IS_READY = 1;
+    }
+}
+function checkUpgradeStatus()
+{
+    if (workerParams.doUpgrade !== parent.window.doUpgarde)
+    {
+        workerParams.doUpgrade = parent.window.doUpgarde;
+    }
+    if (null !== xmlWorker)
+    {
+        xmlWorker.postMessage(workerParams);
+    }
+}
+function port_led_state_init()
+{
+    var i = 0;
+    var wd = (100 - (3 * port_down_row.length)) / 2;
+    var tbl_led = $id("tbl_led"), led_l = "";
+
+    if(0 != port_up_row.length)
+    {
+        led_l += "<tr><td width='" + wd + "%'></td>";
+        for(i = 0; i < port_up_row.length; i++)
+        {
+            if(0 == Number(port_up_row[i]))
+            {
+                led_l += "<td class='BSP'></td>";
+            }
+            else
+            {
+                led_l += "<td class='NUMUP' align='center'>" + (Number(port_up_row[i]) > 100 ? Number(port_up_row[i]) - 100 : Number(port_up_row[i])) + "</td>";
+            }
+        }
+        led_l += "<td width='" + wd + "%'></td></tr>";
+
+        led_l += "<tr><td width='" + wd + "%'></td>";
+        for(i = 0; i < port_up_row.length; i++)
+        {
+            led_l += "<td>";
+            if(0 == Number(port_up_row[i]))
+            {
+                led_l += "<img id='up" + Number(port_up_row[i]) + "' class='POSUP' src=''>";
+            }
+            else
+            {
+                led_l += "<img id='up" + Number(port_up_row[i]) + "' class='POSUP' src='" + ledImg_up[0].src +"'>";
+            }
+            led_l += "</td>";
+        }
+        led_l += "<td width='" + wd + "%'></td></tr>";
+    }
+    else
+    {
+        led_l += "<tr>&nbsp;</tr>";
+    }
+
+    led_l += "<tr><td width='" + wd + "%'></td>";
+    for(i = 0; i < port_down_row.length; i++)
+    {
+        led_l += "<td>";
+        if(0 == Number(port_down_row[i]))
+        {
+            led_l += "<img id='dwn" + Number(port_down_row[i]) + "' class='POSDOWN' src=''>";
+        }
+        else
+        {
+            led_l += "<img id='dwn" + Number(port_down_row[i]) + "' class='POSDOWN' src='" + ledImg_dwn[0].src + "'>";
+        }
+        led_l += "</td>";
+    }
+    led_l += "<td width='" + wd + "%'></td></tr>";
+
+    led_l += "<tr><td width='" + wd + "%'></td>";
+    for(i = 0; i < port_down_row.length; i++)
+    {
+        if(0 == Number(port_down_row[i]))
+        {
+            led_l += "<td class='BSP'></td>";
+        }
+        else
+        {
+            led_l += "<td class='NUMDWN' align='center'>" + (Number(port_down_row[i]) > 100 ? Number(port_down_row[i]) - 100 : Number(port_down_row[i])) + "</td>";
+        }
+    }
+    led_l += "<td width='" + wd + "%'></td></tr>";
+    tbl_led.innerHTML = led_l;
+
+    if(window.Worker)
+    {
+        xmlWorker = new Worker("timerworker.js");
+        xmlWorker.postMessage(workerParams);
+        xmlWorker.onmessage = loadStatus;
+        setInterval(checkUpgradeStatus, 1500);
+    }
+    else
+    {
+        normal_timer();
+    }
+}
+window.onload = () => {
+    port_led_state_init();
+};
+</script>
+</head>
+<body marginwidth="0" marginheight="0">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tbody id="tbl_led"></tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,47 @@
+USER_SECTIONS .dmem_pdmabuffer, .dmem_debugbuffer
+
+DEFINE SRAM_BASE_ADDR    0x80000000
+DEFINE STACK_BOTTOM_ADDR 0x8000b000
+DEFINE STACK_SIZE        0x2000     // reserved 8K for init stack
+DEFINE STACK_TOP_ADDR    (STACK_BOTTOM_ADDR-STACK_SIZE)
+DEFINE MAX_SRAM_SIZE     (STACK_BOTTOM_ADDR-SRAM_BASE_ADDR-STACK_SIZE)
+DEFINE FLASH_WRITE_SIZE  0x1000     // reserved 4K(0x8000b000~0x8000c000) for spi driver code
+
+DEFINE DMEM_SIZE         0x10000    // dmem size is 64k
+DEFINE PDMA_BASE_ADDR    (STACK_BOTTOM_ADDR+FLASH_WRITE_SIZE)
+DEFINE PDMA_MAX_SIZE     (SRAM_BASE_ADDR+DMEM_SIZE-PDMA_BASE_ADDR)
+
+FLASH 0x20000000
+{
+	EXEC 0x20000000
+	{
+		* (+ISR)
+		* EXCLUDE_FILE(*spi_nor_entry.o *spi_controller.o *flash_util.o)(+RO)
+	}
+	SRAM SRAM_BASE_ADDR MAX_SRAM_SIZE
+	{
+		LOADADDR NEXT __data_lmastart
+		ADDR NEXT __data_start
+		* (+RW,+ZI)
+		STACK = STACK_BOTTOM_ADDR
+	}
+
+	SRAM_code_flashwriter STACK_BOTTOM_ADDR FLASH_WRITE_SIZE
+	{
+		LOADADDR NEXT __dmemimg_lmastart
+		ADDR NEXT __dmemimg_vmastart
+		*spi_nor_entry.o KEEP(+RO)
+		*spi_controller.o KEEP(+RO)
+		*flash_util.o KEEP(+RO)
+		ADDR __dmemimg_vmaend
+		. = ALIGN(4)
+		* KEEP(.dmem_debugbuffer | NOLOAD)
+	}
+
+	PDMA_buffer PDMA_BASE_ADDR PDMA_MAX_SIZE
+	{
+		ADDR NEXT __pdmabuffer_vmastart
+		* KEEP(.dmem_pdmabuffer | NOLOAD)
+		ADDR __pdmabuffer_vmaend
+	}
+}

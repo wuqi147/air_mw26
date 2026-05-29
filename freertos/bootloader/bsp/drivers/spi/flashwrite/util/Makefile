@@ -1,0 +1,1 @@
+obj-y += flash_util.o

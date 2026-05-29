@@ -1,0 +1,41 @@
+dbg set hal warn=on
+init start sdk unit=0 low-level
+perif set gpio data-direction pin-number=0 direction=output
+perif set gpio data-direction pin-number=4 direction=output
+perif set gpio data-direction pin-number=9 direction=input
+perif set gpio data-direction pin-number=11 direction=input
+perif set gpio output-data pin-number=4 data=low
+init add sdk-port unit=0 port=1  max-speed=1000m type=xsgmii xsgmii-id=3 pkg-id=6
+init add sdk-port unit=0 port=2  max-speed=1000m type=xsgmii xsgmii-id=3 pkg-id=7
+init add sdk-port unit=0 port=3  max-speed=1000m type=xsgmii xsgmii-id=3 pkg-id=4
+init add sdk-port unit=0 port=4  max-speed=1000m type=xsgmii xsgmii-id=3 pkg-id=5
+init add sdk-port unit=0 port=5  max-speed=1000m type=xsgmii xsgmii-id=4 pkg-id=0
+init add sdk-port unit=0 port=6  max-speed=1000m type=xsgmii xsgmii-id=4 pkg-id=1
+init add sdk-port unit=0 port=7  max-speed=1000m type=xsgmii xsgmii-id=4 pkg-id=2
+init add sdk-port unit=0 port=8  max-speed=1000m type=xsgmii xsgmii-id=4 pkg-id=3
+init add sdk-port unit=0 port=9  max-speed=1000m type=baset pkg-id=6
+init add sdk-port unit=0 port=10 max-speed=1000m type=baset pkg-id=7
+init add sdk-port unit=0 port=11 max-speed=1000m type=baset pkg-id=4
+init add sdk-port unit=0 port=12 max-speed=1000m type=baset pkg-id=5
+init add sdk-port unit=0 port=13 max-speed=1000m type=baset pkg-id=0
+init add sdk-port unit=0 port=14 max-speed=1000m type=baset pkg-id=1
+init add sdk-port unit=0 port=15 max-speed=1000m type=baset pkg-id=2
+init add sdk-port unit=0 port=16 max-speed=1000m type=baset pkg-id=3
+init add sdk-port unit=0 port=17 max-speed=1000m type=xsgmii xsgmii-id=0 pkg-id=6
+init add sdk-port unit=0 port=18 max-speed=1000m type=xsgmii xsgmii-id=0 pkg-id=7
+init add sdk-port unit=0 port=19 max-speed=1000m type=xsgmii xsgmii-id=0 pkg-id=4
+init add sdk-port unit=0 port=20 max-speed=1000m type=xsgmii xsgmii-id=0 pkg-id=5
+init add sdk-port unit=0 port=21 max-speed=1000m type=xsgmii xsgmii-id=1 pkg-id=0
+init add sdk-port unit=0 port=22 max-speed=1000m type=xsgmii xsgmii-id=1 pkg-id=1
+init add sdk-port unit=0 port=23 max-speed=1000m type=xsgmii xsgmii-id=1 pkg-id=2
+init add sdk-port unit=0 port=24 max-speed=1000m type=xsgmii xsgmii-id=1 pkg-id=3
+init add sdk-port unit=0 port=25 max-speed=1000m type=xsgmii xsgmii-id=2 pkg-id=0 ext-cpu combo-port
+init add sdk-port unit=0 port=26 max-speed=1000m type=xsgmii xsgmii-id=2 pkg-id=1 combo-port
+init add sdk-port unit=0 port=27 max-speed=1000m type=xsgmii xsgmii-id=2 pkg-id=2 combo-port
+init add sdk-port unit=0 port=28 max-speed=1000m type=xsgmii xsgmii-id=2 pkg-id=3 combo-port
+init apply sdk-port unit=0
+init start sdk unit=0 task-rsrc
+init start sdk unit=0 module
+init start sdk unit=0 task
+perif set gpio output-data pin-number=4 data=high
+port set an-mode portlist=25 mode=disable
