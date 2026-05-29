@@ -20,6 +20,7 @@ CFLAGS += -I$(OS_PATH)/kernel/include \
 
 ################################################################################
 compile:: $(TGT_OBJS_TOTAL)
+	$(TEST_PATH) $(AIR_SYSTEM_BUILD)/image || $(MKDIR) $(AIR_SYSTEM_BUILD)/image
 	$(AR) -cr $(AIR_SYSTEM_BUILD)/image/$(ARCHIVE_NAME).a $(TGT_OBJS_TOTAL) $(HW_UTIL_LIB)
 
 $(AIR_SYSTEM_BUILD)/%.o: ../%.c

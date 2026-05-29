@@ -2,7 +2,7 @@ export # export all symbol
 ################################################################################
 # toolchain position
 ################################################################################
-CROSS_COMPILE_PATH := /mtkeda/airoha/enb/toolchain/andes/nds32le-elf-mculib-v3j/bin/
+CROSS_COMPILE_PATH := $(HOME)/nds32le-elf-mculib-v3j/bin/
 
 ################################################################################
 # configure compile flags

@@ -1,5 +1,5 @@
 ifneq ($(CONFIG_NDS32),)
-CROSS_COMPILE_PATH  ?= /mtkeda/airoha/enb/toolchain/andes/nds32le-elf-mculib-v3j/bin
+CROSS_COMPILE_PATH  ?= $(HOME)/nds32le-elf-mculib-v3j/bin
 CROSS_COMPILE       := $(CROSS_COMPILE_PATH)/nds32le-elf-
 PATH                := $(CROSS_COMPILE_PATH):$(PATH)
 CC                  = $(CROSS_COMPILE)gcc

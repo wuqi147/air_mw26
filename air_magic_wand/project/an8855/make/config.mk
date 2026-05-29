@@ -45,7 +45,7 @@ AIR_SUPPORT_SFP_DDM                     = ENABLED
 AIR_SUPPORT_MQTTD                       = DISABLED
 AIR_SUPPORT_MQTTD_STARTONBOOT           = DISABLED
 # CABLE DIAG
-AIR_SUPPORT_CABLE_DIAG                  = DISABLED
+AIR_SUPPORT_CABLE_DIAG                  = ENABLED
 # SNTP
 AIR_SUPPORT_SNTP                        = ENABLED
 # Second NETIF

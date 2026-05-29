@@ -1,5 +1,5 @@
 ################################################################################
-CROSS_COMPILE_PATH  := /mtkeda/airoha/enb/toolchain/andes/nds32le-elf-mculib-v3j/bin/
+CROSS_COMPILE_PATH  := $(HOME)/nds32le-elf-mculib-v3j/bin/
 CROSS_COMPILE       := nds32le-elf-
 
 CC                  := $(CROSS_COMPILE)gcc
