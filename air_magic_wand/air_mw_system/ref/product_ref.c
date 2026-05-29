@@ -58,109 +58,48 @@
 /* GLOBAL VARIABLE DECLARATIONS
  */
 static const MW_PRODUCT_ID_INFO_T _mw_product_id_array[] = {
-    /* Description                      Product_ID */
-    {"EN8851C_8P",                    MW_PRODUCT_ID_EN8851C_8P},
-    {"EN8851C_RFB",                   MW_PRODUCT_ID_EN8851C_RFB},
-#ifdef AIR_SUPPORT_POE
-    {"EN8851C_RFB_AN8502_4P",         MW_PRODUCT_ID_EN8851C_RFB_AN8502_4P},
-    {"EN8851C_RFB_AN8503_8P",         MW_PRODUCT_ID_EN8851C_RFB_AN8503_8P},
+    /* Description                    Product_ID */
+    {"AN8855M_5P",                    MW_PRODUCT_ID_AN8855M_5P},
+    {"AN8855M_5P_1SFP",               MW_PRODUCT_ID_AN8855M_5P_1SFP},
+    {"AN8855M_5P_1SFP_A",             MW_PRODUCT_ID_AN8855M_5P_1SFP_A},
+#ifdef AIR_EN_AN8801SB_PHY
+    {"AN8855M_5P_AN8801SB_1P",        MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P},
 #endif
-    {"EN8851C_8P_2SFP",               MW_PRODUCT_ID_EN8851C_8P_2SFP},
-    {"EN8851C_8P_2SFP_L",             MW_PRODUCT_ID_EN8851C_8P_2SFP_L},
-
-    {"EN8853C_24P",                   MW_PRODUCT_ID_EN8853C_24P},
-    {"EN8853C_RFB",                   MW_PRODUCT_ID_EN8853C_RFB},
-    {"EN8853C_AN8808Q_RFB",           MW_PRODUCT_ID_EN8853C_AN8808Q_RFB},
-    {"EN8853C_24P_EN8804_4P_4SFP",    MW_PRODUCT_ID_EN8853C_24P_EN8804_4P_4SFP},
-    {"EN8853C_24P_1SFP",              MW_PRODUCT_ID_EN8853C_24P_1SFP},
-    {"EN8853C_8P_EN8804_4SFP",        MW_PRODUCT_ID_EN8853C_8P_EN8804_4SFP},
-    {"EN8853C_8P_EN8804_8SFP",        MW_PRODUCT_ID_EN8853C_8P_EN8804_8SFP},
-    {"EN8853C_8P_EN8804_12SFP",       MW_PRODUCT_ID_EN8853C_8P_EN8804_12SFP},
-    {"EN8853C_8P_EN8804_16SFP",       MW_PRODUCT_ID_EN8853C_8P_EN8804_16SFP},
-    {"EN8853C_16P_2SFP",              MW_PRODUCT_ID_EN8853C_16P_2SFP},
+#ifdef AIR_SUPPORT_POE
+    {"AN8855M_5P_AN8502_4P",          MW_PRODUCT_ID_AN8855M_5P_AN8502_4P},
+#endif
 };
 
 static const MW_LIGHTS_ARRAY_T _mw_product_lights_array[] = {
     {
-        MW_PRODUCT_ID_EN8851C_8P,
+        MW_PRODUCT_ID_AN8855M_5P,
         "",
-        "1,2,3,4,5,6,7,8"
+        "1,2,3,4,5"
     },
     {
-        MW_PRODUCT_ID_EN8851C_RFB,
+        MW_PRODUCT_ID_AN8855M_5P_1SFP,
         "",
-        "1,2,3,4,5,6,7,8,0,0,109,110"
+        "1,2,3,4,5,0,106"
     },
     {
-        MW_PRODUCT_ID_EN8851C_RFB_AN8502_4P,
+        MW_PRODUCT_ID_AN8855M_5P_1SFP_A,
         "",
-        "1,2,3,4,5,6,7,8,0,0,109,110"
+        "1,2,3,4,5,0,106"
     },
+#ifdef AIR_EN_AN8801SB_PHY
     {
-        MW_PRODUCT_ID_EN8851C_RFB_AN8503_8P,
+        MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P,
         "",
-        "1,2,3,4,5,6,7,8,0,0,109,110"
+        "1,2,3,4,5,6"
     },
+#endif
+#ifdef AIR_SUPPORT_POE
     {
-        MW_PRODUCT_ID_EN8851C_8P_2SFP,
+        MW_PRODUCT_ID_AN8855M_5P_AN8502_4P,
         "",
-        "1,2,3,4,5,6,7,8,0,0,109,110"
+        "1,2,3,4,5"
     },
-    {
-        MW_PRODUCT_ID_EN8851C_8P_2SFP_L,
-        "0,0,0,0,7,5,3,1",
-        "110,109,0,0,8,6,4,2"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_24P,
-        "1,3,5,7,0,9,11,13,15,0,17,19,21,23",
-        "2,4,6,8,0,10,12,14,16,0,18,20,22,24"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_RFB,
-        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,25,27,0,0,125,127",
-        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,26,28,0,0,126,128"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_AN8808Q_RFB,
-        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,25,27,0,0,125,127",
-        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,26,28,0,0,126,128"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_24P_EN8804_4P_4SFP,
-        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,25,27,0,0,125,127",
-        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,26,28,0,0,126,128"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_24P_1SFP,
-        "1,3,5,7,0,9,11,13,15,0,17,19,21,23,0,0,0",
-        "2,4,6,8,0,10,12,14,16,0,18,20,22,24,0,0,125"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_8P_EN8804_4SFP,
-        "1,3,5,7,0,0,109,111",
-        "2,4,6,8,0,0,110,112"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_8P_EN8804_8SFP,
-        "1,3,5,7,0,0,109,111,113,115",
-        "2,4,6,8,0,0,110,112,114,116"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_8P_EN8804_12SFP,
-        "1,3,5,7,0,0,109,111,113,115,0,117,119",
-        "2,4,6,8,0,0,110,112,114,116,0,118,120"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_8P_EN8804_16SFP,
-        "1,3,5,7,0,0,109,111,113,115,0,117,119,121,123",
-        "2,4,6,8,0,0,110,112,114,116,0,118,120,122,124"
-    },
-    {
-        MW_PRODUCT_ID_EN8853C_16P_2SFP,
-        "1,3,5,7,0,9,11,13,15,0,0,0,0",
-        "2,4,6,8,0,10,12,14,16,0,0,117,118"
-    },
+#endif
 };
 
 /* LOCAL SUBPROGRAM DECLARATIONS

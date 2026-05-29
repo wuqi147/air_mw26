@@ -46,7 +46,7 @@
 #include "sfp_sff_data.h"
 #include "sfp_pin_sda.h"
 #include "sfp_pin_io.h"
-#include "mw_utils.h"
+#include "product_ref.h"
 
 /* NAMING CONSTANT DECLARATIONS
  */
@@ -198,13 +198,11 @@ static const SFP_CONFIG_WHITELIST_SETTINGS_T _sfp_config_whitelist_settings_arra
 /* The array for the SFP SDA PIN driver */
 static const SFP_PIN_SDA_DRIVER_FUNC_T _sfp_pin_sda_driver[] = {
     {
-        /* EN8851C Default
-         * EN8853C_EN8804 Default
-         */
+        /* AN8855 Default */
         sfp_pin_sda_driver_init0,
-        sfp_pin_sda_driver_switchCtrlToPort0,
-        sfp_pin_sda_driver_write0,
-        sfp_pin_sda_driver_read0,
+        sfp_pin_sda_driver_switchCtrlToPort1,
+        sfp_pin_sda_driver_write1,
+        sfp_pin_sda_driver_read1,
         sfp_pin_sda_driver_writeC22ByPort0,
         sfp_pin_sda_driver_readC22ByPort0,
         sfp_pin_sda_driver_writeC45ByPort0,
@@ -215,47 +213,26 @@ static const SFP_PIN_SDA_DRIVER_FUNC_T _sfp_pin_sda_driver[] = {
 /* The array for the SFP IO PIN driver */
 static const SFP_PIN_IO_DRIVER_FUNC_T _sfp_pin_io_driver[] = {
     {
-        /* EN8851C Default */
+        /* AN8855 Default */
         sfp_pin_io_driver_init0,
         sfp_pin_io_driver_switchCtrlToPort0,
         sfp_pin_io_driver_getPIONum0,
         sfp_pin_io_driver_setValue0,
         sfp_pin_io_driver_getValue0
     },
-
-    {
-        /* EN8853C_EN8804 Default */
-        sfp_pin_io_driver_init1,
-        sfp_pin_io_driver_switchCtrlToPort0,
-        sfp_pin_io_driver_getPIONum0,
-        sfp_pin_io_driver_setValue1,
-        sfp_pin_io_driver_getValue1
-    },
 };
 
 /* The array for the HW parmeters based on the HW schematics. */
 static const SFP_HW_PARAM_T _sfp_hw_param[] = {
     {
-        /* EN8851C Default */
-        0x01, /* I2C channel */
-        0x70, /* PCA9542A I2C address */
+        /* AN8855 Default */
+        0x0, /* I2C channel */
+        0x0,
         {
             0x0,
             0x0,
             0x0,
             0x0
-        }
-    },
-
-    {
-        /* EN8853C_EN8804 Default */
-        0x0, /* I2C channel */
-        0x70, /* PCA954XA I2C address */
-        {
-            0x21, /* PCA9535 I2C address */
-            0x06, /* PCA9535 CONTROL address */
-            0x0, /* PCA9535 INPUT address */
-            0x02 /* PCA9535 OUTPUT address */
         }
     },
 };
@@ -266,94 +243,21 @@ static const SFP_HW_PARAM_T _sfp_hw_param[] = {
  * sfp_pin_customer.c.
  */
 
-/* EN8853C RFB example */
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8853c_rfb[] = {
-/*   PORT_NUM  PORT_TYPE                    PORT_DRIVER               MOD_ABS  Tx_Disable  Rx_LOS  Tx_Fault  MUX_CHANNEL  SDA_PIN_Driver            IO_PIN_Driver            Addr */
-    {25,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  2,       3,          1,      0,        0x4,         &_sfp_pin_sda_driver[0],  &_sfp_pin_io_driver[1],  &_sfp_hw_param[1]},
-    {26,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  6,       7,          5,      4,        0x5,         &_sfp_pin_sda_driver[0],  &_sfp_pin_io_driver[1],  &_sfp_hw_param[1]},
-    {27,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  14,      15,         13,     12,       0x6,         &_sfp_pin_sda_driver[0],  &_sfp_pin_io_driver[1],  &_sfp_hw_param[1]},
-    {28,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  10,      11,         9,      8,        0x7,         &_sfp_pin_sda_driver[0],  &_sfp_pin_io_driver[1],  &_sfp_hw_param[1]},
+/* AN8855_5P_1SFP example */
+static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_an8855_5p_1sfp[] = {
+/*   PORT_NUM  PORT_TYPE                  PORT_DRIVER               MOD_ABS  Tx_Disable               Rx_LOS  Tx_Fault                 MUX_CHANNEL                  SDA_PIN_Driver            IO_PIN_Driver            Addr */
+    {6,        SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  8,       SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_SWRXLOSPIN(6),   SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  &_sfp_pin_sda_driver[0],  &_sfp_pin_io_driver[0],  &_sfp_hw_param[0]},
 };
 
-/* EN8851C RFB example */
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8851c_rfb[] = {
-/*   PORT_NUM  PORT_TYPE                  PORT_DRIVER               MOD_ABS  Tx_Disable  Rx_LOS  Tx_Fault                 MUX_CHANNEL  SDA_PIN_Driver            IO_PIN_Driver            Addr */
-    {9,        SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  11,      13,         10,     SFP_PIN_PIONUM_INVALID,  0x4,         &_sfp_pin_sda_driver[0],  &_sfp_pin_io_driver[0],  &_sfp_hw_param[0]},
-    {10,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  15,      16,         17,     SFP_PIN_PIONUM_INVALID,  0x5,         &_sfp_pin_sda_driver[0],  &_sfp_pin_io_driver[0],  &_sfp_hw_param[0]},
-};
-
-/* EN8853C RFB customer example */
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_array_customer[] = {
-/*   PORT_NUM  PORT_TYPE                    PORT_DRIVER                MOD_ABS  Tx_Disable  Rx_LOS  Tx_Fault  MUX_CHANNEL  SDA_PIN_Driver  IO_PIN_Driver  Addr */
-    {25,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_CUSTOMER,  2,       3,          1,      0,        0x4,         NULL,           NULL,             NULL},
-    {26,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_CUSTOMER,  6,       7,          5,      4,        0x5,         NULL,           NULL,             NULL},
-    {27,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_CUSTOMER,  14,      15,         13,     12,       0x6,         NULL,           NULL,             NULL},
-    {28,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_CUSTOMER,  10,      11,         9,      8,        0x7,         NULL,           NULL,             NULL},
-};
-
-/* EN8853C_24P_EN8804_4P_4SFP example (SFP SDA PINs are not connected to I2C) */
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8853c_24p_en8804_4p_4sfp[] = {
-/*   PORT_NUM  PORT_TYPE                    PORT_DRIVER               MOD_ABS                  Tx_Disable               Rx_LOS                   Tx_Fault                 MUX_CHANNEL                  SDA_PIN_Driver  IO_PIN_Driver  Addr */
-    {25,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,          &_sfp_hw_param[0]},
-    {26,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,          &_sfp_hw_param[0]},
-    {27,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,          &_sfp_hw_param[0]},
-    {28,       SFP_CONFIG_PORT_TYPE_COMBO,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,          &_sfp_hw_param[0]},
-};
-
-/* EN8853C_24P_1SFP example (SFP SDA PIN is not connected to I2C) */
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8853c_24p_1sfp[] = {
-/*   PORT_NUM  PORT_TYPE                  PORT_DRIVER               MOD_ABS                  Tx_Disable              Rx_LOS  Tx_Fault                 MUX_CHANNEL                  SDA_PIN_Driver  IO_PIN_Driver            Addr */
-    {25,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID, 17,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-};
-
-/* EN8851C_8P_2SFP example (SFP SDA PINs are not connected to I2C) */
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8851c_8p_2sfp[] = {
-/*   PORT_NUM  PORT_TYPE                  PORT_DRIVER               MOD_ABS                  Tx_Disable               Rx_LOS  Tx_Fault                 MUX_CHANNEL                  SDA_PIN_Driver  IO_PIN_Driver            Addr */
-    {9,        SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  13,                      10,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {10,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  16,                      17,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-};
-
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8853c_8p_4sfp[] = {
-/*   PORT_NUM  PORT_TYPE                  PORT_DRIVER               MOD_ABS                  Tx_Disable               Rx_LOS  Tx_Fault                 MUX_CHANNEL                  SDA_PIN_Driver  IO_PIN_Driver            Addr */
-    {9,        SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  13,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {10,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  15,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {11,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  16,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {12,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  17,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-};
-
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8853c_16p_2sfp[] = {
-/*   PORT_NUM  PORT_TYPE                  PORT_DRIVER               MOD_ABS      Tx_Disable      Rx_LOS  Tx_Fault                 MUX_CHANNEL                  SDA_PIN_Driver  IO_PIN_Driver            Addr */
-    {17,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  11,          13,             10,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {18,       SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  15,          16,             17,     SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-};
-
-static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_en8853c_8p_8sfp[] = {
-/*   PORT_NUM  PORT_TYPE                        PORT_DRIVER               MOD_ABS                  Tx_Disable               Rx_LOS                   Tx_Fault                 MUX_CHANNEL                  SDA_PIN_Driver  IO_PIN_Driver            Addr */
-    {9,        SFP_CONFIG_PORT_TYPE_SFP,        SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  13,                      SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {10,       SFP_CONFIG_PORT_TYPE_SFP,        SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  15,                      SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {11,       SFP_CONFIG_PORT_TYPE_SFP,        SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  16,                      SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {12,       SFP_CONFIG_PORT_TYPE_SFP,        SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  17,                      SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           &_sfp_pin_io_driver[0],  NULL},
-    {13,       SFP_CONFIG_PORT_TYPE_COMBO_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,                    NULL},
-    {14,       SFP_CONFIG_PORT_TYPE_COMBO_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,                    NULL},
-    {15,       SFP_CONFIG_PORT_TYPE_COMBO_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,                    NULL},
-    {16,       SFP_CONFIG_PORT_TYPE_COMBO_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_PIONUM_INVALID,  SFP_PIN_MUXCHANNEL_INVALID,  NULL,           NULL,                    NULL},
+/* AN8855_5P_1SFP adaption example */
+static const SFP_CONFIG_PORT_SETTINGS_T _sfp_config_port_settings_an8855_5p_1sfp_adaption[] = {
+/*   PORT_NUM  PORT_TYPE                  PORT_DRIVER               MOD_ABS                 Tx_Disable              Rx_LOS                  Tx_Fault                MUX_CHANNEL                 SDA_PIN_Driver           IO_PIN_Driver           Addr */
+    {6,        SFP_CONFIG_PORT_TYPE_SFP,  SFP_PORT_DRIVER_DEFAULT,  SFP_PIN_PIONUM_INVALID, SFP_PIN_PIONUM_INVALID, SFP_PIN_PIONUM_INVALID, SFP_PIN_PIONUM_INVALID, SFP_PIN_MUXCHANNEL_INVALID, NULL, NULL, NULL},
 };
 
 static const SFP_CONFIG_PORT_PRODUCT_ID_MAP_T _sfp_config_port_product_id_map[] = {
-    {MW_PRODUCT_ID_EN8851C_RFB, _sfp_config_port_settings_en8851c_rfb, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8851c_rfb, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8851C_RFB_AN8502_4P, _sfp_config_port_settings_en8851c_rfb, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8851c_rfb, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8851C_RFB_AN8503_8P, _sfp_config_port_settings_en8851c_rfb, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8851c_rfb, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8853C_RFB, _sfp_config_port_settings_en8853c_rfb, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8853c_rfb, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8853C_AN8808Q_RFB, _sfp_config_port_settings_en8853c_rfb, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8853c_rfb, SFP_CONFIG_PORT_SETTINGS_T)},
-
-    {MW_PRODUCT_ID_EN8851C_8P_2SFP, _sfp_config_port_settings_en8851c_8p_2sfp, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8851c_8p_2sfp, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8851C_8P_2SFP_L, _sfp_config_port_settings_en8851c_8p_2sfp, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8851c_8p_2sfp, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8853C_24P_EN8804_4P_4SFP, _sfp_config_port_settings_en8853c_24p_en8804_4p_4sfp, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8853c_24p_en8804_4p_4sfp, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8853C_24P_1SFP, _sfp_config_port_settings_en8853c_24p_1sfp, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8853c_24p_1sfp, SFP_CONFIG_PORT_SETTINGS_T)},
-
-    {MW_PRODUCT_ID_EN8853C_8P_EN8804_4SFP,   _sfp_config_port_settings_en8853c_8p_4sfp,  SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8853c_8p_4sfp, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8853C_8P_EN8804_8SFP,   _sfp_config_port_settings_en8853c_8p_8sfp,  SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8853c_8p_8sfp, SFP_CONFIG_PORT_SETTINGS_T)},
-    {MW_PRODUCT_ID_EN8853C_16P_2SFP,         _sfp_config_port_settings_en8853c_16p_2sfp, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_en8853c_16p_2sfp, SFP_CONFIG_PORT_SETTINGS_T)},
+    {MW_PRODUCT_ID_AN8855M_5P_1SFP, _sfp_config_port_settings_an8855_5p_1sfp, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_an8855_5p_1sfp, SFP_CONFIG_PORT_SETTINGS_T)},
+    {MW_PRODUCT_ID_AN8855M_5P_1SFP_A, _sfp_config_port_settings_an8855_5p_1sfp_adaption, SFP_UTIL_GETARRAYSIZE(_sfp_config_port_settings_an8855_5p_1sfp_adaption, SFP_CONFIG_PORT_SETTINGS_T)},
 };
 
 static const SFP_CONFIG_PORT_SETTINGS_T *_sfp_port_settings_array;
