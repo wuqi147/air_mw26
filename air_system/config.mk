@@ -31,7 +31,7 @@ BUILD_TYPE              := STATIC_LIB
 ################################################################################
 ENABLED_SWITCH_CHIPS    := en8851c an8855m an8858c
 ENABLED_PHY_CHIPS       := en8808 en8801s en8811h an8801sb an8804 an8808q an8811b
-ENABLED_POE_CHIPS       :=
+ENABLED_POE_CHIPS       := an8502 an8503 dh2184
 
 ################################################################################
 # Enable the following feature by set the value to "ENABLED"
@@ -81,6 +81,7 @@ export WORK_SPACE
 export BUILD_TYPE
 export ENABLED_SWITCH_CHIPS
 export ENABLED_PHY_CHIPS
+export ENABLED_POE_CHIPS
 export AIR_EN_DEBUG
 export AIR_EN_I2C_PHY
 export AIR_EN_LED_CLK_SYNC

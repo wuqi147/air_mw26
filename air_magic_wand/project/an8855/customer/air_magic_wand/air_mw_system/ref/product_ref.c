@@ -64,6 +64,7 @@ static const MW_PRODUCT_ID_INFO_T _mw_product_id_array[] = {
     {"AN8855M_5P_1SFP_A",             MW_PRODUCT_ID_AN8855M_5P_1SFP_A},
 #ifdef AIR_EN_AN8801SB_PHY
     {"AN8855M_5P_AN8801SB_1P",        MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P},
+    {"AN8855M_6P_4GE_2GE_POE",        MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE},
 #endif
 #ifdef AIR_SUPPORT_POE
     {"AN8855M_5P_AN8502_4P",          MW_PRODUCT_ID_AN8855M_5P_AN8502_4P},
@@ -98,6 +99,11 @@ static const MW_LIGHTS_ARRAY_T _mw_product_lights_array[] = {
         MW_PRODUCT_ID_AN8855M_5P_AN8502_4P,
         "",
         "1,2,3,4,5"
+    },
+    {
+        MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE,
+        "",
+        "1,2,3,4,5,6"
     },
 #endif
 };

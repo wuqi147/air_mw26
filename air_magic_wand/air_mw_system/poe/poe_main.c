@@ -1333,6 +1333,12 @@ _poe_app_hardwareReset(
     ptr_poeCfg = poe_config_getPoeCfg();
     if (NULL != ptr_poeCfg)
     {
+        if (MW_LED_GPIO_PIN_INVALID == ptr_poeCfg->poe_reset_pin)
+        {
+            _ptr_poe_control_block->hw_reset_done = TRUE;
+            return;
+        }
+
         for (i = 0; i < AIR_CFG_MAXIMUM_CHIPS_PER_SYSTEM; i++)
         {
             if (NULL == UNIT_INFO(_ptr_poe_control_block, i))
@@ -1374,6 +1380,10 @@ _poe_app_thread(
     do
     {
         rc = dbapi_dbisReady();
+        if (MW_E_OK != rc)
+        {
+            osapi_delay(POE_MON_POLLING_INTERVAL_MS);
+        }
     } while (MW_E_OK != rc);
 
     start_tick = osapi_sysTickGet();

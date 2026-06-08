@@ -94,5 +94,8 @@ endif
 ifeq ($(findstring an8503,$(ENABLED_POE_CHIPS)),an8503)
 COMPILED_POE_CHIPS       += an8503
 endif
+ifeq ($(findstring dh2184,$(ENABLED_POE_CHIPS)),dh2184)
+COMPILED_POE_CHIPS       += dh2184
+endif
 
 export COMPILED_SWITCH_CHIPS COMPILED_PHY_CHIPS COMPILED_POE_CHIPS

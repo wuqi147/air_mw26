@@ -55,6 +55,8 @@
 #include <poe_main.h>
 #include <poe_info.h>
 #include <poe_config_customer.h>
+#include <poe_db_relate.h>
+#include <air_poe.h>
 #include <air_perif.h>
 #include <air_gpio.h>
 #include <air_chipscu.h>
@@ -180,6 +182,7 @@ poe_maxLed_handler(
     static BOOL_T                max_led_off = FALSE, max_led_blink = FALSE, max_led_on = FALSE;
     UI8_T                        rc = AIR_E_OK;
     UI32_T                       power_limit = 0, data = 0;
+    UI16_T                       device_id = 0;
     POE_SYS_SUPPLY_T             supply = {0};
 
     ptr_poeCfg = poe_config_getPoeCfg();
@@ -187,11 +190,15 @@ poe_maxLed_handler(
     {
         if (FALSE == ptr_poe_control_block->max_led_solid_flag)
         {
-            rc = hal_poe_readReg(0, 0,
-                                 HAL_POE_PAGE_1,
-                                 POE_SYS_INIT_AND_CURR_OVERLOAD_EVENT,
-                                 HAL_POE_REG_LEN_1,
-                                 &data);
+            rc = air_poe_getDeviceInfo(0, 0, &device_id);
+            if ((AIR_E_OK == rc) && (POE_DEVICE_ID_DH2184 != device_id))
+            {
+                rc = hal_poe_readReg(0, 0,
+                                     HAL_POE_PAGE_1,
+                                     POE_SYS_INIT_AND_CURR_OVERLOAD_EVENT,
+                                     HAL_POE_REG_LEN_1,
+                                     &data);
+            }
             if (POE_PSE_CURR_OVERLOAD_EVENT == BITS_OFF_R(data,
                                                           POE_PSE_CURR_OVERLOAD_EVENT_OFFSET,
                                                           POE_PSE_CURR_OVERLOAD_EVENT_LEN))

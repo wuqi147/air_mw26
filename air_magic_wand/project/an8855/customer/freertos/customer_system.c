@@ -125,6 +125,7 @@ static const CUSTOMER_SYSTEM_INIT_FUNC_MAP_T _customer_system_init_funcs_map[]=
     {MW_PRODUCT_ID_AN8855M_5P_1SFP_A, _customer_system_init_an8855m_5p_1sfp, _customer_system_post_init_an8855m_5p_1sfp},
     {MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P, _customer_system_init_an8855m_5p_an8801sb_1p, _customer_system_post_init_an8855m_5p_an8801sb_1p},
     {MW_PRODUCT_ID_AN8855M_5P_AN8502_4P, _customer_system_init_an8855m_5p_an8801sb_1p, _customer_system_post_init_an8855m_5p_an8801sb_1p},
+    {MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE, _customer_system_init_an8855m_5p, _customer_system_post_init_an8855m_5p},
 };
 
 /*LOCAL SUBPROGRAM BODIES

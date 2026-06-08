@@ -345,6 +345,82 @@ static AIR_INIT_POE_PORT_MAP_T _poe_an8855m_5p_an8502_4p_port_map[] =
 };
 #endif /* AIR_EN_POE */
 
+#ifdef AIR_EN_AN8801SB_PHY
+static const SDK_CFG_T _customer_ref_cfg_an8855m_6p_4ge_2ge_poe[] =
+{
+/*
+ *  unit    AIR_CFG_TYPE_XXX                    param0  param1  value
+ *  ----    ----------------                    ------  ------  -----
+ */
+    {0, AIR_CFG_TYPE_FORCE_DEVICE_ID,           0,      0,   0x8855},
+    {0, AIR_CFG_TYPE_IFMON_ENABLE,              0,      0,     TRUE},
+    {0, AIR_CFG_TYPE_IFMON_THREAD_PRI,          0,      0,   MW_TASK_PRIORITY_IFMON},
+    {0, AIR_CFG_TYPE_IFMON_THREAD_STACK,        0,      0,      303},
+    {0, AIR_CFG_TYPE_PHY_ADDRESS,               1,      0,        0},
+    {0, AIR_CFG_TYPE_PHY_ADDRESS,               2,      0,        1},
+    {0, AIR_CFG_TYPE_PHY_ADDRESS,               3,      0,        2},
+    {0, AIR_CFG_TYPE_PHY_ADDRESS,               4,      0,        3},
+    {0, AIR_CFG_TYPE_PHY_ADDRESS,               5,      0,        4},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          1,      1,    0x786},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          2,      1,    0x786},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          3,      1,    0x786},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          4,      1,    0x786},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          5,      1,    0x786},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          1,      0,     0x61},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          2,      0,     0x61},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          3,      0,     0x61},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          4,      0,     0x61},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          5,      0,     0x61},
+    {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          1,      0,        0},
+    {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          2,      0,        0},
+    {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          3,      0,        0},
+    {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          4,      0,        0},
+    {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          5,      0,        0},
+    {0, AIR_CFG_TYPE_PHY_LED_COUNT,             0,      0,        2},
+    {0, AIR_CFG_TYPE_PHY_LED_TYPE,              0,      0,        0},
+    {0, AIR_CFG_TYPE_PHY_ADDRESS,               6,      0,       30},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          6,      0,    0x786},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          6,      1,     0x61},
+    {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          6,      0,        0},
+    {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,     13,      0,        1},
+    {0, AIR_CFG_TYPE_MDIO_ENABLE,               0,      0,        1},
+    {0, AIR_CFG_TYPE_SIF_LOCAL_CLOCK,           0,      0,        1},
+    {0, AIR_CFG_TYPE_LPDET_ETH_TYPE,            0,      0,   0x8070},
+};
+
+static AIR_INIT_PORT_MAP_T _ref_board_port_map_an8855m_6p_4ge_2ge_poe[] =
+{
+/*
+ * port    AIR_INIT_PORT_SPEED_T    AIR_INIT_PORT_TYPE_T    ...
+ * ----    ---------------------    --------------------
+ */
+    { 0,  AIR_INIT_PORT_TYPE_CPU, AIR_INIT_PORT_SPEED_1000M},
+    { 1,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 0}},
+    { 2,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 1}},
+    { 3,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 2}},
+    { 4,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 3}},
+    { 5,  AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,  .baset_port={4}},
+    { 6,  AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,  .xsgmii_port={0, 0, 0}},
+};
+
+#ifdef AIR_EN_POE
+static AIR_INIT_POE_DEVICE_MAP_T _poe_an8855m_6p_4ge_2ge_poe_device_map[] =
+{
+  /* unit,  device index,  i2c bus id, i2c address */
+    {0,     0,             0,          0x20},
+};
+
+static AIR_INIT_POE_PORT_MAP_T _poe_an8855m_6p_4ge_2ge_poe_port_map[] =
+{
+  /* unit,  air port,   type,   primary port,   secondary port */
+    {0, 1,  AIR_INIT_POE_PORT_TYPE_AF_AT,   .primary_port = {0, 0} },
+    {0, 2,  AIR_INIT_POE_PORT_TYPE_AF_AT,   .primary_port = {0, 1} },
+    {0, 3,  AIR_INIT_POE_PORT_TYPE_AF_AT,   .primary_port = {0, 2} },
+    {0, 4,  AIR_INIT_POE_PORT_TYPE_AF_AT,   .primary_port = {0, 3} }
+};
+#endif /* AIR_EN_POE */
+#endif /* AIR_EN_AN8801SB_PHY */
+
 
 static const MODULE_CFG_MAP_ITEM_T _customer_system_module_cfg_map[] =
 {
@@ -370,6 +446,12 @@ static const MODULE_CFG_MAP_ITEM_T _customer_system_module_cfg_map[] =
      _ref_board_port_map_an8855m_5p_an8502_4p, (sizeof(_ref_board_port_map_an8855m_5p_an8502_4p)/sizeof(AIR_INIT_PORT_MAP_T))
     },
 #endif /* AIR_EN_POE */
+#ifdef AIR_EN_AN8801SB_PHY
+    {MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE,
+     _customer_ref_cfg_an8855m_6p_4ge_2ge_poe, (sizeof(_customer_ref_cfg_an8855m_6p_4ge_2ge_poe)/sizeof(SDK_CFG_T)),
+     _ref_board_port_map_an8855m_6p_4ge_2ge_poe, (sizeof(_ref_board_port_map_an8855m_6p_4ge_2ge_poe)/sizeof(AIR_INIT_PORT_MAP_T))
+    },
+#endif /* AIR_EN_AN8801SB_PHY */
 };
 
 #ifdef AIR_EN_SFP_LED
@@ -405,6 +487,9 @@ static const CUSTOMER_I2C_BITBANG_CFG_T _i2c_bitbang_cfg[] =
     {MW_PRODUCT_ID_AN8855M_5P_1SFP, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
     {MW_PRODUCT_ID_AN8855M_5P_1SFP_A, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
     {MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
+#ifdef AIR_EN_POE
+    {MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
+#endif
 };
 #endif
 
@@ -414,6 +499,12 @@ static const POE_CONFIG_MAP_T _poe_config_map[] = {
     _poe_an8855m_5p_an8502_4p_device_map, (sizeof(_poe_an8855m_5p_an8502_4p_device_map) / sizeof(AIR_INIT_POE_DEVICE_MAP_T)),
     _poe_an8855m_5p_an8502_4p_port_map, (sizeof(_poe_an8855m_5p_an8502_4p_port_map) / sizeof(AIR_INIT_POE_PORT_MAP_T))
     },
+#ifdef AIR_EN_AN8801SB_PHY
+    {MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE,
+    _poe_an8855m_6p_4ge_2ge_poe_device_map, (sizeof(_poe_an8855m_6p_4ge_2ge_poe_device_map) / sizeof(AIR_INIT_POE_DEVICE_MAP_T)),
+    _poe_an8855m_6p_4ge_2ge_poe_port_map, (sizeof(_poe_an8855m_6p_4ge_2ge_poe_port_map) / sizeof(AIR_INIT_POE_PORT_MAP_T))
+    },
+#endif /* AIR_EN_AN8801SB_PHY */
 };
 #endif /* AIR_EN_POE */
 

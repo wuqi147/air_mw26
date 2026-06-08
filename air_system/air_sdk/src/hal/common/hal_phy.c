@@ -166,6 +166,56 @@ static HAL_PHY_DRIVER_MAP_T _hal_phy_driver_ext_func_vector[] = {
 #endif
 };
 
+static BOOL_T
+_hal_phy_isIntDriverEntryMatched(
+    const UI32_T                unit,
+    const HAL_PHY_DRIVER_MAP_T *ptr_entry)
+{
+#ifdef AIR_EN_SCORPIO
+    if (HAL_IS_DEVICE_SCO_FAMILY(unit) &&
+        (hal_sco_serdes_getDriver == ptr_entry->phy_driver_func) &&
+        (((HAL_SCO_DEVICE_ID_EN8851C == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_SCO_DEVICE_ID_EN8851C == ptr_entry->phy_id)) ||
+         ((HAL_SCO_DEVICE_ID_EN8853C == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_SCO_DEVICE_ID_EN8853C == ptr_entry->phy_id)) ||
+         ((HAL_SCO_DEVICE_ID_EN8860C == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_SCO_DEVICE_ID_EN8860C == ptr_entry->phy_id))))
+    {
+        return TRUE;
+    }
+#endif
+
+#ifdef AIR_EN_PEARL
+    if (HAL_IS_DEVICE_PEARL_FAMILY(unit) &&
+        (hal_pearl_serdes_getDriver == ptr_entry->phy_driver_func) &&
+        (((HAL_PEARL_DEVICE_ID_AN8855M == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_PEARL_DEVICE_ID_AN8855M == ptr_entry->phy_id)) ||
+         ((HAL_PEARL_DEVICE_ID_AN8855H == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_PEARL_DEVICE_ID_AN8855H == ptr_entry->phy_id))))
+    {
+        return TRUE;
+    }
+#endif
+
+#ifdef AIR_EN_CORAL
+    if (HAL_IS_DEVICE_CORAL_FAMILY(unit) &&
+        (hal_coral_serdes_getDriver == ptr_entry->phy_driver_func) &&
+        (((HAL_CORAL_DEVICE_ID_AN8858C == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_CORAL_DEVICE_ID_AN8858C == ptr_entry->phy_id)) ||
+         ((HAL_CORAL_DEVICE_ID_AN8858D == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_CORAL_DEVICE_ID_AN8858D == ptr_entry->phy_id)) ||
+         ((HAL_CORAL_DEVICE_ID_AN8858H == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_CORAL_DEVICE_ID_AN8858H == ptr_entry->phy_id)) ||
+         ((HAL_CORAL_DEVICE_ID_AN8858B == HAL_DEVICE_CHIP_ID(unit)) &&
+          (HAL_CORAL_DEVICE_ID_AN8858B == ptr_entry->phy_id))))
+    {
+        return TRUE;
+    }
+#endif
+
+    return FALSE;
+}
+
 /* FUNCTION NAME:   _hal_phy_ext_probe
  * PURPOSE:
  *      This API is used to initialize PHY.
@@ -337,7 +387,7 @@ _hal_phy_int_probe(
     {
         ptr_entry = HAL_PHY_DRIVER_INT_MAP_VECTOR_ENTRY(i);
 
-        if (HAL_DEVICE_CHIP_ID(unit) == ptr_entry->phy_id)
+        if (_hal_phy_isIntDriverEntryMatched(unit, ptr_entry))
         {
             if (NULL != ptr_entry->phy_driver_func)
             {

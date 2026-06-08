@@ -331,14 +331,12 @@ hal_pearl_chip_init(
         /* config mdio clock */
         rv = _hal_pearl_chip_setMdioClock(unit);
     }
-    else
+
+    if (TRUE == _hal_pearl_chip_checkI2cMasterEnable(unit))
     {
-        if (TRUE == _hal_pearl_chip_checkI2cMasterEnable(unit))
-        {
-            aml_readReg(unit, PEARL_RG_I2C_IOMUX, &u32dat, sizeof(u32dat));
-            u32dat |= PEARL_RG_I2C_MST_IOMUX_MASK;
-            aml_writeReg(unit, PEARL_RG_I2C_IOMUX, &u32dat, sizeof(u32dat));
-        }
+        aml_readReg(unit, PEARL_RG_I2C_IOMUX, &u32dat, sizeof(u32dat));
+        u32dat |= PEARL_RG_I2C_MST_IOMUX_MASK;
+        aml_writeReg(unit, PEARL_RG_I2C_IOMUX, &u32dat, sizeof(u32dat));
     }
 
     /* Enable HW reset de-glitch */

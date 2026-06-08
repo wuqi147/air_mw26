@@ -187,6 +187,9 @@ endif
 ifeq ($(findstring an8503,$(COMPILED_POE_CHIPS)),an8503)
 EXTRA_CFLAGS            += -DAIR_EN_AN8503_POE
 endif
+ifeq ($(findstring dh2184,$(COMPILED_POE_CHIPS)),dh2184)
+EXTRA_CFLAGS            += -DAIR_EN_DH2184_POE
+endif
 
 ################################################################################
 export EXTRA_CFLAGS

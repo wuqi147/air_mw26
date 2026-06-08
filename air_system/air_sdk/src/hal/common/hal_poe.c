@@ -53,6 +53,9 @@
 #ifdef AIR_EN_AN8503_POE
 #include <hal/poe/an8503/hal_an8503_poe.h>
 #endif
+#ifdef AIR_EN_DH2184_POE
+#include <hal/poe/dh2184/hal_dh2184_poe.h>
+#endif
 
 /* NAMING CONSTANT DECLARATIONS
  */
@@ -91,7 +94,10 @@ static HAL_POE_DRIVER_MAP_T _hal_poe_driver_func_vector[] = {
 #endif
 #ifdef AIR_EN_AN8503_POE
     {HAL_POE_DEVICE_ID_IP808AR, hal_an8503_poe_getDriver},
-    { HAL_POE_DEVICE_ID_AN8503, hal_an8503_poe_getDriver}
+    { HAL_POE_DEVICE_ID_AN8503, hal_an8503_poe_getDriver},
+#endif
+#ifdef AIR_EN_DH2184_POE
+    { HAL_POE_DEVICE_ID_DH2184, hal_dh2184_poe_getDriver},
 #endif
 };
 
@@ -248,6 +254,9 @@ _hal_poe_getDevicePortCnt(
             break;
         case HAL_POE_DEVICE_ID_AN8503:
             port_cnt = 8;
+            break;
+        case HAL_POE_DEVICE_ID_DH2184:
+            port_cnt = 4;
             break;
         default:
             port_cnt = 0;
@@ -410,6 +419,9 @@ _hal_poe_initDriver(
 {
     AIR_ERROR_NO_T rc = AIR_E_OK;
     UI32_T         hw_rev_data = 0;
+#ifdef AIR_EN_DH2184_POE
+    UI32_T         dh2184_id = 0;
+#endif
 
     /* update poe hardware info */
     rc = hal_poe_readReg(unit, device_idx, HAL_POE_PAGE_1, HAL_POE_HW_REVISION_REG, HAL_POE_REG_LEN_2, &hw_rev_data);
@@ -432,10 +444,44 @@ _hal_poe_initDriver(
             rc = AIR_E_NOT_INITED;
         }
     }
-    else
+#ifdef AIR_EN_DH2184_POE
+    if (AIR_E_OK != rc)
     {
-        rc = AIR_E_NOT_SUPPORT;
+        AIR_ERROR_NO_T dh2184_rc = AIR_E_OK;
+
+        dh2184_rc = hal_i2c_readReg(unit, HAL_POE_DEVICE_I2C_BUS_ID(unit, device_idx),
+                                    HAL_POE_DEVICE_I2C_SLAVE_ADDR(unit, device_idx), DH2184_ID, HAL_POE_REG_LEN_1,
+                                    HAL_POE_REG_LEN_1, &dh2184_id);
+        if ((AIR_E_OK == dh2184_rc) && (DH2184_ID_CODE == (dh2184_id & DH2184_ID_CODE_MASK)))
+        {
+            DIAG_PRINT(HAL_DBG_INFO, "[Dbg]: device %d DH2184 id %x\n", device_idx, dh2184_id);
+            HAL_POE_DEVICE_HW_DEV_ID(unit, device_idx) = HAL_POE_DEVICE_ID_DH2184;
+            HAL_POE_DEVICE_INFO(unit, device_idx).revision_id = dh2184_id & 0x7;
+
+            rc = _hal_poe_probe(unit, device_idx);
+            if (AIR_E_OK == rc)
+            {
+                rc = _hal_poe_initPoe(unit, device_idx);
+            }
+            else
+            {
+                rc = AIR_E_NOT_INITED;
+            }
+        }
+        else
+        {
+            if (AIR_E_OK != dh2184_rc)
+            {
+                DIAG_PRINT(HAL_DBG_ERR, "[Dbg]: device %d DH2184 id read failed, rc=%d\n", device_idx, dh2184_rc);
+            }
+            else
+            {
+                DIAG_PRINT(HAL_DBG_ERR, "[Dbg]: device %d unexpected DH2184 id 0x%x\n", device_idx, dh2184_id);
+            }
+            rc = AIR_E_NOT_SUPPORT;
+        }
     }
+#endif
 
     return rc;
 }

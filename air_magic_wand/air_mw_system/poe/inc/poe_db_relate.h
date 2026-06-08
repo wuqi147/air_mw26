@@ -77,6 +77,7 @@
 #define POE_DEVICE_ID_AN8503                             (0x00008503)
 #define POE_DEVICE_ID_IP804AR                            (0x000004A2)
 #define POE_DEVICE_ID_AN8502                             (0x000004B0)
+#define POE_DEVICE_ID_DH2184                             (0x00002184)
 #define POE_TIMEOUT_SELECTION_DISABLE                    (0)
 #define POE_DISABLE_IVT_AUTO_CLEAR_OFFSET                (1)
 #define POE_DISABLE_IVT_AUTO_CLEAR                       (1)            /* 1: Disable, 0: Enable */

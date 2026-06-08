@@ -1123,6 +1123,11 @@ poe_chip_init(
     {
         if (NULL != _ptr_device_info[i])
         {
+            if (POE_DEVICE_ID_DH2184 == _ptr_device_info[i]->revision_id)
+            {
+                continue;
+            }
+
             ret = hal_poe_readReg(0, i,
                                   HAL_POE_PAGE_0,
                                   POE_808AR_V24_CHECK_VERSION,
