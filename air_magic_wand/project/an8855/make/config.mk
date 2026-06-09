@@ -35,12 +35,12 @@ AIR_SUPPORT_MSTP                        = ENABLED
 # LLDP
 AIR_SUPPORT_LLDPD                       = DISABLED
 # POE
-AIR_SUPPORT_POE                         = ENABLED
-AIR_SUPPORT_POE_WATCHDOG                = ENABLED
+AIR_SUPPORT_POE                         = DISABLED
+AIR_SUPPORT_POE_WATCHDOG                = DISABLED
 # SFP
-AIR_SUPPORT_SFP                         = ENABLED
+AIR_SUPPORT_SFP                         = DISABLED
 AIR_SUPPORT_SFP_WITH_THREAD             = DISABLED
-AIR_SUPPORT_SFP_DDM                     = ENABLED
+AIR_SUPPORT_SFP_DDM                     = DISABLED
 # MQTTD
 AIR_SUPPORT_MQTTD                       = DISABLED
 AIR_SUPPORT_MQTTD_STARTONBOOT           = DISABLED

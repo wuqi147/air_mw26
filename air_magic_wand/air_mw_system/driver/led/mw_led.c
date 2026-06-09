@@ -54,6 +54,7 @@
 #include "air_chipscu.h"
 #include "air_gpio.h"
 #include "air_perif.h"
+#include "mw_log.h"
 #ifdef AIR_SUPPORT_SFP
 #include "sfp_util.h"
 #include "mw_sfp_led.h"

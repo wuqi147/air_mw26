@@ -561,8 +561,10 @@ port_db_initPortMode(
     UI8_T port = 0, port_mode = 0;
     UI32_T count = 0;
     AIR_INIT_PORT_MAP_T *ptr_portMapList = NULL;
-    AIR_PORT_COMBO_MODE_T combo_mode;
     AIR_PORT_SERDES_MODE_T serdes_mode;
+#ifdef AIR_SUPPORT_SFP
+    AIR_PORT_COMBO_MODE_T combo_mode;
+#endif
     AIR_ERROR_NO_T rc = AIR_E_OTHERS;
     MW_ERROR_NO_T  ret = MW_E_OK;
 

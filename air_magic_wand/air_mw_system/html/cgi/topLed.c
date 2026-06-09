@@ -234,9 +234,7 @@ ssi_get_topLed_info_Handle(
     char up_row[(3 * MAX_PORT_NUM)] = {0};
     char dwn_row[(3 * MAX_PORT_NUM)] = {0};
     char tmpbuf[(3 * MAX_PORT_NUM)] = {0};
-#ifdef AIR_SUPPORT_SFP
     BOOL_T isSerdes = FALSE;
-#endif
     DB_MSG_T *ptr_msg = NULL;
     void *ptr_data = NULL;
     UI16_T size = 0;
