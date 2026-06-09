@@ -29,9 +29,12 @@ BUILD_TYPE              := STATIC_LIB
 #BUILD_TYPE              := SHARED_LIB
 
 ################################################################################
-ENABLED_SWITCH_CHIPS    := en8851c an8855m an8858c
-ENABLED_PHY_CHIPS       := en8808 en8801s en8811h an8801sb an8804 an8808q an8811b
-ENABLED_POE_CHIPS       := an8502 an8503 dh2184
+# ENABLED_SWITCH_CHIPS    := en8851c an8855m an8858c
+# ENABLED_PHY_CHIPS       := en8808 en8801s en8811h an8801sb an8804 an8808q an8811b
+# ENABLED_POE_CHIPS       := an8502 an8503 dh2184
+ENABLED_SWITCH_CHIPS    := an8855m
+ENABLED_PHY_CHIPS       := an8801sb
+ENABLED_POE_CHIPS       := 
 
 ################################################################################
 # Enable the following feature by set the value to "ENABLED"
@@ -43,13 +46,13 @@ AIR_EN_DEBUG            := ENABLED
 AIR_EN_I2C_PHY          := ENABLED
 
 ################################################################################
-AIR_EN_LED_CLK_SYNC     := ENABLED
+AIR_EN_LED_CLK_SYNC     := DISABLED
 
 ################################################################################
 AIR_EN_L2_SHADOW        := DISABLED
 
 ################################################################################
-AIR_EN_CABLE_DIAG       := ENABLED
+AIR_EN_CABLE_DIAG       := DISABLED
 
 ################################################################################
 AIR_EN_COMPILER_SUPPORT_FUNCTION   := ENABLED
@@ -61,7 +64,7 @@ AIR_EN_COMPILER_SUPPORT_FUNCTION   := ENABLED
 AIR_EN_SFP_LED          := DISABLED
 
 ################################################################################
-AIR_EN_SFP_LED_WITH_THREAD     := ENABLED
+AIR_EN_SFP_LED_WITH_THREAD     := DISABLED
 
 ################################################################################
 AIR_EN_I2C_BITBANG      := DISABLED

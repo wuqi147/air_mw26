@@ -385,6 +385,10 @@ static const SDK_CFG_T _customer_ref_cfg_an8855m_6p_4ge_2ge_poe[] =
     {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,     13,      0,        1},
     {0, AIR_CFG_TYPE_MDIO_ENABLE,               0,      0,        1},
     {0, AIR_CFG_TYPE_SIF_LOCAL_CLOCK,           0,      0,        1},
+#ifdef AIR_EN_I2C_BITBANG
+    {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,      19,     0,        1},
+    {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,      20,     0,        1},
+#endif
     {0, AIR_CFG_TYPE_LPDET_ETH_TYPE,            0,      0,   0x8070},
 };
 
