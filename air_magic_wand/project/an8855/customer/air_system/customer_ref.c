@@ -361,26 +361,21 @@ static const SDK_CFG_T _customer_ref_cfg_an8855m_6p_4ge_2ge_poe[] =
     {0, AIR_CFG_TYPE_PHY_ADDRESS,               3,      0,        2},
     {0, AIR_CFG_TYPE_PHY_ADDRESS,               4,      0,        3},
     {0, AIR_CFG_TYPE_PHY_ADDRESS,               5,      0,        4},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          1,      1,    0x786},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          2,      1,    0x786},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          3,      1,    0x786},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          4,      1,    0x786},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          5,      1,    0x786},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          1,      0,     0x61},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          2,      0,     0x61},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          3,      0,     0x61},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          4,      0,     0x61},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          5,      0,     0x61},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          1,      0,    0xFE7},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          2,      0,    0xFE7},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          3,      0,    0x7E7},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          4,      0,    0xFE7},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          5,      0,    0xFE7},
     {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          1,      0,        0},
     {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          2,      0,        0},
     {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          3,      0,        0},
     {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          4,      0,        0},
     {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          5,      0,        0},
-    {0, AIR_CFG_TYPE_PHY_LED_COUNT,             0,      0,        2},
-    {0, AIR_CFG_TYPE_PHY_LED_TYPE,              0,      0,        0},
-    {0, AIR_CFG_TYPE_PHY_ADDRESS,               6,      0,       30},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          6,      0,    0x786},
-    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          6,      1,     0x61},
+    {0, AIR_CFG_TYPE_PHY_LED_COUNT,             0,      0,        1},
+    {0, AIR_CFG_TYPE_PHY_LED_TYPE,              0,      0,        1},
+    {0, AIR_CFG_TYPE_PHY_ADDRESS,               6,      0,        6},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          6,      0,        0},
+    {0, AIR_CFG_TYPE_PHY_LED_BEHAVIOR,          6,      1,    0x7E7},
     {0, AIR_CFG_TYPE_PORT_ADMIN_STATE,          6,      0,        0},
     {0, AIR_CFG_TYPE_PERIF_FORCE_GPIO_PIN,     13,      0,        1},
     {0, AIR_CFG_TYPE_MDIO_ENABLE,               0,      0,        1},
@@ -399,10 +394,17 @@ static AIR_INIT_PORT_MAP_T _ref_board_port_map_an8855m_6p_4ge_2ge_poe[] =
  * ----    ---------------------    --------------------
  */
     { 0,  AIR_INIT_PORT_TYPE_CPU, AIR_INIT_PORT_SPEED_1000M},
+#ifdef AIR_EN_POE
     { 1,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 0}},
     { 2,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 1}},
     { 3,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 2}},
     { 4,  AIR_INIT_PORT_TYPE_ENHANCED_BASET, AIR_INIT_PORT_SPEED_1000M,  .enhanced_baset_port = {AIR_INIT_ENHANCED_BASET_PORT_FLAGS_POE, 3}},
+#else
+    { 1,  AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,  .baset_port={0}},
+    { 2,  AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,  .baset_port={1}},
+    { 3,  AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,  .baset_port={2}},
+    { 4,  AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,  .baset_port={3}},
+#endif
     { 5,  AIR_INIT_PORT_TYPE_BASET, AIR_INIT_PORT_SPEED_1000M,  .baset_port={4}},
     { 6,  AIR_INIT_PORT_TYPE_XSGMII, AIR_INIT_PORT_SPEED_1000M,  .xsgmii_port={0, 0, 0}},
 };
@@ -491,9 +493,6 @@ static const CUSTOMER_I2C_BITBANG_CFG_T _i2c_bitbang_cfg[] =
     {MW_PRODUCT_ID_AN8855M_5P_1SFP, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
     {MW_PRODUCT_ID_AN8855M_5P_1SFP_A, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
     {MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
-#ifdef AIR_EN_POE
-    {MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE, sizeof(_i2c_bitbang_cfg_5p_1sfp) / sizeof(I2C_BITBANG_CFG_T), _i2c_bitbang_cfg_5p_1sfp},
-#endif
 };
 #endif
 

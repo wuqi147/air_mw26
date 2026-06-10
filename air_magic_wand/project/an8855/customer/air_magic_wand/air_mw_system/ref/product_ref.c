@@ -93,17 +93,17 @@ static const MW_LIGHTS_ARRAY_T _mw_product_lights_array[] = {
         "",
         "1,2,3,4,5,6"
     },
+    {
+        MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE,
+        "",
+        "1,2,3,4,5,6"
+    },
 #endif
 #ifdef AIR_SUPPORT_POE
     {
         MW_PRODUCT_ID_AN8855M_5P_AN8502_4P,
         "",
         "1,2,3,4,5"
-    },
-    {
-        MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE,
-        "",
-        "1,2,3,4,5,6"
     },
 #endif
 };
@@ -140,4 +140,3 @@ mw_product_getLightsArraySize(
 {
     return sizeof(_mw_product_lights_array) / sizeof(MW_LIGHTS_ARRAY_T);
 }
-
