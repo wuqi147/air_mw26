@@ -56,6 +56,9 @@
 #ifdef AIR_EN_DH2184_POE
 #include <hal/poe/dh2184/hal_dh2184_poe.h>
 #endif
+#ifdef AIR_EN_SK49145B_POE
+#include <hal/poe/sk49145b/hal_sk49145b_poe.h>
+#endif
 
 /* NAMING CONSTANT DECLARATIONS
  */
@@ -98,6 +101,9 @@ static HAL_POE_DRIVER_MAP_T _hal_poe_driver_func_vector[] = {
 #endif
 #ifdef AIR_EN_DH2184_POE
     { HAL_POE_DEVICE_ID_DH2184, hal_dh2184_poe_getDriver},
+#endif
+#ifdef AIR_EN_SK49145B_POE
+    { HAL_POE_DEVICE_ID_SK49145B, hal_sk49145b_poe_getDriver},
 #endif
 };
 
@@ -256,6 +262,9 @@ _hal_poe_getDevicePortCnt(
             port_cnt = 8;
             break;
         case HAL_POE_DEVICE_ID_DH2184:
+            port_cnt = 4;
+            break;
+        case HAL_POE_DEVICE_ID_SK49145B:
             port_cnt = 4;
             break;
         default:
@@ -477,6 +486,46 @@ _hal_poe_initDriver(
             else
             {
                 DIAG_PRINT(HAL_DBG_ERR, "[Dbg]: device %d unexpected DH2184 id 0x%x\n", device_idx, dh2184_id);
+            }
+            rc = AIR_E_NOT_SUPPORT;
+        }
+    }
+#endif
+
+#ifdef AIR_EN_SK49145B_POE
+    if (AIR_E_OK != rc)
+    {
+        AIR_ERROR_NO_T sk49145b_rc = AIR_E_OK;
+        UI32_T         sk49145b_id = 0;
+
+        sk49145b_rc = hal_i2c_readReg(unit, HAL_POE_DEVICE_I2C_BUS_ID(unit, device_idx),
+                                      HAL_POE_DEVICE_I2C_SLAVE_ADDR(unit, device_idx), SK49145B_ID, HAL_POE_REG_LEN_1,
+                                      HAL_POE_REG_LEN_1, &sk49145b_id);
+        if ((AIR_E_OK == sk49145b_rc) && (SK49145B_ID_CODE == (sk49145b_id & SK49145B_ID_CODE_MASK)))
+        {
+            DIAG_PRINT(HAL_DBG_INFO, "[Dbg]: device %d SK49145B id %x\n", device_idx, sk49145b_id);
+            HAL_POE_DEVICE_HW_DEV_ID(unit, device_idx) = HAL_POE_DEVICE_ID_SK49145B;
+            HAL_POE_DEVICE_INFO(unit, device_idx).revision_id = sk49145b_id & 0x7;
+
+            rc = _hal_poe_probe(unit, device_idx);
+            if (AIR_E_OK == rc)
+            {
+                rc = _hal_poe_initPoe(unit, device_idx);
+            }
+            else
+            {
+                rc = AIR_E_NOT_INITED;
+            }
+        }
+        else
+        {
+            if (AIR_E_OK != sk49145b_rc)
+            {
+                DIAG_PRINT(HAL_DBG_ERR, "[Dbg]: device %d SK49145B id read failed, rc=%d\n", device_idx, sk49145b_rc);
+            }
+            else
+            {
+                DIAG_PRINT(HAL_DBG_ERR, "[Dbg]: device %d unexpected SK49145B id 0x%x\n", device_idx, sk49145b_id);
             }
             rc = AIR_E_NOT_SUPPORT;
         }

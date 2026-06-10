@@ -16,6 +16,11 @@ dir             := $(d)/dh2184
 include         $(dir)/make.mk
 endif
 
+ifeq ($(findstring sk49145b,$(COMPILED_POE_CHIPS)),sk49145b)
+dir             := $(d)/sk49145b
+include         $(dir)/make.mk
+endif
+
 # End subdirectories
 # Local rules
 

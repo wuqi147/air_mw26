@@ -1,0 +1,257 @@
+/*
+ * FreeRTOS Kernel V10.1.1
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software. If you wish to use our Amazon
+ * FreeRTOS name, please do so in a fair use way that does not cause confusion.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
+ *
+ * 1 tab == 4 spaces!
+ */
+
+/******************************************************************************
+ * NOTE 1:  This project provides two demo applications.  A simple blinky
+ * style project, and a more comprehensive test and demo application.  The
+ * mainSELECTED_APPLICATION setting in main.c is used to select between the two.
+ * See the notes on using mainSELECTED_APPLICATION where it is defined below.
+ *
+ * NOTE 2:  This file only contains the source code that is not specific to
+ * either the simply blinky or full demos - this includes initialisation code
+ * and callback functions.
+ */
+
+/* Standard includes. */
+#include <stdio.h>
+
+/* Kernel includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+
+#include "spinorwrite.h"
+#include "timer.h"
+#include "customer_switch_init.h"
+
+/* Prototypes for the standard FreeRTOS callback/hook functions implemented
+within this file. */
+void vApplicationMallocFailedHook( void );
+void vApplicationIdleHook( void );
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName );
+void vApplicationTickHook( void );
+
+/*-----------------------------------------------------------*/
+static void airSetupHardware( void )
+{
+    /* Ensure no interrupts execute while the scheduler is in an inconsistent
+    state.  Interrupts are automatically enabled when the scheduler is
+    started. */
+    portDISABLE_INTERRUPTS();
+
+    airInitHardware();
+}
+
+int main( void )
+{
+    /* Configure the hardware ready to run the demo. */
+    airSetupHardware();
+
+    printf("Initializing hardware setup...\n");
+
+    /* create tasks */
+    create_queue_recv_task();
+    create_flash_conf_task();
+
+    printf("Initializing switch...\n");
+    customer_switch_init();
+
+    printf("Initializing watchdog setup...\n");
+    wdog_setup(Wdog_Timeout_Counter, Sw_Wdog_Timeout_Counter);
+
+    printf("Starting tasks...\n");
+    vTaskStartScheduler();
+    while(1); /* Don't expect to reach here. */
+
+    /* Don't expect to reach here. */
+    return 0;
+}
+/*-----------------------------------------------------------*/
+
+void vAssertCalled( const char * pcFile, unsigned long ulLine )
+{
+volatile unsigned long ul = 0;
+
+    ( void ) pcFile;
+    ( void ) ulLine;
+
+    printf( "ASSERT! Line %d, file %s\r\n", ( int )ulLine, pcFile );
+
+    taskENTER_CRITICAL();
+    {
+        /* Set ul to a non-zero value using the debugger to step out of this
+        function. */
+        while( ul == 0 )
+        {
+            portNOP();
+        }
+    }
+    taskEXIT_CRITICAL();
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationMallocFailedHook( void )
+{
+    /* vApplicationMallocFailedHook() will only be called if
+    configUSE_MALLOC_FAILED_HOOK is set to 1 in FreeRTOSConfig.h.  It is a hook
+    function that will get called if a call to pvPortMalloc() fails.
+    pvPortMalloc() is called internally by the kernel whenever a task, queue,
+    timer or semaphore is created.  It is also called by various parts of the
+    demo application.  If heap_1.c, heap_2.c or heap_4.c is being used, then the
+    size of the     heap available to pvPortMalloc() is defined by
+    configTOTAL_HEAP_SIZE in FreeRTOSConfig.h, and the xPortGetFreeHeapSize()
+    API function can be used to query the size of free heap space that remains
+    (although it does not provide information on how the remaining heap might be
+    fragmented).  See http://www.freertos.org/a00111.html for more
+    information. */
+    #ifdef AIR_8855_SUPPORT
+    DUMP_STACK();
+    #endif
+    vAssertCalled( __FILE__, __LINE__ );
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
+{
+    ( void ) pcTaskName;
+    ( void ) pxTask;
+
+    printf( "StackOverflow task %s\r\n", pcTaskName );
+
+    /* Run time stack overflow checking is performed if
+    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
+    function is called if a stack overflow is detected. */
+    #ifdef AIR_8855_SUPPORT
+    DUMP_STACK();
+    #endif
+    vAssertCalled( __FILE__, __LINE__ );
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationIdleHook( void )
+{
+volatile size_t xFreeHeapSpace;
+
+    /* This is just a trivial example of an idle hook.  It is called on each
+    cycle of the idle task.  It must *NOT* attempt to block.  In this case the
+    idle task just queries the amount of FreeRTOS heap that remains.  See the
+    memory management section on the http://www.FreeRTOS.org web site for memory
+    management options.  If there is a lot of heap memory free then the
+    configTOTAL_HEAP_SIZE value in FreeRTOSConfig.h can be reduced to free up
+    RAM. */
+    xFreeHeapSpace = xPortGetFreeHeapSize();
+
+    /* Remove compiler warning about xFreeHeapSpace being set but never used. */
+    ( void ) xFreeHeapSpace;
+
+    wdog_idle_handler();
+}
+
+/*-----------------------------------------------------------*/
+
+void vApplicationTickHook( void )
+{
+
+}
+/*-----------------------------------------------------------*/
+
+/* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
+implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
+used by the Idle task. */
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+{
+#define config_IDLE_STACK_SIZE 128
+
+
+/* If the buffers to be provided to the Idle task are declared inside this
+function then they must be declared static - otherwise they will be allocated on
+the stack and so not exists after this function exits. */
+GDMPSRAM_BSS static StaticTask_t xIdleTaskTCB;
+GDMPSRAM_BSS static StackType_t uxIdleTaskStack[ config_IDLE_STACK_SIZE ];
+
+    /* Pass out a pointer to the StaticTask_t structure in which the Idle task's
+    state will be stored. */
+    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+
+    /* Pass out the array that will be used as the Idle task's stack. */
+    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+
+    /* Pass out the size of the array pointed to by *ppxIdleTaskStackBuffer.
+    Note that, as the array is necessarily of type StackType_t,
+    configMINIMAL_STACK_SIZE is specified in words, not bytes. */
+    *pulIdleTaskStackSize = config_IDLE_STACK_SIZE;
+}
+/*-----------------------------------------------------------*/
+
+/* configUSE_STATIC_ALLOCATION and configUSE_TIMERS are both set to 1, so the
+application must provide an implementation of vApplicationGetTimerTaskMemory()
+to provide the memory that is used by the Timer service task. */
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize )
+{
+/* If the buffers to be provided to the Timer task are declared inside this
+function then they must be declared static - otherwise they will be allocated on
+the stack and so not exists after this function exits. */
+GDMPSRAM_BSS static StaticTask_t xTimerTaskTCB;
+GDMPSRAM_BSS static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
+
+    /* Pass out a pointer to the StaticTask_t structure in which the Timer
+    task's state will be stored. */
+    *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
+
+    /* Pass out the array that will be used as the Timer task's stack. */
+    *ppxTimerTaskStackBuffer = uxTimerTaskStack;
+
+    /* Pass out the size of the array pointed to by *ppxTimerTaskStackBuffer.
+    Note that, as the array is necessarily of type StackType_t,
+    configMINIMAL_STACK_SIZE is specified in words, not bytes. */
+    *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+}
+/*-----------------------------------------------------------*/
+
+void vPreSleepProcessing( unsigned long uxModifiableIdleTime )
+{
+    /* Called by the kernel before it places the MCU into a sleep mode because
+    configPRE_SLEEP_PROCESSING() is #defined to vPreSleepProcessing().
+
+    NOTE:  Additional actions can be taken here to get the power consumption
+    even lower.  For example, peripherals can be turned off here, and then back
+    on again in the post sleep processing function.  For maximum power saving
+    ensure all unused pins are in their lowest power state. */
+
+    /* Avoid compiler warnings about the unused parameter. */
+    ( void ) uxModifiableIdleTime;
+}
+/*-----------------------------------------------------------*/
+
+void vPostSleepProcessing( unsigned long uxModifiableIdleTime )
+{
+    /* Called by the kernel when the MCU exits a sleep mode because
+    configPOST_SLEEP_PROCESSING is #defined to vPostSleepProcessing(). */
+
+    /* Avoid compiler warnings about the unused parameter. */
+    ( void ) uxModifiableIdleTime;
+}
