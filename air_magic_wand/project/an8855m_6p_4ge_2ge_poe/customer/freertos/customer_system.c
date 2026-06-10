@@ -62,7 +62,6 @@
 #include "product_ref.h"
 #include "customer_ref.h"
 #include "default_config.h"
-#include "sfp_util.h"
 #include "mw_log.h"
 
 /* NAMING CONSTANT DECLARATIONS
@@ -100,31 +99,11 @@ static int
 _customer_system_post_init_an8855m_5p(
     void);
 
-static int
-_customer_system_init_an8855m_5p_1sfp(
-    void);
-
-static int
-_customer_system_post_init_an8855m_5p_1sfp(
-    void);
-
-static int
-_customer_system_init_an8855m_5p_an8801sb_1p(
-    void);
-
-static int
-_customer_system_post_init_an8855m_5p_an8801sb_1p(
-    void);
-
 /*STATIC VARIABLE DECLARATIONS
 */
 static const CUSTOMER_SYSTEM_INIT_FUNC_MAP_T _customer_system_init_funcs_map[]=
 {
-    {MW_PRODUCT_ID_AN8855M_5P, _customer_system_init_an8855m_5p, _customer_system_post_init_an8855m_5p},
-    {MW_PRODUCT_ID_AN8855M_5P_1SFP, _customer_system_init_an8855m_5p_1sfp, _customer_system_post_init_an8855m_5p_1sfp},
-    {MW_PRODUCT_ID_AN8855M_5P_1SFP_A, _customer_system_init_an8855m_5p_1sfp, _customer_system_post_init_an8855m_5p_1sfp},
-    {MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P, _customer_system_init_an8855m_5p_an8801sb_1p, _customer_system_post_init_an8855m_5p_an8801sb_1p},
-    {MW_PRODUCT_ID_AN8855M_5P_AN8502_4P, _customer_system_init_an8855m_5p_an8801sb_1p, _customer_system_post_init_an8855m_5p_an8801sb_1p},
+    {MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE, _customer_system_init_an8855m_5p, _customer_system_post_init_an8855m_5p},
 };
 
 /*LOCAL SUBPROGRAM BODIES
@@ -144,58 +123,6 @@ _customer_system_post_init_an8855m_5p(
 {
     int rc = E_OK;
 
-    return rc;
-}
-
-static int
-_customer_system_init_an8855m_5p_1sfp(
-    void)
-{
-    int rc = E_OK;
-
-#ifdef AIR_SUPPORT_SFP
-    rc |= air_chipscu_setIomuxFuncState(0, AIR_CHIPSCU_IOMUX_FORCE_GPIO6_MODE, AIR_CHIPSCU_IOMUX_ENABLE);
-    rc |= air_gpio_setDirection(GPIO_PIN6, AIR_GPIO_DIRECTION_OUTPUT);
-    SET_GPIO_OUTPUT(GPIO_PIN6, rc);
-    rc |= air_gpio_setValue(GPIO_PIN6, GPIO_PIN_LOW);
-#endif
-
-    return rc;
-}
-
-static int
-_customer_system_post_init_an8855m_5p_1sfp(
-    void)
-{
-    int rc = E_OK;
-
-#ifdef AIR_SUPPORT_SFP
-    rc |= air_gpio_setValue(GPIO_PIN6, GPIO_PIN_HIGH);
-#endif
-
-    return rc;
-}
-
-static int
-_customer_system_init_an8855m_5p_an8801sb_1p(
-    void)
-{
-    int rc = E_OK;
-
-    rc |= air_chipscu_setIomuxFuncState(0, AIR_CHIPSCU_IOMUX_FORCE_GPIO4_MODE, AIR_CHIPSCU_IOMUX_ENABLE);
-    rc |= air_gpio_setDirection(GPIO_PIN4, AIR_GPIO_DIRECTION_OUTPUT);
-    SET_GPIO_OUTPUT(GPIO_PIN4, rc);
-    rc |= air_gpio_setValue(GPIO_PIN4, GPIO_PIN_LOW);
-    return rc;
-}
-
-static int
-_customer_system_post_init_an8855m_5p_an8801sb_1p(
-    void)
-{
-    int rc = E_OK;
-
-    rc |= air_gpio_setValue(GPIO_PIN4, GPIO_PIN_HIGH);
     return rc;
 }
 
@@ -264,94 +191,7 @@ _customer_system_set_port_led(
     const AIR_PORT_PHY_LED_STATE_T state)
 {
     I32_T rc = AIR_E_OK, i = 0;
-#ifdef AIR_SUPPORT_SFP
-    UI32_T led_count = 0;
-    AIR_PORT_COMBO_MODE_T old_combo_mode = AIR_PORT_COMBO_MODE_LAST, new_combo_mode = AIR_PORT_COMBO_MODE_LAST;
 
-    if ((0 == phy_led_count) && (0 == sfp_led_count))
-    {
-        return AIR_E_BAD_PARAMETER;
-    }
-
-    if (TRUE == sfp_port_is_comboPort(unit, port))
-    {
-        rc = air_port_getComboMode(unit, port, &old_combo_mode);
-        if ((TRUE == sfp_port_is_pureComboSerdesPort(unit, port)) &&
-            (AIR_PORT_COMBO_MODE_SERDES != old_combo_mode))
-        {
-            rc |= air_port_setComboMode(unit, port, AIR_PORT_COMBO_MODE_SERDES);
-            old_combo_mode = AIR_PORT_COMBO_MODE_SERDES;
-        }
-
-        if (AIR_E_OK != rc)
-        {
-            return rc;
-        }
-    }
-
-    if (((FALSE == sfp_port_is_serdesPort(unit, port)) &&
-          (FALSE == sfp_port_is_comboPort(unit, port))) ||
-        (AIR_PORT_COMBO_MODE_PHY == old_combo_mode))
-    {
-        /* Set PHY LED: PHY port + combo PHY port */
-        for (i = 0; i < phy_led_count; i++)
-        {
-            if (AIR_PORT_PHY_LED_STATE_ON == state)
-            {
-                rc |= air_port_setPhyLedCtrlMode(unit, port, i, AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
-            }
-            rc |= air_port_setPhyLedForceState(unit, port, i, state);
-            if (AIR_PORT_PHY_LED_STATE_OFF == state)
-            {
-                rc |= air_port_setPhyLedCtrlMode(unit, port, i, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
-            }
-        }
-    }
-    else
-    {
-        /* Set SFP LED: Serdes port + combo serdes port + pure combo serdes port */
-        for (i = 0; i < sfp_led_count; i++)
-        {
-            if (AIR_PORT_PHY_LED_STATE_ON == state)
-            {
-                rc |= air_port_setPhyLedCtrlMode(unit, port, i, AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
-            }
-            rc |= air_port_setPhyLedForceState(unit, port, i, state);
-            if (AIR_PORT_PHY_LED_STATE_OFF == state)
-            {
-                rc |= air_port_setPhyLedCtrlMode(unit, port, i, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
-            }
-        }
-    }
-
-    if ((TRUE == sfp_port_is_comboPort(unit, port)) &&
-        (FALSE == sfp_port_is_pureComboSerdesPort(unit, port)))
-    {
-        /* combo PHY port or combo serdes port */
-        new_combo_mode = (AIR_PORT_COMBO_MODE_SERDES == old_combo_mode) ? AIR_PORT_COMBO_MODE_PHY : AIR_PORT_COMBO_MODE_SERDES;
-        led_count = (AIR_PORT_COMBO_MODE_SERDES == old_combo_mode) ? phy_led_count : sfp_led_count;
-
-        if (0 != led_count)
-        {
-            rc |= air_port_setComboMode(unit, port, new_combo_mode);
-
-            for (i = 0; i < led_count; i++)
-            {
-                if (AIR_PORT_PHY_LED_STATE_ON == state)
-                {
-                    rc |= air_port_setPhyLedCtrlMode(unit, port, i, AIR_PORT_PHY_LED_CTRL_MODE_FORCE);
-                }
-                rc |= air_port_setPhyLedForceState(unit, port, i, state);
-                if (AIR_PORT_PHY_LED_STATE_OFF == state)
-                {
-                    rc |= air_port_setPhyLedCtrlMode(unit, port, i, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
-                }
-            }
-
-            rc |= air_port_setComboMode(unit, port, old_combo_mode);
-        }
-    }
-#else
     for (i = 0; i < phy_led_count; i++)
     {
         if (AIR_PORT_PHY_LED_STATE_ON == state)
@@ -365,7 +205,6 @@ _customer_system_set_port_led(
             rc |= air_port_setPhyLedCtrlMode(unit, port, i, AIR_PORT_PHY_LED_CTRL_MODE_PHY);
         }
     }
-#endif
 
     return rc;
 }
@@ -419,9 +258,6 @@ customer_system_post_init(
 {
     I32_T rc = E_ENTRY_NOT_FOUND, ret = E_ENTRY_NOT_FOUND;
     UI32_T total_port_num = 0, unit = 0;
-#ifdef AIR_SUPPORT_SFP
-    UI32_T port = 0;
-#endif
     const CUSTOMER_SYSTEM_INIT_FUNC_MAP_T *ptr_funcs = _customer_system_get_init_funcs();
     AIR_INIT_PORT_MAP_T *ptr_portMapList = NULL;
     MW_LEDAPP_SYSLED_FLASH_TYPE_T flash_type = MW_LEDAPP_SYSLED_FLASH_TYPE_LAST;
@@ -445,16 +281,6 @@ customer_system_post_init(
         MW_FREE(ptr_portMapList);
     }
 
-#ifdef AIR_SUPPORT_SFP
-    for (port = 0; port < total_port_num; port++)
-    {
-        if (TRUE == sfp_port_is_serdesPort(unit, port))
-        {
-            sfp_writeReg(unit, port, 0xE400, 0x60000);
-        }
-    }
-#endif
-
     mw_ledapp_sysled_get_info(NULL, NULL, &flash_type);
 
     if (MW_LEDAPP_SYSLED_FLASH_TYPE_AUTO_FLASH == flash_type)
@@ -473,7 +299,7 @@ customer_system_post_init(
         {
             mw_ledapp_sysled_trigger_manual_flash(unit);
         }
-        delay1ms(500); /* Delay for SFP REG settings. */
+        delay1ms(500);
         if (MW_LEDAPP_SYSLED_FLASH_TYPE_MANUAL_FLASH == flash_type)
         {
             mw_ledapp_sysled_trigger_manual_flash(unit);
@@ -487,4 +313,3 @@ customer_system_post_init(
 
     return rc;
 }
-

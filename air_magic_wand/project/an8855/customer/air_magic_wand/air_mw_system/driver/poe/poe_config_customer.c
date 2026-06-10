@@ -66,19 +66,8 @@ static const POE_CONFIG_SETTINGS_T _poe_config_an8855m_5p_an8502_4p_settings = {
     POE_RESET_PIN
 };
 
-static const POE_CONFIG_SETTINGS_T _poe_config_an8855m_6p_4ge_2ge_poe_settings = {
-    4,
-    POE_MAX_LED_BLINK_THRESHOLD_IN_PERCENTAGE_DEFAULT,
-    0,
-    MW_LED_GPIO_PIN_INVALID,
-    MW_LED_ACTIVE_TYPE_HIGH_ACTIVE,
-    POE_PWR_CONTROL_HW,
-    MW_LED_GPIO_PIN_INVALID
-};
-
 static const POE_CONFIG_PRODUCT_SETTINGS_T _poe_config_product_settings[] = {
     {MW_PRODUCT_ID_AN8855M_5P_AN8502_4P, &_poe_config_an8855m_5p_an8502_4p_settings},
-    {MW_PRODUCT_ID_AN8855M_6P_4GE_2GE_POE, &_poe_config_an8855m_6p_4ge_2ge_poe_settings},
 };
 
 static const POE_CONFIG_SETTINGS_T *_ptr_poe_settings = NULL;

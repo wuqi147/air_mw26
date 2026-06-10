@@ -4,7 +4,7 @@
 *  This software is protected by Copyright and the information contained
 *  herein is confidential. The software may not be copied and the information
 *  contained herein may not be used or disclosed except with the written
-*  permission of Airoha Technology Corp. (C) 2024
+*  permission of Airoha Technology Corp. (C) 2021
 *
 *  BY OPENING THIS FILE, BUYER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
 *  THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("AIROHA SOFTWARE")
@@ -33,104 +33,56 @@
 *
 *******************************************************************************/
 
-/* FILE NAME:   product_ref.c
+/* FILE NAME:  customer_system.c
  * PURPOSE:
- *       Define the arrangement of icons for web page ports.
+ *  Specify customer system configuration.
  *
  * NOTES:
  *
  */
 
-/* INCLUDE FILE DECLARATIONS
- */
-#include "mw_types.h"
-#include "product_ref.h"
+/* INCLUDE FILE DECLARTIONS
+*/
+#include "customer_system.h"
+#include "hwcfg_util.h"
+#include "util.h"
+#include "air_chipscu.h"
+#include "air_gpio.h"
+#include <platform.h>
+#include <osal/osal_type.h>
+#include <osal/osal_lib.h>
 
 /* NAMING CONSTANT DECLARATIONS
 */
 
+
 /* MACRO FUNCTION DECLARATIONS
- */
+*/
+#define SET_GPIO_OUTPUT(x, rc)    do                              \
+    {                                                             \
+        rc |= air_gpio_setValue(x, GPIO_PIN_HIGH);                \
+        rc |= air_gpio_setOutputEnable(x, ENABLE_PIN_OE);         \
+    }while(0)
 
-/* DATA TYPE DECLARATIONS
- */
+/* LOCAL SUBPROGRAM SPECIFICATIONS
+*/
 
-/* GLOBAL VARIABLE DECLARATIONS
- */
-static const MW_PRODUCT_ID_INFO_T _mw_product_id_array[] = {
-    /* Description                    Product_ID */
-    {"AN8855M_5P",                    MW_PRODUCT_ID_AN8855M_5P},
-    {"AN8855M_5P_1SFP",               MW_PRODUCT_ID_AN8855M_5P_1SFP},
-    {"AN8855M_5P_1SFP_A",             MW_PRODUCT_ID_AN8855M_5P_1SFP_A},
-#ifdef AIR_EN_AN8801SB_PHY
-    {"AN8855M_5P_AN8801SB_1P",        MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P},
-#endif
-#ifdef AIR_SUPPORT_POE
-    {"AN8855M_5P_AN8502_4P",          MW_PRODUCT_ID_AN8855M_5P_AN8502_4P},
-#endif
-};
-
-static const MW_LIGHTS_ARRAY_T _mw_product_lights_array[] = {
-    {
-        MW_PRODUCT_ID_AN8855M_5P,
-        "",
-        "1,2,3,4,5"
-    },
-    {
-        MW_PRODUCT_ID_AN8855M_5P_1SFP,
-        "",
-        "1,2,3,4,5,0,106"
-    },
-    {
-        MW_PRODUCT_ID_AN8855M_5P_1SFP_A,
-        "",
-        "1,2,3,4,5,0,106"
-    },
-#ifdef AIR_EN_AN8801SB_PHY
-    {
-        MW_PRODUCT_ID_AN8855M_5P_AN8801SB_1P,
-        "",
-        "1,2,3,4,5,6"
-    },
-#endif
-#ifdef AIR_SUPPORT_POE
-    {
-        MW_PRODUCT_ID_AN8855M_5P_AN8502_4P,
-        "",
-        "1,2,3,4,5"
-    },
-#endif
-};
-
-/* LOCAL SUBPROGRAM DECLARATIONS
- */
-
-/* EXPORTED SUBPROGRAM SPECIFICATIONS
- */
-const MW_PRODUCT_ID_INFO_T *
-mw_product_getProductIdArray(
-    void)
+/* EXPORTED SUBPROGRAM BODIES*/
+int customer_system_init(void)
 {
-    return _mw_product_id_array;
+    int rc = E_OK;
+
+    rc |= air_chipscu_setIomuxFuncState(0, AIR_CHIPSCU_IOMUX_FORCE_GPIO4_MODE, AIR_CHIPSCU_IOMUX_ENABLE);
+    rc |= air_gpio_setDirection(GPIO_PIN4, AIR_GPIO_DIRECTION_OUTPUT);
+    SET_GPIO_OUTPUT(GPIO_PIN4, rc);
+    rc |= air_gpio_setValue(GPIO_PIN4, GPIO_PIN_LOW);
+    return rc;
 }
 
-UI32_T
-mw_product_getProductIdArraySize(
-    void)
+int customer_system_post_init(void)
 {
-    return sizeof(_mw_product_id_array) / sizeof(MW_PRODUCT_ID_INFO_T);
-}
+    int rc = E_OK;
 
-const MW_LIGHTS_ARRAY_T *
-mw_product_getLightsArray(
-    void)
-{
-    return _mw_product_lights_array;
-}
-
-UI32_T
-mw_product_getLightsArraySize(
-    void)
-{
-    return sizeof(_mw_product_lights_array) / sizeof(MW_LIGHTS_ARRAY_T);
+    rc |= air_gpio_setValue(GPIO_PIN4, GPIO_PIN_HIGH);
+    return rc;
 }
