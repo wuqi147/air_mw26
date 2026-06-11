@@ -56,39 +56,29 @@
 
 /* STATIC VARIABLE DECLARATIONS
  */
-static const POE_CONFIG_SETTINGS_T _poe_config_an8855m_5p_an8502_4p_settings = {
+static const POE_CONFIG_SETTINGS_T _poe_config_en8851c_rfb_an8502_4p_settings = {
     4,
     POE_MAX_LED_BLINK_THRESHOLD_IN_PERCENTAGE_DEFAULT,
     0,
-    GPIO_PIN5,
-    MW_LED_ACTIVE_TYPE_HIGH_ACTIVE,
+    GPIO_PIN0,
+    MW_LED_ACTIVE_TYPE_LOW_ACTIVE,
     POE_PWR_CONTROL_HW,
     POE_RESET_PIN
 };
 
-static const POE_CONFIG_SETTINGS_T _poe_config_an8855m_6p_4ge_2ge_poe_settings = {
-    4,
+static const POE_CONFIG_SETTINGS_T _poe_config_en8851c_rfb_an8503_8p_settings = {
+    8,
     POE_MAX_LED_BLINK_THRESHOLD_IN_PERCENTAGE_DEFAULT,
     0,
-    MW_LED_GPIO_PIN_INVALID,
-    MW_LED_ACTIVE_TYPE_HIGH_ACTIVE,
+    GPIO_PIN0,
+    MW_LED_ACTIVE_TYPE_LOW_ACTIVE,
     POE_PWR_CONTROL_HW,
-    MW_LED_GPIO_PIN_INVALID
-};
-
-static const POE_CONFIG_SETTINGS_T _poe_config_spb5060s_settings = {
-    4,
-    POE_MAX_LED_BLINK_THRESHOLD_IN_PERCENTAGE_DEFAULT,
-    0,
-    MW_LED_GPIO_PIN_INVALID,
-    MW_LED_ACTIVE_TYPE_HIGH_ACTIVE,
-    POE_PWR_CONTROL_HW,
-    GPIO_PIN4
+    POE_RESET_PIN
 };
 
 static const POE_CONFIG_PRODUCT_SETTINGS_T _poe_config_product_settings[] = {
-    {MW_PRODUCT_ID_AN8855M_5P_AN8502_4P, &_poe_config_an8855m_5p_an8502_4p_settings},
-    {MW_PRODUCT_ID_SPB5060S_6GN, &_poe_config_spb5060s_settings},
+    {MW_PRODUCT_ID_EN8851C_RFB_AN8502_4P, &_poe_config_en8851c_rfb_an8502_4p_settings},
+    {MW_PRODUCT_ID_EN8851C_RFB_AN8503_8P, &_poe_config_en8851c_rfb_an8503_8p_settings},
 };
 
 static const POE_CONFIG_SETTINGS_T *_ptr_poe_settings = NULL;
