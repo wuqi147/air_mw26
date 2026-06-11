@@ -134,3 +134,4 @@ mw_product_getLightsArraySize(
 {
     return sizeof(_mw_product_lights_array) / sizeof(MW_LIGHTS_ARRAY_T);
 }
+

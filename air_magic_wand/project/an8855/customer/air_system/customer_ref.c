@@ -346,8 +346,6 @@ static AIR_INIT_POE_PORT_MAP_T _poe_an8855m_5p_an8502_4p_port_map[] =
 #endif /* AIR_EN_POE */
 
 
-
-
 static const MODULE_CFG_MAP_ITEM_T _customer_system_module_cfg_map[] =
 {
     {MW_PRODUCT_ID_AN8855M_5P,
@@ -372,7 +370,6 @@ static const MODULE_CFG_MAP_ITEM_T _customer_system_module_cfg_map[] =
      _ref_board_port_map_an8855m_5p_an8502_4p, (sizeof(_ref_board_port_map_an8855m_5p_an8502_4p)/sizeof(AIR_INIT_PORT_MAP_T))
     },
 #endif /* AIR_EN_POE */
-
 };
 
 #ifdef AIR_EN_SFP_LED
@@ -417,7 +414,6 @@ static const POE_CONFIG_MAP_T _poe_config_map[] = {
     _poe_an8855m_5p_an8502_4p_device_map, (sizeof(_poe_an8855m_5p_an8502_4p_device_map) / sizeof(AIR_INIT_POE_DEVICE_MAP_T)),
     _poe_an8855m_5p_an8502_4p_port_map, (sizeof(_poe_an8855m_5p_an8502_4p_port_map) / sizeof(AIR_INIT_POE_PORT_MAP_T))
     },
-
 };
 #endif /* AIR_EN_POE */
 
